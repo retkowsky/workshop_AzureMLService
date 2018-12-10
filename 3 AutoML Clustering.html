@@ -11775,7 +11775,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="3.-AutoML:-Classification-des-donn&#233;es">3. AutoML: Classification des donn&#233;es<a class="anchor-link" href="#3.-AutoML:-Classification-des-donn&#233;es">&#182;</a></h1><p><br></p>
+<h1 id="3.-AutoML-:-Classification-des-donn&#233;es">3. AutoML : Classification des donn&#233;es<a class="anchor-link" href="#3.-AutoML-:-Classification-des-donn&#233;es">&#182;</a></h1><p><br></p>
 <p>In this example we use the scikit-learn's <a href="http://scikit-learn.org/stable/datasets/index.html#optical-recognition-of-handwritten-digits-dataset">digit dataset</a> to showcase how you can use AutoML for a simple classification problem.</p>
 <p>Make sure you have executed the <a href="00.configuration.ipynb">00.configuration</a> before running this notebook.</p>
 <p>In this notebook you will learn how to:</p>
@@ -11794,6 +11794,34 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="0.-Introduction">0. Introduction<a class="anchor-link" href="#0.-Introduction">&#182;</a></h2><p>Avec Azure ML service :</p>
+<ul>
+<li>Select your experiment type: Classification, Regression or Forecasting<br></li>
+<li>Data source, formats, and fetch data<br></li>
+<li>Choose your compute target: local or remote<br></li>
+<li>Automated machine learning experiment settings<br></li>
+<li>Run an automated machine learning experiment<br></li>
+<li>Explore model metrics<br></li>
+<li>Register and deploy model<br></li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Documentation :
+&gt; <a href="https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-automated-ml">https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-automated-ml</a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="1.-Informations">1. Informations<a class="anchor-link" href="#1.-Informations">&#182;</a></h2><p>As part of the setup you have already created an Azure ML <code>Workspace</code> object. For AutoML you will need to create an <code>Experiment</code> object, which is a named object in a <code>Workspace</code> used to run experiments.</p>
 
 </div>
@@ -11802,19 +11830,6 @@ div#notebook {
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="ch">#!pip install azureml-sdk</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">azureml.core</span>
@@ -11835,7 +11850,7 @@ div#notebook {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Version Azure ML Service : 0.1.74
+<pre>Version Azure ML Service : 1.0.2
 </pre>
 </div>
 </div>
@@ -11846,404 +11861,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>pip list
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Package                              Version  
------------------------------------- ---------
-absl-py                              0.6.1    
-adal                                 1.2.0    
-alabaster                            0.7.11   
-altair                               2.2.2    
-anaconda-client                      1.7.2    
-anaconda-navigator                   1.9.2    
-anaconda-project                     0.8.2    
-antlr4-python3-runtime               4.7.1    
-appdirs                              1.4.3    
-applicationinsights                  0.11.7   
-argcomplete                          1.9.4    
-arrow                                0.12.1   
-asn1crypto                           0.24.0   
-astor                                0.7.1    
-astroid                              2.0.4    
-astropy                              3.0.4    
-atomicwrites                         1.2.1    
-attrs                                18.2.0   
-Automat                              0.7.0    
-azure-cli-command-modules-nspkg      2.0.2    
-azure-cli-core                       2.0.50   
-azure-cli-nspkg                      3.0.3    
-azure-cli-profile                    2.1.2    
-azure-cli-telemetry                  1.0.0    
-azure-common                         1.1.16   
-azure-graphrbac                      0.52.0   
-azure-kusto-data                     0.0.11   
-azure-kusto-ingest                   0.0.11   
-azure-mgmt-authorization             0.50.0   
-azure-mgmt-containerregistry         2.4.0    
-azure-mgmt-keyvault                  1.1.0    
-azure-mgmt-nspkg                     3.0.2    
-azure-mgmt-resource                  2.0.0    
-azure-mgmt-storage                   3.0.0    
-azure-nspkg                          3.0.2    
-azure-storage-blob                   1.4.0    
-azure-storage-common                 1.4.0    
-azure-storage-nspkg                  3.1.0    
-azure-storage-queue                  1.4.0    
-azureml                              0.2.7    
-azureml-core                         0.1.74   
-azureml-dataprep                     0.3.0    
-azureml-dataprep-native              10.4.0   
-azureml-pipeline                     0.1.74   
-azureml-pipeline-core                0.1.74   
-azureml-pipeline-steps               0.1.74   
-azureml-sdk                          0.1.74   
-azureml-telemetry                    0.1.74   
-azureml-train                        0.1.74   
-azureml-train-automl                 0.1.74   
-azureml-train-core                   0.1.74   
-azureml-train-restclients-hyperdrive 0.1.74   
-azureml-train-widgets                0.1.74   
-Babel                                2.6.0    
-backcall                             0.1.0    
-backports.shutil-get-terminal-size   1.0.0    
-backports.tempfile                   1.0      
-backports.weakref                    1.0rc1   
-bcrypt                               3.1.4    
-beautifier                           0.5.5    
-beautifulsoup4                       4.6.3    
-bitarray                             0.8.3    
-bkcharts                             0.2      
-blaze                                0.11.3   
-bleach                               1.5.0    
-bokeh                                0.13.0   
-boto                                 2.49.0   
-boto3                                1.4.8    
-botocore                             1.8.50   
-Bottleneck                           1.2.1    
-bqplot                               0.11.2   
-brewer2mpl                           1.4.1    
-bz2file                              0.98     
-CacheControl                         0.12.5   
-certifi                              2018.8.24
-cffi                                 1.11.5   
-chardet                              3.0.4    
-Click                                7.0      
-cloudpickle                          0.5.6    
-clyent                               1.2.2    
-cntk                                 2.5.1    
-colorama                             0.3.9    
-conda                                4.5.11   
-conda-build                          3.16.0   
-constantly                           15.1.0   
-contextlib2                          0.5.5    
-cryptography                         2.3.1    
-cycler                               0.10.0   
-Cython                               0.28.5   
-cytoolz                              0.9.0.1  
-dask                                 0.19.3   
-datacleaner                          0.1.5    
-datashape                            0.5.4    
-decorator                            4.3.0    
-defusedxml                           0.5.0    
-Deprecated                           1.2.4    
-distributed                          1.23.3   
-distro                               1.2.0    
-docker                               3.5.1    
-docker-py                            1.10.6   
-docker-pycreds                       0.3.0    
-docutils                             0.14     
-Dora                                 0.0.2    
-dotnetcore2                          2.1.0    
-edward                               1.3.5    
-elasticsearch                        6.3.1    
-entrypoints                          0.2.3    
-et-xmlfile                           1.0.1    
-fastcache                            1.0.2    
-feedparser                           5.2.1    
-filelock                             3.0.8    
-Flask                                1.0.2    
-Flask-Cors                           3.0.6    
-ftfy                                 5.3.0    
-future                               0.16.0   
-gast                                 0.2.0    
-GDAL                                 2.3.0    
-gevent                               1.3.6    
-ggplot                               0.11.5   
-glob2                                0.6      
-gmpy2                                2.0.8    
-graphviz                             0.10.1   
-greenlet                             0.4.15   
-grpcio                               1.16.0   
-gym                                  0.10.9   
-h5py                                 2.8.0    
-hdmedians                            0.13     
-heapdict                             1.0.0    
-holoviews                            1.10.7   
-html5lib                             0.9999999
-humanfriendly                        4.17     
-hyperlink                            18.0.0   
-idna                                 2.7      
-imageio                              2.4.1    
-imagesize                            1.1.0    
-incremental                          17.5.0   
-ipykernel                            5.0.0    
-ipython                              7.0.1    
-ipython-genutils                     0.2.0    
-ipywidgets                           7.4.2    
-isodate                              0.6.0    
-isort                                4.3.4    
-itsdangerous                         0.24     
-jdcal                                1.4      
-jedi                                 0.12.1   
-jeepney                              0.4      
-Jinja2                               2.10     
-jmespath                             0.9.3    
-joblib                               0.13.0   
-JsonForm                             0.0.2    
-jsonpickle                           1.0      
-jsonschema                           2.6.0    
-JsonSir                              0.0.2    
-jupyter                              1.0.0    
-jupyter-client                       5.2.3    
-jupyter-console                      5.2.0    
-jupyter-core                         4.4.0    
-jupyterlab                           0.34.12  
-jupyterlab-launcher                  0.13.1   
-kafka-python                         1.4.3    
-kazoo                                2.5.0    
-Keras                                2.2.2    
-Keras-Applications                   1.0.4    
-Keras-Preprocessing                  1.0.2    
-keyring                              13.2.1   
-kiwisolver                           1.0.1    
-klein                                17.10.0  
-knack                                0.4.5    
-lancet-ioam                          0.9.0    
-lazy-object-proxy                    1.3.1    
-libarchive-c                         2.8      
-lightgbm                             2.2.1    
-line-profiler                        2.1.2    
-llvmlite                             0.25.0   
-locket                               0.2.0    
-lockfile                             0.12.2   
-luigi                                2.8.0    
-lxml                                 4.2.5    
-Markdown                             2.6.11   
-MarkupSafe                           1.0      
-matplotlib                           3.0.0    
-mccabe                               0.6.1    
-memory-profiler                      0.54.0   
-mistune                              0.8.3    
-mkl-fft                              1.0.6    
-mkl-random                           1.0.1    
-mock                                 2.0.0    
-more-itertools                       4.3.0    
-mpmath                               1.0.0    
-msgpack                              0.5.6    
-msrest                               0.6.1    
-msrestazure                          0.5.1    
-multipledispatch                     0.6.0    
-natsort                              5.4.0    
-navigator-updater                    0.2.1    
-nbconvert                            5.4.0    
-nbformat                             4.4.0    
-ndg-httpsclient                      0.5.1    
-networkx                             2.2      
-nltk                                 3.3      
-nose                                 1.3.7    
-notebook                             5.7.0    
-numba                                0.40.0   
-numexpr                              2.6.8    
-numpy                                1.14.5   
-numpydoc                             0.8.0    
-oauthlib                             2.1.0    
-odo                                  0.5.1    
-olefile                              0.46     
-openfst                              1.6.1    
-openpyxl                             2.5.8    
-packaging                            18.0     
-pandas                               0.22.0   
-pandasql                             0.7.3    
-pandocfilters                        1.4.2    
-param                                1.7.0    
-paramiko                             2.4.2    
-parso                                0.3.1    
-partd                                0.3.8    
-path.py                              11.1.0   
-pathlib2                             2.3.2    
-pathspec                             0.5.9    
-patsy                                0.5.0    
-pbr                                  4.2.0    
-pep8                                 1.7.1    
-pexpect                              4.6.0    
-phonenumbers                         8.9.16   
-pickleshare                          0.7.5    
-Pillow                               5.3.0    
-pip                                  18.1     
-pkginfo                              1.4.2    
-plotly                               3.4.1    
-pluggy                               0.7.1    
-ply                                  3.11     
-portalocker                          1.2.1    
-prettypandas                         0.0.4    
-prometheus-client                    0.3.1    
-prompt-toolkit                       2.0.5    
-protobuf                             3.6.0    
-psutil                               5.4.7    
-psycopg2                             2.7.5    
-ptyprocess                           0.6.0    
-py                                   1.6.0    
-pyang                                1.7.5    
-pyasn1                               0.4.4    
-pyasn1-modules                       0.2.2    
-pycodestyle                          2.4.0    
-pycosat                              0.6.3    
-pycparser                            2.19     
-pycrypto                             2.6.1    
-pycurl                               7.43.0.2 
-pydot                                1.2.4    
-pyflakes                             2.0.0    
-PyGithub                             1.43.3   
-pyglet                               1.3.2    
-Pygments                             2.2.0    
-PyHamcrest                           1.9.0    
-PyJWT                                1.6.4    
-pykafka                              2.8.0    
-pylint                               2.1.1    
-pymc                                 2.3.6    
-pymc3                                3.5      
-pymongo                              3.7.1    
-Pympler                              0.6      
-pymssql                              2.1.1    
-PyMySQL                              0.9.2    
-PyNaCl                               1.3.0    
-pyodbc                               3.1.1    
-pyOpenSSL                            18.0.0   
-pypachy                              0.1.5    
-pyparsing                            2.2.1    
-pyprof2calltree                      1.4.4    
-PySocks                              1.6.8    
-pytest                               3.8.2    
-pytest-arraydiff                     0.2      
-pytest-astropy                       0.4.0    
-pytest-doctestplus                   0.1.3    
-pytest-openfiles                     0.3.0    
-pytest-remotedata                    0.3.0    
-python-daemon                        2.1.2    
-python-dateutil                      2.7.3    
-Python-EasyConfig                    0.1.7    
-pytz                                 2018.5   
-pyviz-comms                          0.6.0    
-PyWavelets                           1.0.1    
-PyYAML                               3.13     
-pyzmq                                17.1.2   
-QtAwesome                            0.5.0    
-qtconsole                            4.4.1    
-QtPy                                 1.5.1    
-readline                             6.2.4.1  
-requests                             2.19.1   
-requests-oauthlib                    1.0.0    
-Resource                             0.2.1    
-retrying                             1.3.3    
-rope                                 0.11.0   
-rpy2                                 2.9.4    
-ruamel-yaml                          0.15.46  
-ruamel.yaml                          0.15.51  
-s3transfer                           0.1.13   
-scikit-bio                           0.5.4    
-scikit-image                         0.13.0   
-scikit-learn                         0.19.1   
-scipy                                1.1.0    
-scrubadub                            1.2.0    
-seaborn                              0.9.0    
-SecretStorage                        2.3.1    
-Send2Trash                           1.5.0    
-service-identity                     17.0.0   
-setuptools                           40.4.3   
-simplegeneric                        0.8.1    
-singledispatch                       3.4.0.3  
-six                                  1.11.0   
-sklearn                              0.0      
-sklearn-pandas                       1.7.0    
-snakeviz                             1.0.0    
-snowballstemmer                      1.2.1    
-sortedcollections                    1.0.1    
-sortedcontainers                     2.0.5    
-Sphinx                               1.8.1    
-sphinxcontrib-websupport             1.1.0    
-spyder                               3.3.1    
-spyder-kernels                       0.2.6    
-SQLAlchemy                           1.2.12   
-statsmodels                          0.9.0    
-sympy                                1.3      
-tables                               3.4.4    
-tabulate                             0.8.2    
-tblib                                1.3.2    
-tensorboard                          1.10.0   
-tensorflow                           1.10.0   
-tensorflow-tensorboard               0.1.8    
-termcolor                            1.1.0    
-terminado                            0.8.1    
-testpath                             0.4.2    
-textblob                             0.10.0   
-Theano                               1.0.3    
-toolz                                0.9.0    
-torch                                0.4.1    
-torchvision                          0.2.1    
-tornado                              4.5.3    
-tqdm                                 4.26.0   
-traitlets                            4.3.2    
-traittypes                           0.2.1    
-treq                                 18.6.0   
-Twisted                              18.7.0   
-typed-ast                            1.1.0    
-typing                               3.6.6    
-unicodecsv                           0.14.1   
-update-checker                       0.16     
-urllib3                              1.23     
-wcwidth                              0.1.7    
-webencodings                         0.5.1    
-websocket-client                     0.54.0   
-Werkzeug                             0.14.1   
-wget                                 3.2      
-wheel                                0.30.0   
-widgetsnbextension                   3.4.2    
-word2vec                             0.10.2   
-wrapt                                1.10.11  
-xlrd                                 1.1.0    
-XlsxWriter                           1.1.1    
-xlwt                                 1.3.0    
-zict                                 0.1.3    
-zope.interface                       4.5.0    
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
@@ -12278,7 +11896,7 @@ zope.interface                       4.5.0
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="o">.</span><span class="n">from_config</span><span class="p">()</span>
@@ -12322,7 +11940,7 @@ zope.interface                       4.5.0
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[5]:</div>
+<div class="prompt output_prompt">Out[3]:</div>
 
 
 
@@ -12363,11 +11981,11 @@ zope.interface                       4.5.0
     </tr>
     <tr>
       <th>Resource Group</th>
-      <td>mlserviceresourcegroup</td>
+      <td>resgrpAMLS</td>
     </tr>
     <tr>
       <th>SDK version</th>
-      <td>0.1.74</td>
+      <td>1.0.2</td>
     </tr>
     <tr>
       <th>Subscription ID</th>
@@ -12375,7 +11993,7 @@ zope.interface                       4.5.0
     </tr>
     <tr>
       <th>Workspace Name</th>
-      <td>MLServiceWorkspace</td>
+      <td>AMLSworkspace</td>
     </tr>
   </tbody>
 </table>
@@ -12399,7 +12017,7 @@ zope.interface                       4.5.0
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.telemetry</span> <span class="k">import</span> <span class="n">set_diagnostics_collection</span>
@@ -12422,7 +12040,7 @@ zope.interface                       4.5.0
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">datasets</span>
@@ -12489,16 +12107,53 @@ zope.interface                       4.5.0
 </div>
 </div>
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>K-Folds Cross Validation</strong></p>
+<p>Use <code>n_cross_validations</code> setting to specify the number of cross validations. The training data set will be randomly split into <code>n_cross_validations</code> folds of equal size. During each cross validation round, one of the folds will be used for validation of the model trained on the remaining folds. This process repeats for <code>n_cross_validations</code> rounds until each fold is used once as validation set. The average scores across all <code>cross_validations rounds</code> will be reported, and the corresponding model will be retrained on the whole training data set.</p>
+<p><strong>Monte Carlo Cross Validation (a.k.a. Repeated Random Sub-Sampling)</strong></p>
+<p>Use <code>validation_size</code> to specify the percentage of the training dataset that should be used for validation, and use <code>n_cross_validations</code> to specify the number of cross validations. During each cross validation round, a subset of size validation_size will be randomly selected for validation of the model trained on the remaining data. Finally, the average scores across all <code>n_cross_validations</code> rounds will be reported, and the corresponding model will be retrained on the whole training data set.</p>
+<p><strong> Métriques disponibles</strong> :<br><code>Accuracy
+AUC_weighted
+precision_score_weighted
+balanced_accuracy
+average_precision_score_weighted</code></p>
+<p>Documentation :
+<a href="https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-configure-auto-train">https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-configure-auto-train</a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="4.1-Liste-des-mod&#232;les-:">4.1 Liste des mod&#232;les :<a class="anchor-link" href="#4.1-Liste-des-mod&#232;les-:">&#182;</a></h3><p><img height="800" src="https://raw.githubusercontent.com/retkowsky/workshop_AzureMLService/master/Liste%20des%20mod%C3%A8les%20AUTOML.jpg" width="800"></p>
+<p><a href="https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-configure-auto-train">https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-configure-auto-train</a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="4.2-Configuration">4.2 Configuration<a class="anchor-link" href="#4.2-Configuration">&#182;</a></h3>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">automl_config</span> <span class="o">=</span> <span class="n">AutoMLConfig</span><span class="p">(</span><span class="n">task</span> <span class="o">=</span> <span class="s1">&#39;classification&#39;</span><span class="p">,</span>
                              <span class="n">debug_log</span> <span class="o">=</span> <span class="s1">&#39;automl_errors.log&#39;</span><span class="p">,</span>
                              <span class="n">primary_metric</span> <span class="o">=</span> <span class="s1">&#39;AUC_weighted&#39;</span><span class="p">,</span>
-                             <span class="n">max_time_sec</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>
-                             <span class="n">iterations</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+                             <span class="n">iteration_timeout_minutes</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+                             <span class="n">iterations</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
                              <span class="n">n_cross_validations</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
                              <span class="n">verbosity</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
                              <span class="n">X</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">,</span> 
@@ -12517,14 +12172,14 @@ zope.interface                       4.5.0
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="5.-AutoML">5. AutoML<a class="anchor-link" href="#5.-AutoML">&#182;</a></h2><p>Call the <code>submit</code> method on the experiment object and pass the run configuration. Execution of local runs is synchronous. Depending on the data and the number of iterations this can run for a while.
 In this example, we specify <code>show_output = True</code> to print currently running iterations to the console.</p>
-<p><code>AUC_weighted</code> is the metric used.</p>
+<p><code>AUC_weighted</code> is the <strong>metric</strong> used.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">local_run</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">automl_config</span><span class="p">,</span> <span class="n">show_output</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -12544,46 +12199,40 @@ In this example, we specify <code>show_output = True</code> to print currently r
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Parent Run ID: AutoML_69eeff87-6863-44ca-a245-762a6c1879b7
-***********************************************************************************************
+<pre>Parent Run ID: AutoML_6c3b7279-9f0e-4519-af7d-191f7bb0f8f6
+*******************************************************************************************
 ITERATION: The iteration being evaluated.
 PIPELINE: A summary description of the pipeline being evaluated.
 DURATION: Time taken for the current iteration.
 METRIC: The result of computing score on the fitted pipeline.
 BEST: The best observed score thus far.
-***********************************************************************************************
+*******************************************************************************************
 
- ITERATION     PIPELINE                               DURATION                METRIC      BEST
-         0      StandardScalerWrapper KNeighborsClassi0:00:11.242567           0.999     0.999
-         1      StandardScalerWrapper KNeighborsClassi0:00:11.947598           0.998     0.999
-         2      MaxAbsScaler LightGBMClassifier       0:00:13.130926           0.997     0.999
-         3      StandardScalerWrapper LightGBMClassifi0:00:12.886183           0.993     0.999
-         4      StandardScalerWrapper LogisticRegressi0:00:12.052117           0.994     0.999
-         5      TruncatedSVDWrapper KNeighborsClassifi0:00:11.448889           0.999     0.999
-         6      StandardScalerWrapper LightGBMClassifi0:00:20.444612           0.999     0.999
-         7      MinMaxScaler LightGBMClassifier       0:00:13.305308           0.997     0.999
-         8      MaxAbsScaler LightGBMClassifier       0:00:14.592224           0.989     0.999
-         9      SparseNormalizer RandomForestClassifie0:00:15.750992           0.966     0.999
-        10      RobustScaler KNeighborsClassifier     0:00:12.701848           0.998     0.999
-        11      StandardScalerWrapper LightGBMClassifi0:00:12.866707           0.995     0.999
-        12      SparseNormalizer KNeighborsClassifier 0:00:11.790333           0.999     0.999
-        13      MinMaxScaler LightGBMClassifier       0:00:13.063430           0.981     0.999
-        14      StandardScalerWrapper LightGBMClassifi0:00:14.302894           0.998     0.999
-        15      MinMaxScaler ExtraTreesClassifier     0:00:13.712721           0.990     0.999
-        16      StandardScalerWrapper LightGBMClassifi0:00:13.019363           0.969     0.999
-        17      MinMaxScaler LightGBMClassifier       0:00:19.045328           0.998     0.999
-        18      RobustScaler LightGBMClassifier       0:00:22.423935           0.999     0.999
-        19      MaxAbsScaler LightGBMClassifier       0:00:18.883201           0.999     0.999
-        20      StandardScalerWrapper SVCWrapper      0:00:16.786177           1.000     1.000
-        21      RobustScaler KNeighborsClassifier     0:00:15.424243           0.996     1.000
-        22      MaxAbsScaler SVCWrapper               0:00:15.135329           1.000     1.000
-        23      RobustScaler LogisticRegression       0:00:19.200374           0.996     1.000
-        24      StandardScalerWrapper GradientBoosting0:01:21.416902           0.999     1.000
-        25      StandardScalerWrapper SVCWrapper      0:00:16.822189           1.000     1.000
-        26      RobustScaler KNeighborsClassifier     0:00:14.061291           0.996     1.000
-        27      SparseNormalizer KNeighborsClassifier 0:00:12.007599           0.999     1.000
-        28      StandardScalerWrapper SVCWrapper      0:00:16.780894           1.000     1.000
-        29      MinMaxScaler SVCWrapper               0:00:16.802486           1.000     1.000
+ ITERATION   PIPELINE                                       DURATION      METRIC      BEST
+         0   StandardScalerWrapper KNN                      0:00:56       0.9988    0.9988
+         1   MinMaxScaler LightGBM                          0:01:12       0.9983    0.9988
+         2   </pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>MSI: Failed to retrieve a token from &#39;http://localhost:25198/nb/api/nbsvc/oauth2/token&#39; with an error of &#39;HTTPConnectionPool(host=&#39;localhost&#39;, port=25198): Max retries exceeded with url: /nb/api/nbsvc/oauth2/token (Caused by NewConnectionError(&#39;&lt;urllib3.connection.HTTPConnection object at 0x7fae5fd9d518&gt;: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution&#39;,))&#39;. This could be caused by the MSI extension not yet fullly provisioned.
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre> Ensemble                                      0:01:17       0.9994    0.9994
 </pre>
 </div>
 </div>
@@ -12594,7 +12243,7 @@ BEST: The best observed score thus far.
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">local_run</span>
@@ -12610,12 +12259,12 @@ BEST: The best observed score thus far.
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[10]:</div>
+<div class="prompt output_prompt">Out[8]:</div>
 
 
 
 <div class="output_html rendered_html output_subarea output_execute_result">
-<table style="width: 100%;"><tbody><tr><th>Experiment</th><th>Id</th><th>Type</th><th>Status</th><th>Details Page</th><th>Docs Page</th></tr><tr><td>automl-local-clustering</td><td>AutoML_69eeff87-6863-44ca-a245-762a6c1879b7</td><td>automl</td><td>Completed</td><td><a>Link to Azure Portal</a></td><td><a>Link to Documentation</a></td></tr></tbody></table>
+<table style="width: 100%;"><tbody><tr><th>Experiment</th><th>Id</th><th>Type</th><th>Status</th><th>Details Page</th><th>Docs Page</th></tr><tr><td>automl-local-clustering</td><td>AutoML_6c3b7279-9f0e-4519-af7d-191f7bb0f8f6</td><td>automl</td><td>Completed</td><td><a>Link to Azure Portal</a></td><td><a>Link to Documentation</a></td></tr></tbody></table>
 </div>
 
 </div>
@@ -12647,7 +12296,7 @@ BEST: The best observed score thus far.
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#local_run</span>
@@ -12678,10 +12327,10 @@ BEST: The best observed score thus far.
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.train.widgets</span> <span class="k">import</span> <span class="n">RunDetails</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.widgets</span> <span class="k">import</span> <span class="n">RunDetails</span>
 <span class="n">RunDetails</span><span class="p">(</span><span class="n">local_run</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span> 
 </pre></div>
 
@@ -12701,33 +12350,7 @@ BEST: The best observed score thus far.
 
 
 <div class="output_text output_subarea ">
-<pre>_AutoML(widget_settings={&#39;childWidgetDisplay&#39;: &#39;popup&#39;})</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-
-
-<div class="output_text output_subarea ">
-<pre>_UserRun(widget_settings={&#39;childWidgetDisplay&#39;: &#39;popup&#39;, &#39;display&#39;: &#39;popup&#39;})</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-
-
-<div class="output_text output_subarea ">
-<pre>_UserRun(widget_settings={&#39;childWidgetDisplay&#39;: &#39;popup&#39;, &#39;display&#39;: &#39;popup&#39;})</pre>
+<pre>_AutoMLWidget(widget_settings={&#39;childWidgetDisplay&#39;: &#39;popup&#39;, &#39;send_telemetry&#39;: True, &#39;log_level&#39;: &#39;INFO&#39;, &#39;sd…</pre>
 </div>
 
 </div>
@@ -12740,14 +12363,13 @@ BEST: The best observed score thus far.
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="6.2-Toutes-les-it&#233;rations">6.2 Toutes les it&#233;rations<a class="anchor-link" href="#6.2-Toutes-les-it&#233;rations">&#182;</a></h3><p>You can also use SDK methods to fetch all the child runs and see individual metrics that we log.</p>
-
+<h3 id="6.2-M&#233;triques-par-it&#233;ration">6.2 M&#233;triques par it&#233;ration<a class="anchor-link" href="#6.2-M&#233;triques-par-it&#233;ration">&#182;</a></h3>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">children</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">local_run</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span>
@@ -12771,7 +12393,7 @@ BEST: The best observed score thus far.
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[15]:</div>
+<div class="prompt output_prompt">Out[11]:</div>
 
 
 
@@ -12797,534 +12419,137 @@ BEST: The best observed score thus far.
       <th>0</th>
       <th>1</th>
       <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
-      <th>6</th>
-      <th>7</th>
-      <th>8</th>
-      <th>9</th>
-      <th>...</th>
-      <th>20</th>
-      <th>21</th>
-      <th>22</th>
-      <th>23</th>
-      <th>24</th>
-      <th>25</th>
-      <th>26</th>
-      <th>27</th>
-      <th>28</th>
-      <th>29</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>AUC_macro</th>
       <td>0.998831</td>
-      <td>0.998494</td>
-      <td>0.996619</td>
-      <td>0.992970</td>
-      <td>0.994572</td>
-      <td>0.998801</td>
-      <td>0.998993</td>
-      <td>0.997422</td>
-      <td>0.988989</td>
-      <td>0.966443</td>
-      <td>...</td>
-      <td>0.999494</td>
-      <td>0.996448</td>
-      <td>0.999658</td>
-      <td>0.996205</td>
-      <td>0.999417</td>
-      <td>0.999492</td>
-      <td>0.996261</td>
-      <td>0.998764</td>
-      <td>0.999495</td>
-      <td>0.999658</td>
+      <td>0.998365</td>
+      <td>0.999438</td>
     </tr>
     <tr>
       <th>AUC_micro</th>
       <td>0.999016</td>
-      <td>0.998573</td>
-      <td>0.996997</td>
-      <td>0.993801</td>
-      <td>0.995906</td>
-      <td>0.998874</td>
-      <td>0.998963</td>
-      <td>0.997402</td>
-      <td>0.990063</td>
-      <td>0.961402</td>
-      <td>...</td>
-      <td>0.999634</td>
-      <td>0.996734</td>
-      <td>0.999796</td>
-      <td>0.996748</td>
-      <td>0.999436</td>
-      <td>0.999627</td>
-      <td>0.996498</td>
-      <td>0.998829</td>
-      <td>0.999634</td>
-      <td>0.999796</td>
+      <td>0.998403</td>
+      <td>0.999516</td>
     </tr>
     <tr>
       <th>AUC_weighted</th>
       <td>0.998831</td>
-      <td>0.998492</td>
-      <td>0.996640</td>
-      <td>0.993057</td>
-      <td>0.994496</td>
-      <td>0.998807</td>
-      <td>0.998958</td>
-      <td>0.997445</td>
-      <td>0.988991</td>
-      <td>0.966332</td>
-      <td>...</td>
-      <td>0.999506</td>
-      <td>0.996461</td>
-      <td>0.999664</td>
-      <td>0.996246</td>
-      <td>0.999407</td>
-      <td>0.999502</td>
-      <td>0.996307</td>
-      <td>0.998790</td>
-      <td>0.999507</td>
-      <td>0.999664</td>
+      <td>0.998341</td>
+      <td>0.999431</td>
     </tr>
     <tr>
       <th>AUC_weighted_max</th>
       <td>0.998831</td>
       <td>0.998831</td>
-      <td>0.998831</td>
-      <td>0.998831</td>
-      <td>0.998831</td>
-      <td>0.998831</td>
-      <td>0.998958</td>
-      <td>0.998958</td>
-      <td>0.998958</td>
-      <td>0.998958</td>
-      <td>...</td>
-      <td>0.999506</td>
-      <td>0.999506</td>
-      <td>0.999664</td>
-      <td>0.999664</td>
-      <td>0.999664</td>
-      <td>0.999664</td>
-      <td>0.999664</td>
-      <td>0.999664</td>
-      <td>0.999664</td>
-      <td>0.999664</td>
+      <td>0.999431</td>
     </tr>
     <tr>
       <th>accuracy</th>
       <td>0.965236</td>
-      <td>0.951091</td>
-      <td>0.938722</td>
-      <td>0.916912</td>
-      <td>0.943437</td>
-      <td>0.982321</td>
-      <td>0.956989</td>
-      <td>0.935771</td>
-      <td>0.900999</td>
-      <td>0.783743</td>
-      <td>...</td>
-      <td>0.982325</td>
-      <td>0.935765</td>
-      <td>0.985859</td>
-      <td>0.954040</td>
-      <td>0.968773</td>
-      <td>0.981735</td>
-      <td>0.939302</td>
-      <td>0.977016</td>
-      <td>0.982325</td>
-      <td>0.985859</td>
+      <td>0.946971</td>
+      <td>0.974076</td>
     </tr>
     <tr>
       <th>average_precision_score_macro</th>
       <td>0.993350</td>
-      <td>0.988972</td>
-      <td>0.980108</td>
-      <td>0.961565</td>
-      <td>0.969308</td>
-      <td>0.996008</td>
-      <td>0.993213</td>
-      <td>0.983879</td>
-      <td>0.942835</td>
-      <td>0.871795</td>
-      <td>...</td>
-      <td>0.996819</td>
-      <td>0.981190</td>
-      <td>0.998110</td>
-      <td>0.979943</td>
-      <td>0.995863</td>
-      <td>0.996852</td>
-      <td>0.982886</td>
-      <td>0.995572</td>
-      <td>0.996832</td>
-      <td>0.998110</td>
+      <td>0.988943</td>
+      <td>0.996166</td>
     </tr>
     <tr>
       <th>average_precision_score_micro</th>
       <td>0.994107</td>
-      <td>0.989024</td>
-      <td>0.981398</td>
-      <td>0.966684</td>
-      <td>0.976404</td>
-      <td>0.996241</td>
-      <td>0.993039</td>
-      <td>0.983700</td>
-      <td>0.946554</td>
-      <td>0.830287</td>
-      <td>...</td>
-      <td>0.997329</td>
-      <td>0.982452</td>
-      <td>0.998559</td>
-      <td>0.981062</td>
-      <td>0.995914</td>
-      <td>0.997289</td>
-      <td>0.983902</td>
-      <td>0.995405</td>
-      <td>0.997330</td>
-      <td>0.998559</td>
+      <td>0.989461</td>
+      <td>0.996292</td>
     </tr>
     <tr>
       <th>average_precision_score_weighted</th>
       <td>0.993454</td>
-      <td>0.989008</td>
-      <td>0.980327</td>
-      <td>0.962536</td>
-      <td>0.969055</td>
-      <td>0.995935</td>
-      <td>0.993202</td>
-      <td>0.984169</td>
-      <td>0.943403</td>
-      <td>0.872376</td>
-      <td>...</td>
-      <td>0.996894</td>
-      <td>0.981394</td>
-      <td>0.998127</td>
-      <td>0.980296</td>
-      <td>0.995847</td>
-      <td>0.996916</td>
-      <td>0.983087</td>
-      <td>0.995413</td>
-      <td>0.996905</td>
-      <td>0.998127</td>
+      <td>0.988931</td>
+      <td>0.996146</td>
     </tr>
     <tr>
       <th>balanced_accuracy</th>
       <td>0.965062</td>
-      <td>0.951313</td>
-      <td>0.939286</td>
-      <td>0.918155</td>
-      <td>0.944181</td>
-      <td>0.982353</td>
-      <td>0.957209</td>
-      <td>0.936803</td>
-      <td>0.900893</td>
-      <td>0.784445</td>
-      <td>...</td>
-      <td>0.982350</td>
-      <td>0.935090</td>
-      <td>0.985809</td>
-      <td>0.954286</td>
-      <td>0.969021</td>
-      <td>0.981779</td>
-      <td>0.938729</td>
-      <td>0.977205</td>
-      <td>0.982350</td>
-      <td>0.985809</td>
+      <td>0.947500</td>
+      <td>0.974723</td>
     </tr>
     <tr>
       <th>f1_score_macro</th>
       <td>0.965093</td>
-      <td>0.950920</td>
-      <td>0.938919</td>
-      <td>0.916932</td>
-      <td>0.943563</td>
-      <td>0.982144</td>
-      <td>0.956960</td>
-      <td>0.935569</td>
-      <td>0.900288</td>
-      <td>0.765376</td>
-      <td>...</td>
-      <td>0.982284</td>
-      <td>0.934877</td>
-      <td>0.985949</td>
-      <td>0.954017</td>
-      <td>0.969023</td>
-      <td>0.981763</td>
-      <td>0.938790</td>
-      <td>0.977133</td>
-      <td>0.982284</td>
-      <td>0.985949</td>
+      <td>0.947203</td>
+      <td>0.974355</td>
     </tr>
     <tr>
       <th>f1_score_micro</th>
       <td>0.965236</td>
-      <td>0.951091</td>
-      <td>0.938722</td>
-      <td>0.916912</td>
-      <td>0.943437</td>
-      <td>0.982321</td>
-      <td>0.956989</td>
-      <td>0.935771</td>
-      <td>0.900999</td>
-      <td>0.783743</td>
-      <td>...</td>
-      <td>0.982325</td>
-      <td>0.935765</td>
-      <td>0.985859</td>
-      <td>0.954040</td>
-      <td>0.968773</td>
-      <td>0.981735</td>
-      <td>0.939302</td>
-      <td>0.977016</td>
-      <td>0.982325</td>
-      <td>0.985859</td>
+      <td>0.946971</td>
+      <td>0.974076</td>
     </tr>
     <tr>
       <th>f1_score_weighted</th>
       <td>0.965333</td>
-      <td>0.951030</td>
-      <td>0.938831</td>
-      <td>0.916964</td>
-      <td>0.943464</td>
-      <td>0.982211</td>
-      <td>0.957153</td>
-      <td>0.935708</td>
-      <td>0.900840</td>
-      <td>0.766262</td>
-      <td>...</td>
-      <td>0.982354</td>
-      <td>0.935797</td>
-      <td>0.985862</td>
-      <td>0.954093</td>
-      <td>0.968735</td>
-      <td>0.981762</td>
-      <td>0.939428</td>
-      <td>0.976899</td>
-      <td>0.982354</td>
-      <td>0.985862</td>
+      <td>0.947077</td>
+      <td>0.974067</td>
     </tr>
     <tr>
       <th>log_loss</th>
       <td>0.149926</td>
-      <td>0.224888</td>
-      <td>0.846541</td>
-      <td>0.951443</td>
-      <td>0.774787</td>
-      <td>0.134813</td>
-      <td>0.198793</td>
-      <td>0.365917</td>
-      <td>1.463401</td>
-      <td>1.562470</td>
-      <td>...</td>
-      <td>0.119634</td>
-      <td>0.309422</td>
-      <td>0.108929</td>
-      <td>0.271297</td>
-      <td>0.099987</td>
-      <td>0.120793</td>
-      <td>0.324571</td>
-      <td>0.130809</td>
-      <td>0.119634</td>
-      <td>0.108929</td>
+      <td>0.231995</td>
+      <td>0.165937</td>
     </tr>
     <tr>
       <th>norm_macro_recall</th>
       <td>0.961180</td>
-      <td>0.945903</td>
-      <td>0.932540</td>
-      <td>0.909061</td>
-      <td>0.937979</td>
-      <td>0.980393</td>
-      <td>0.952454</td>
-      <td>0.929781</td>
-      <td>0.889881</td>
-      <td>0.760494</td>
-      <td>...</td>
-      <td>0.980389</td>
-      <td>0.927877</td>
-      <td>0.984232</td>
-      <td>0.949207</td>
-      <td>0.965579</td>
-      <td>0.979755</td>
-      <td>0.931921</td>
-      <td>0.974672</td>
-      <td>0.980389</td>
-      <td>0.984232</td>
+      <td>0.941667</td>
+      <td>0.971915</td>
     </tr>
     <tr>
       <th>precision_score_macro</th>
       <td>0.966393</td>
-      <td>0.953327</td>
-      <td>0.940587</td>
-      <td>0.918796</td>
-      <td>0.944564</td>
-      <td>0.982593</td>
-      <td>0.957986</td>
-      <td>0.937136</td>
-      <td>0.903527</td>
-      <td>0.803218</td>
-      <td>...</td>
-      <td>0.982569</td>
-      <td>0.938654</td>
-      <td>0.986342</td>
-      <td>0.954860</td>
-      <td>0.969879</td>
-      <td>0.982100</td>
-      <td>0.942509</td>
-      <td>0.977890</td>
-      <td>0.982569</td>
-      <td>0.986342</td>
+      <td>0.948406</td>
+      <td>0.974626</td>
     </tr>
     <tr>
       <th>precision_score_micro</th>
       <td>0.965236</td>
-      <td>0.951091</td>
-      <td>0.938722</td>
-      <td>0.916912</td>
-      <td>0.943437</td>
-      <td>0.982321</td>
-      <td>0.956989</td>
-      <td>0.935771</td>
-      <td>0.900999</td>
-      <td>0.783743</td>
-      <td>...</td>
-      <td>0.982325</td>
-      <td>0.935765</td>
-      <td>0.985859</td>
-      <td>0.954040</td>
-      <td>0.968773</td>
-      <td>0.981735</td>
-      <td>0.939302</td>
-      <td>0.977016</td>
-      <td>0.982325</td>
-      <td>0.985859</td>
+      <td>0.946971</td>
+      <td>0.974076</td>
     </tr>
     <tr>
       <th>precision_score_weighted</th>
       <td>0.966693</td>
-      <td>0.953782</td>
-      <td>0.940955</td>
-      <td>0.920149</td>
-      <td>0.945145</td>
-      <td>0.982773</td>
-      <td>0.958561</td>
-      <td>0.938472</td>
-      <td>0.904588</td>
-      <td>0.804456</td>
-      <td>...</td>
-      <td>0.982729</td>
-      <td>0.939749</td>
-      <td>0.986116</td>
-      <td>0.955271</td>
-      <td>0.969524</td>
-      <td>0.982136</td>
-      <td>0.943180</td>
-      <td>0.977634</td>
-      <td>0.982729</td>
-      <td>0.986116</td>
+      <td>0.948637</td>
+      <td>0.974701</td>
     </tr>
     <tr>
       <th>recall_score_macro</th>
       <td>0.965062</td>
-      <td>0.951313</td>
-      <td>0.939286</td>
-      <td>0.918155</td>
-      <td>0.944181</td>
-      <td>0.982353</td>
-      <td>0.957209</td>
-      <td>0.936803</td>
-      <td>0.900893</td>
-      <td>0.784445</td>
-      <td>...</td>
-      <td>0.982350</td>
-      <td>0.935090</td>
-      <td>0.985809</td>
-      <td>0.954286</td>
-      <td>0.969021</td>
-      <td>0.981779</td>
-      <td>0.938729</td>
-      <td>0.977205</td>
-      <td>0.982350</td>
-      <td>0.985809</td>
+      <td>0.947500</td>
+      <td>0.974723</td>
     </tr>
     <tr>
       <th>recall_score_micro</th>
       <td>0.965236</td>
-      <td>0.951091</td>
-      <td>0.938722</td>
-      <td>0.916912</td>
-      <td>0.943437</td>
-      <td>0.982321</td>
-      <td>0.956989</td>
-      <td>0.935771</td>
-      <td>0.900999</td>
-      <td>0.783743</td>
-      <td>...</td>
-      <td>0.982325</td>
-      <td>0.935765</td>
-      <td>0.985859</td>
-      <td>0.954040</td>
-      <td>0.968773</td>
-      <td>0.981735</td>
-      <td>0.939302</td>
-      <td>0.977016</td>
-      <td>0.982325</td>
-      <td>0.985859</td>
+      <td>0.946971</td>
+      <td>0.974076</td>
     </tr>
     <tr>
       <th>recall_score_weighted</th>
       <td>0.965236</td>
-      <td>0.951091</td>
-      <td>0.938722</td>
-      <td>0.916912</td>
-      <td>0.943437</td>
-      <td>0.982321</td>
-      <td>0.956989</td>
-      <td>0.935771</td>
-      <td>0.900999</td>
-      <td>0.783743</td>
-      <td>...</td>
-      <td>0.982325</td>
-      <td>0.935765</td>
-      <td>0.985859</td>
-      <td>0.954040</td>
-      <td>0.968773</td>
-      <td>0.981735</td>
-      <td>0.939302</td>
-      <td>0.977016</td>
-      <td>0.982325</td>
-      <td>0.985859</td>
+      <td>0.946971</td>
+      <td>0.974076</td>
     </tr>
     <tr>
       <th>weighted_accuracy</th>
       <td>0.965412</td>
-      <td>0.950992</td>
-      <td>0.938143</td>
-      <td>0.915584</td>
-      <td>0.942616</td>
-      <td>0.982320</td>
-      <td>0.956726</td>
-      <td>0.934636</td>
-      <td>0.900943</td>
-      <td>0.782652</td>
-      <td>...</td>
-      <td>0.982332</td>
-      <td>0.936471</td>
-      <td>0.985930</td>
-      <td>0.953742</td>
-      <td>0.968452</td>
-      <td>0.981700</td>
-      <td>0.939862</td>
-      <td>0.976809</td>
-      <td>0.982332</td>
-      <td>0.985930</td>
+      <td>0.946363</td>
+      <td>0.973428</td>
     </tr>
   </tbody>
 </table>
-<p>21 rows × 30 columns</p>
 </div>
 </div>
 
@@ -13345,7 +12570,7 @@ BEST: The best observed score thus far.
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">best_run</span><span class="p">,</span> <span class="n">fitted_model</span> <span class="o">=</span> <span class="n">local_run</span><span class="o">.</span><span class="n">get_output</span><span class="p">()</span>
@@ -13368,12 +12593,14 @@ BEST: The best observed score thus far.
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Run(Experiment: automl-local-clustering,
-Id: AutoML_69eeff87-6863-44ca-a245-762a6c1879b7_29,
+Id: AutoML_6c3b7279-9f0e-4519-af7d-191f7bb0f8f6_2,
 Type: None,
 Status: Completed)
 Pipeline(memory=None,
-     steps=[(&#39;MinMaxScaler&#39;, MinMaxScaler(copy=True, feature_range=(0, 1))), (&#39;SVCWrapper&#39;, SVCWrapper(C=1048.1131341546852, class_weight=None, kernel=&#39;rbf&#39;,
-      probability=True, random_state=None))])
+     steps=[(&#39;prefittedsoftvotingclassifier&#39;, PreFittedSoftVotingClassifier(classification_labels=None,
+               estimators=[(&#39;KNN&#39;, Pipeline(memory=None,
+     steps=[(&#39;StandardScalerWrapper&#39;, &lt;automl.client.core.common.model_wrappers.StandardScalerWrapper object at 0x7fae5f5d8048&gt;), (&#39;KNeighborsCl...          flatten_transform=None,
+               weights=[0.3333333333333333, 0.3333333333333333]))])
 </pre>
 </div>
 </div>
@@ -13386,14 +12613,13 @@ Pipeline(memory=None,
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="7.1-Changement-m&#233;trique">7.1 Changement m&#233;trique<a class="anchor-link" href="#7.1-Changement-m&#233;trique">&#182;</a></h3><p>Show the run and the model that has the smallest <code>f1_score_weighted</code> value:</p>
-
+<h3 id="7.1-Changement-de-la-m&#233;trique-AutoML">7.1 Changement de la m&#233;trique AutoML<a class="anchor-link" href="#7.1-Changement-de-la-m&#233;trique-AutoML">&#182;</a></h3>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">lookup_metric</span> <span class="o">=</span> <span class="s2">&quot;f1_score_weighted&quot;</span>
@@ -13417,12 +12643,14 @@ Pipeline(memory=None,
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Run(Experiment: automl-local-clustering,
-Id: AutoML_69eeff87-6863-44ca-a245-762a6c1879b7_29,
+Id: AutoML_6c3b7279-9f0e-4519-af7d-191f7bb0f8f6_2,
 Type: None,
 Status: Completed)
 Pipeline(memory=None,
-     steps=[(&#39;MinMaxScaler&#39;, MinMaxScaler(copy=True, feature_range=(0, 1))), (&#39;SVCWrapper&#39;, SVCWrapper(C=1048.1131341546852, class_weight=None, kernel=&#39;rbf&#39;,
-      probability=True, random_state=None))])
+     steps=[(&#39;prefittedsoftvotingclassifier&#39;, PreFittedSoftVotingClassifier(classification_labels=None,
+               estimators=[(&#39;KNN&#39;, Pipeline(memory=None,
+     steps=[(&#39;StandardScalerWrapper&#39;, &lt;automl.client.core.common.model_wrappers.StandardScalerWrapper object at 0x7fae5f891ba8&gt;), (&#39;KNeighborsCl...          flatten_transform=None,
+               weights=[0.3333333333333333, 0.3333333333333333]))])
 </pre>
 </div>
 </div>
@@ -13443,10 +12671,10 @@ Show the run and the model from the third iteration:</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iteration</span> <span class="o">=</span> <span class="mi">3</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iteration</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">third_run</span><span class="p">,</span> <span class="n">third_model</span> <span class="o">=</span> <span class="n">local_run</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="n">iteration</span> <span class="o">=</span> <span class="n">iteration</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">third_run</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">third_model</span><span class="p">)</span>
@@ -13467,11 +12695,14 @@ Show the run and the model from the third iteration:</p>
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Run(Experiment: automl-local-clustering,
-Id: AutoML_69eeff87-6863-44ca-a245-762a6c1879b7_3,
+Id: AutoML_6c3b7279-9f0e-4519-af7d-191f7bb0f8f6_2,
 Type: None,
 Status: Completed)
 Pipeline(memory=None,
-     steps=[(&#39;StandardScalerWrapper&#39;, &lt;automl.client.core.common.model_wrappers.StandardScalerWrapper object at 0x7f827153a4e0&gt;), (&#39;LightGBMClassifier&#39;, &lt;automl.client.core.common.model_wrappers.LightGBMClassifier object at 0x7f827153afd0&gt;)])
+     steps=[(&#39;prefittedsoftvotingclassifier&#39;, PreFittedSoftVotingClassifier(classification_labels=None,
+               estimators=[(&#39;KNN&#39;, Pipeline(memory=None,
+     steps=[(&#39;StandardScalerWrapper&#39;, &lt;automl.client.core.common.model_wrappers.StandardScalerWrapper object at 0x7fae5f1943c8&gt;), (&#39;KNeighborsCl...          flatten_transform=None,
+               weights=[0.3333333333333333, 0.3333333333333333]))])
 </pre>
 </div>
 </div>
@@ -13490,7 +12721,7 @@ Pipeline(memory=None,
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">digits</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_digits</span><span class="p">()</span>
@@ -13515,7 +12746,7 @@ Pipeline(memory=None,
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Randomly select digits and test.</span>
@@ -13545,7 +12776,7 @@ Pipeline(memory=None,
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>6
+<pre>4
 </pre>
 </div>
 </div>
@@ -13558,7 +12789,7 @@ Pipeline(memory=None,
 
 
 <div class="output_png output_subarea ">
-<img src="data:image/png;base64,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
+<img src="data:image/png;base64,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
 "
 >
 </div>
@@ -13571,7 +12802,7 @@ Pipeline(memory=None,
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>3
+<pre>0
 </pre>
 </div>
 </div>
@@ -13584,7 +12815,7 @@ Pipeline(memory=None,
 
 
 <div class="output_png output_subarea ">
-<img src="data:image/png;base64,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
+<img src="data:image/png;base64,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
 "
 >
 </div>
@@ -13594,6 +12825,16 @@ Pipeline(memory=None,
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong> Documentation disponible :</strong>
+    <a href="https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-configure-auto-train">https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-configure-auto-train</a></p>
+
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
