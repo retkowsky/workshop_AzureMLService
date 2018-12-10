@@ -11775,7 +11775,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="1.-Pr&#233;paration-des-donn&#233;es-avec-Azure-ML-Services">1. Pr&#233;paration des donn&#233;es avec Azure ML Services<a class="anchor-link" href="#1.-Pr&#233;paration-des-donn&#233;es-avec-Azure-ML-Services">&#182;</a></h1>
+<h1 id="1.-Pr&#233;paration-des-donn&#233;es-avec-Azure-ML-Service">1. Pr&#233;paration des donn&#233;es avec Azure ML Service<a class="anchor-link" href="#1.-Pr&#233;paration-des-donn&#233;es-avec-Azure-ML-Service">&#182;</a></h1>
 </div>
 </div>
 </div>
@@ -11792,50 +11792,25 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="1.1-Informations">1.1 Informations<a class="anchor-link" href="#1.1-Informations">&#182;</a></h2>
+<p>&gt; <a href="https://docs.microsoft.com/fr-fr/python/api/overview/azure/dataprep/intro?view=azure-dataprep-py">https://docs.microsoft.com/fr-fr/python/api/overview/azure/dataprep/intro?view=azure-dataprep-py</a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="1.1-Param&#233;trage">1.1 Param&#233;trage<a class="anchor-link" href="#1.1-Param&#233;trage">&#182;</a></h2>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">version</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[1]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;3.6.6 |Anaconda, Inc.| (default, Jun 28 2018, 17:14:51) \n[GCC 7.2.0]&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>pip install azureml
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>pip install --upgrade azureml-dataprep
 </pre></div>
 
 </div>
@@ -11852,17 +11827,27 @@ div#notebook {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Requirement already satisfied: azureml in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (0.2.7)
-Requirement already satisfied: pandas in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from azureml) (0.22.0)
-Requirement already satisfied: python-dateutil in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from azureml) (2.7.3)
-Requirement already satisfied: requests in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from azureml) (2.19.1)
-Requirement already satisfied: pytz&gt;=2011k in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from pandas-&gt;azureml) (2018.5)
-Requirement already satisfied: numpy&gt;=1.9.0 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from pandas-&gt;azureml) (1.14.5)
-Requirement already satisfied: six&gt;=1.5 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from python-dateutil-&gt;azureml) (1.11.0)
-Requirement already satisfied: certifi&gt;=2017.4.17 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from requests-&gt;azureml) (2018.8.24)
-Requirement already satisfied: chardet&lt;3.1.0,&gt;=3.0.2 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from requests-&gt;azureml) (3.0.4)
-Requirement already satisfied: urllib3&lt;1.24,&gt;=1.21.1 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from requests-&gt;azureml) (1.23)
-Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from requests-&gt;azureml) (2.7)
+<pre>Collecting azureml-dataprep
+  Downloading https://files.pythonhosted.org/packages/8d/47/b0fb506f7812d64339bc5ec087c6f9ba017a71a82ddaf3e0a448676d55b8/azureml_dataprep-0.5.3-py3-none-any.whl (24.6MB)
+    100% |████████████████████████████████| 24.6MB 164kB/s eta 0:00:01
+Requirement already satisfied, skipping upgrade: numpy&gt;=1.11.3 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from azureml-dataprep) (1.14.6)
+Requirement already satisfied, skipping upgrade: azureml-dataprep-native&lt;12.0.0,&gt;=11.1.2 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from azureml-dataprep) (11.1.2)
+Collecting dotnetcore2==2.1.7 (from azureml-dataprep)
+  Downloading https://files.pythonhosted.org/packages/5e/ad/563e291f291ddae9967fc6347b5240e5ee5fdb173c33e0780c30ca8cd4c2/dotnetcore2-2.1.7-py3-none-manylinux1_x86_64.whl (28.7MB)
+    100% |████████████████████████████████| 28.7MB 135kB/s eta 0:00:01    81% |██████████████████████████      | 23.3MB 39.8MB/s eta 0:00:01
+Requirement already satisfied, skipping upgrade: pandas&gt;=0.19.2 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from azureml-dataprep) (0.22.0)
+Requirement already satisfied, skipping upgrade: distro&gt;=1.2.0 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from dotnetcore2==2.1.7-&gt;azureml-dataprep) (1.3.0)
+Requirement already satisfied, skipping upgrade: python-dateutil&gt;=2 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from pandas&gt;=0.19.2-&gt;azureml-dataprep) (2.7.5)
+Requirement already satisfied, skipping upgrade: pytz&gt;=2011k in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from pandas&gt;=0.19.2-&gt;azureml-dataprep) (2018.7)
+Requirement already satisfied, skipping upgrade: six&gt;=1.5 in /home/nbuser/anaconda3_501/lib/python3.6/site-packages (from python-dateutil&gt;=2-&gt;pandas&gt;=0.19.2-&gt;azureml-dataprep) (1.11.0)
+Installing collected packages: dotnetcore2, azureml-dataprep
+  Found existing installation: dotnetcore2 2.1.6
+    Uninstalling dotnetcore2-2.1.6:
+      Successfully uninstalled dotnetcore2-2.1.6
+  Found existing installation: azureml-dataprep 0.5.2
+    Uninstalling azureml-dataprep-0.5.2:
+      Successfully uninstalled azureml-dataprep-0.5.2
+Successfully installed azureml-dataprep-0.5.3 dotnetcore2-2.1.7
 </pre>
 </div>
 </div>
@@ -11873,7 +11858,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">azureml.core</span>
@@ -11894,7 +11879,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>SDK Version: 0.1.74
+<pre>SDK Version: 1.0.2
 </pre>
 </div>
 </div>
@@ -11905,7 +11890,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">display</span>
@@ -11932,11 +11917,23 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gobike</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;https://dprepdata.blob.core.windows.net/demo/ford_gobike/2017-fordgobike-tripdata.csv&#39;</span><span class="p">)</span>
-<span class="n">gobike</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gobike</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">auto_read_file</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;https://dprepdata.blob.core.windows.net/demo/ford_gobike/2017-fordgobike-tripdata.csv&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gobike</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11949,7 +11946,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[5]:</div>
+<div class="prompt output_prompt">Out[13]:</div>
 
 
 
@@ -11992,200 +11989,182 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
   <tbody>
     <tr>
       <th>0</th>
-      <td>80110</td>
-      <td>2017-12-31 16:57:39.6540</td>
-      <td>2018-01-01 15:12:50.2450</td>
-      <td>74</td>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654</td>
+      <td>2018-01-01 15:12:50.245</td>
+      <td>74.0</td>
       <td>Laguna St at Hayes St</td>
-      <td>37.776434819204745</td>
-      <td>-122.42624402046204</td>
-      <td>43</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
       <td>San Francisco Public Library (Grove St at Hyde...</td>
-      <td>37.7787677</td>
-      <td>-122.4159292</td>
-      <td>96</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
       <td>Customer</td>
       <td>1987</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>78800</td>
-      <td>2017-12-31 15:56:34.8420</td>
-      <td>2018-01-01 13:49:55.6170</td>
-      <td>284</td>
+      <td>78800.0</td>
+      <td>2017-12-31 15:56:34.842</td>
+      <td>2018-01-01 13:49:55.617</td>
+      <td>284.0</td>
       <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>96</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>96.0</td>
       <td>Dolores St at 15th St</td>
-      <td>37.7662102</td>
-      <td>-122.4266136</td>
-      <td>88</td>
+      <td>37.766210</td>
+      <td>-122.426614</td>
+      <td>88.0</td>
       <td>Customer</td>
       <td>1965</td>
       <td>Female</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>45768</td>
-      <td>2017-12-31 22:45:48.4110</td>
-      <td>2018-01-01 11:28:36.8830</td>
-      <td>245</td>
+      <td>45768.0</td>
+      <td>2017-12-31 22:45:48.411</td>
+      <td>2018-01-01 11:28:36.883</td>
+      <td>245.0</td>
       <td>Downtown Berkeley BART</td>
-      <td>37.8703477</td>
-      <td>-122.2677637</td>
-      <td>245</td>
+      <td>37.870348</td>
+      <td>-122.267764</td>
+      <td>245.0</td>
       <td>Downtown Berkeley BART</td>
-      <td>37.8703477</td>
-      <td>-122.2677637</td>
-      <td>1094</td>
+      <td>37.870348</td>
+      <td>-122.267764</td>
+      <td>1094.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>3</th>
-      <td>62172</td>
-      <td>2017-12-31 17:31:10.6360</td>
-      <td>2018-01-01 10:47:23.5310</td>
-      <td>60</td>
+      <td>62172.0</td>
+      <td>2017-12-31 17:31:10.636</td>
+      <td>2018-01-01 10:47:23.531</td>
+      <td>60.0</td>
       <td>8th St at Ringold St</td>
-      <td>37.77452040113685</td>
-      <td>-122.4094493687153</td>
-      <td>5</td>
+      <td>37.774520</td>
+      <td>-122.409449</td>
+      <td>5.0</td>
       <td>Powell St BART Station (Market St at 5th St)</td>
-      <td>37.783899357084934</td>
-      <td>-122.40844488143921</td>
-      <td>2831</td>
+      <td>37.783899</td>
+      <td>-122.408445</td>
+      <td>2831.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>4</th>
-      <td>43603</td>
-      <td>2017-12-31 14:23:14.0010</td>
-      <td>2018-01-01 02:29:57.5710</td>
-      <td>239</td>
+      <td>43603.0</td>
+      <td>2017-12-31 14:23:14.001</td>
+      <td>2018-01-01 02:29:57.571</td>
+      <td>239.0</td>
       <td>Bancroft Way at Telegraph Ave</td>
-      <td>37.8688126</td>
+      <td>37.868813</td>
       <td>-122.258764</td>
-      <td>247</td>
+      <td>247.0</td>
       <td>Fulton St at Bancroft Way</td>
-      <td>37.8677892</td>
-      <td>-122.2658964</td>
-      <td>3167</td>
+      <td>37.867789</td>
+      <td>-122.265896</td>
+      <td>3167.0</td>
       <td>Subscriber</td>
       <td>1997</td>
       <td>Female</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>9226</td>
-      <td>2017-12-31 22:51:00.9180</td>
-      <td>2018-01-01 01:24:47.1660</td>
-      <td>30</td>
+      <td>9226.0</td>
+      <td>2017-12-31 22:51:00.918</td>
+      <td>2018-01-01 01:24:47.166</td>
+      <td>30.0</td>
       <td>San Francisco Caltrain (Townsend St at 4th St)</td>
       <td>37.776598</td>
       <td>-122.395282</td>
-      <td>30</td>
+      <td>30.0</td>
       <td>San Francisco Caltrain (Townsend St at 4th St)</td>
       <td>37.776598</td>
       <td>-122.395282</td>
-      <td>1487</td>
+      <td>1487.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>6</th>
-      <td>4507</td>
-      <td>2017-12-31 23:49:28.4220</td>
-      <td>2018-01-01 01:04:35.6190</td>
-      <td>259</td>
+      <td>4507.0</td>
+      <td>2017-12-31 23:49:28.422</td>
+      <td>2018-01-01 01:04:35.619</td>
+      <td>259.0</td>
       <td>Addison St at Fourth St</td>
       <td>37.866249</td>
-      <td>-122.2993708</td>
-      <td>259</td>
+      <td>-122.299371</td>
+      <td>259.0</td>
       <td>Addison St at Fourth St</td>
       <td>37.866249</td>
-      <td>-122.2993708</td>
-      <td>3539</td>
+      <td>-122.299371</td>
+      <td>3539.0</td>
       <td>Customer</td>
       <td>1991</td>
       <td>Female</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>4334</td>
-      <td>2017-12-31 23:46:37.1960</td>
-      <td>2018-01-01 00:58:51.2110</td>
-      <td>284</td>
+      <td>4334.0</td>
+      <td>2017-12-31 23:46:37.196</td>
+      <td>2018-01-01 00:58:51.211</td>
+      <td>284.0</td>
       <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>284</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>284.0</td>
       <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>1503</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>1503.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>8</th>
-      <td>4150</td>
-      <td>2017-12-31 23:37:07.5480</td>
-      <td>2018-01-01 00:46:18.3080</td>
-      <td>20</td>
+      <td>4150.0</td>
+      <td>2017-12-31 23:37:07.548</td>
+      <td>2018-01-01 00:46:18.308</td>
+      <td>20.0</td>
       <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
+      <td>37.791300</td>
       <td>-122.399051</td>
-      <td>20</td>
+      <td>20.0</td>
       <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
+      <td>37.791300</td>
       <td>-122.399051</td>
-      <td>3125</td>
+      <td>3125.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>9</th>
-      <td>4238</td>
-      <td>2017-12-31 23:35:38.1450</td>
-      <td>2018-01-01 00:46:17.0530</td>
-      <td>20</td>
+      <td>4238.0</td>
+      <td>2017-12-31 23:35:38.145</td>
+      <td>2018-01-01 00:46:17.053</td>
+      <td>20.0</td>
       <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
+      <td>37.791300</td>
       <td>-122.399051</td>
-      <td>20</td>
+      <td>20.0</td>
       <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
+      <td>37.791300</td>
       <td>-122.399051</td>
-      <td>2543</td>
+      <td>2543.0</td>
       <td>Customer</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>3292</td>
-      <td>2017-12-31 23:46:32.4030</td>
-      <td>2018-01-01 00:41:24.6050</td>
-      <td>284</td>
-      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>22</td>
-      <td>Howard St at Beale St</td>
-      <td>37.789756</td>
-      <td>-122.394643</td>
-      <td>3058</td>
-      <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
   </tbody>
@@ -12210,7 +12189,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sampled_gobike</span> <span class="o">=</span> <span class="n">gobike</span><span class="o">.</span><span class="n">take_sample</span><span class="p">(</span><span class="n">probability</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
@@ -12232,7 +12211,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Audit sur l&#39;ensemble des données</span>
@@ -12246,7 +12225,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Audit sur l&#39;échentillon</span>
@@ -12263,7 +12242,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[8]:</div>
+<div class="prompt output_prompt">Out[16]:</div>
 
 
 
@@ -12277,37 +12256,73 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
       <th>Max</th>
       <th>Count</th>
       <th>Missing Count</th>
+      <th>Not Missing Count</th>
+      <th>Percent missing</th>
       <th>Error Count</th>
-      <th>Lower Quartile</th>
-      <th>Median</th>
-      <th>Upper Quartile</th>
-      <th>Standard Deviation</th>
+      <th>Empty count</th>
+      <th>0.1% Quantile</th>
+      <th>1% Quantile</th>
+      <th>5% Quantile</th>
+      <th>25% Quantile</th>
+      <th>50% Quantile</th>
+      <th>75% Quantile</th>
+      <th>95% Quantile</th>
+      <th>99% Quantile</th>
+      <th>99.9% Quantile</th>
       <th>Mean</th>
+      <th>Standard Deviation</th>
+      <th>Variance</th>
+      <th>Skewness</th>
+      <th>Kurtosis</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>duration_sec</th>
-      <td>FieldType.STRING</td>
-      <td>1000</td>
-      <td>997</td>
+      <td>FieldType.DECIMAL</td>
+      <td>61</td>
+      <td>81686</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>0.0</td>
+      <td>79.9623</td>
+      <td>256.069</td>
+      <td>250.957</td>
+      <td>382.902</td>
+      <td>595.069</td>
+      <td>936.276</td>
+      <td>2273.98</td>
+      <td>13244.8</td>
+      <td>56320.1</td>
+      <td>1096.7</td>
+      <td>3332.52</td>
+      <td>1.11057e+07</td>
+      <td>14.3611</td>
+      <td>267.013</td>
     </tr>
     <tr>
       <th>start_time</th>
-      <td>FieldType.STRING</td>
-      <td>2017-06-28 13:48:12.3890</td>
-      <td>2017-12-31 23:55:09.6860</td>
+      <td>FieldType.DATE</td>
+      <td>2017-06-28 13:48:12.389000+00:00</td>
+      <td>2017-12-31 23:55:09.686000+00:00</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -12316,12 +12331,24 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
     </tr>
     <tr>
       <th>end_time</th>
-      <td>FieldType.STRING</td>
-      <td>2017-06-28 14:00:04.9250</td>
-      <td>2018-01-01 15:12:50.2450</td>
+      <td>FieldType.DATE</td>
+      <td>2017-06-28 14:00:04.925000+00:00</td>
+      <td>2018-01-01 15:12:50.245000+00:00</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -12330,17 +12357,29 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
     </tr>
     <tr>
       <th>start_station_id</th>
-      <td>FieldType.STRING</td>
-      <td>10</td>
-      <td>99</td>
+      <td>FieldType.DECIMAL</td>
+      <td>3</td>
+      <td>340</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>0.0</td>
+      <td>3</td>
+      <td>11.2005</td>
+      <td>10.8108</td>
+      <td>23.4783</td>
+      <td>66.6362</td>
+      <td>141.088</td>
+      <td>288.461</td>
+      <td>323.68</td>
+      <td>324.759</td>
+      <td>94.8958</td>
+      <td>86.5886</td>
+      <td>7497.59</td>
+      <td>1.08634</td>
+      <td>0.269416</td>
     </tr>
     <tr>
       <th>start_station_name</th>
@@ -12349,7 +12388,19 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
       <td>Yerba Buena Center for the Arts (Howard St at ...</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -12358,45 +12409,81 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
     </tr>
     <tr>
       <th>start_station_latitude</th>
-      <td>FieldType.STRING</td>
-      <td>37.3229796</td>
-      <td>37.88022244590679</td>
+      <td>FieldType.DECIMAL</td>
+      <td>37.323</td>
+      <td>37.8802</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>0.0</td>
+      <td>37.3252</td>
+      <td>37.7612</td>
+      <td>37.7609</td>
+      <td>37.7738</td>
+      <td>37.7837</td>
+      <td>37.7954</td>
+      <td>37.8319</td>
+      <td>37.8692</td>
+      <td>37.8738</td>
+      <td>37.7715</td>
+      <td>0.0868063</td>
+      <td>0.00753533</td>
+      <td>-4.47498</td>
+      <td>19.8988</td>
     </tr>
     <tr>
       <th>start_station_longitude</th>
-      <td>FieldType.STRING</td>
-      <td>-121.8766132</td>
-      <td>-122.44429260492325</td>
+      <td>FieldType.DECIMAL</td>
+      <td>-122.444</td>
+      <td>-121.877</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>0.0</td>
+      <td>-122.444</td>
+      <td>-122.423</td>
+      <td>-122.423</td>
+      <td>-122.411</td>
+      <td>-122.399</td>
+      <td>-122.391</td>
+      <td>-122.25</td>
+      <td>-121.886</td>
+      <td>-121.877</td>
+      <td>-122.364</td>
+      <td>0.106098</td>
+      <td>0.0112567</td>
+      <td>3.21728</td>
+      <td>11.149</td>
     </tr>
     <tr>
       <th>end_station_id</th>
-      <td>FieldType.STRING</td>
-      <td>10</td>
-      <td>99</td>
+      <td>FieldType.DECIMAL</td>
+      <td>3</td>
+      <td>337</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>0.0</td>
+      <td>3</td>
+      <td>9.55321</td>
+      <td>9</td>
+      <td>22.8194</td>
+      <td>65.7664</td>
+      <td>137.809</td>
+      <td>290.327</td>
+      <td>323.878</td>
+      <td>324.759</td>
+      <td>93.3768</td>
+      <td>86.306</td>
+      <td>7448.72</td>
+      <td>1.11127</td>
+      <td>0.330681</td>
     </tr>
     <tr>
       <th>end_station_name</th>
@@ -12405,7 +12492,19 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
       <td>Yerba Buena Center for the Arts (Howard St at ...</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -12414,45 +12513,81 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
     </tr>
     <tr>
       <th>end_station_latitude</th>
-      <td>FieldType.STRING</td>
-      <td>37.3229796</td>
-      <td>37.8740141</td>
+      <td>FieldType.DECIMAL</td>
+      <td>37.323</td>
+      <td>37.874</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>0.0</td>
+      <td>37.3256</td>
+      <td>37.761</td>
+      <td>37.7606</td>
+      <td>37.7745</td>
+      <td>37.7834</td>
+      <td>37.7954</td>
+      <td>37.83</td>
+      <td>37.8685</td>
+      <td>37.8731</td>
+      <td>37.7713</td>
+      <td>0.0868062</td>
+      <td>0.00753531</td>
+      <td>-4.50761</td>
+      <td>20.0773</td>
     </tr>
     <tr>
       <th>end_station_longitude</th>
-      <td>FieldType.STRING</td>
-      <td>-121.8759263</td>
-      <td>-122.44429260492325</td>
+      <td>FieldType.DECIMAL</td>
+      <td>-122.444</td>
+      <td>-121.876</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>0.0</td>
+      <td>-122.444</td>
+      <td>-122.421</td>
+      <td>-122.421</td>
+      <td>-122.411</td>
+      <td>-122.399</td>
+      <td>-122.391</td>
+      <td>-122.249</td>
+      <td>-121.886</td>
+      <td>-121.877</td>
+      <td>-122.363</td>
+      <td>0.105636</td>
+      <td>0.0111589</td>
+      <td>3.23597</td>
+      <td>11.2536</td>
     </tr>
     <tr>
       <th>bike_id</th>
-      <td>FieldType.STRING</td>
-      <td>100</td>
-      <td>999</td>
+      <td>FieldType.DECIMAL</td>
+      <td>12</td>
+      <td>3720</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>0.0</td>
+      <td>16.8547</td>
+      <td>309.234</td>
+      <td>278.68</td>
+      <td>799.394</td>
+      <td>1735.41</td>
+      <td>2520.68</td>
+      <td>3104.47</td>
+      <td>3388.85</td>
+      <td>3680.57</td>
+      <td>1676.64</td>
+      <td>968.357</td>
+      <td>937715</td>
+      <td>-0.0713108</td>
+      <td>-1.22184</td>
     </tr>
     <tr>
       <th>user_type</th>
@@ -12461,7 +12596,19 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
       <td>Subscriber</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -12470,17 +12617,29 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
     </tr>
     <tr>
       <th>member_birth_year</th>
-      <td>FieldType.STRING</td>
-      <td></td>
+      <td>FieldType.DECIMAL</td>
+      <td>1924</td>
       <td>1999</td>
       <td>5268.0</td>
+      <td>654.0</td>
+      <td>4614.0</td>
+      <td>0.124146</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>1941.69</td>
+      <td>1965.71</td>
+      <td>1965.43</td>
+      <td>1974.51</td>
+      <td>1982.86</td>
+      <td>1987.99</td>
+      <td>1993.49</td>
+      <td>1996.68</td>
+      <td>1999</td>
+      <td>1980.6</td>
+      <td>10.0674</td>
+      <td>101.352</td>
+      <td>-0.857213</td>
+      <td>0.498278</td>
     </tr>
     <tr>
       <th>member_gender</th>
@@ -12489,7 +12648,19 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
       <td>Other</td>
       <td>5268.0</td>
       <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
       <td>0.0</td>
+      <td>652.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -12526,7 +12697,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_derived</span> <span class="o">=</span> <span class="n">sampled_gobike</span>\
@@ -12567,7 +12738,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_derived</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s1">&#39;wday&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;Sunday&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
@@ -12583,7 +12754,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[10]:</div>
+<div class="prompt output_prompt">Out[18]:</div>
 
 
 
@@ -12631,253 +12802,253 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
   <tbody>
     <tr>
       <th>0</th>
-      <td>572</td>
-      <td>2017-12-30 18:19:05.7310</td>
+      <td>572.0</td>
+      <td>2017-12-30 18:19:05.731000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>18</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 18:28:37.8250</td>
-      <td>323</td>
+      <td>2017-12-30 18:28:37.825000</td>
+      <td>323.0</td>
       <td>Broadway at Kearny</td>
-      <td>37.79801364395978</td>
-      <td>-122.40595042705534</td>
-      <td>15</td>
+      <td>37.798014</td>
+      <td>-122.405950</td>
+      <td>15.0</td>
       <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
       <td>37.795392</td>
       <td>-122.394203</td>
-      <td>3033</td>
+      <td>3033.0</td>
       <td>Customer</td>
       <td>1996</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>821</td>
-      <td>2017-12-30 18:13:05.1240</td>
+      <td>821.0</td>
+      <td>2017-12-30 18:13:05.124000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>18</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 18:26:46.3650</td>
-      <td>317</td>
+      <td>2017-12-30 18:26:46.365000</td>
+      <td>317.0</td>
       <td>San Salvador St at 9th St</td>
       <td>37.333955</td>
       <td>-121.877349</td>
-      <td>304</td>
+      <td>304.0</td>
       <td>Jackson St at 5th St</td>
-      <td>37.3487586867448</td>
-      <td>-121.89479783177376</td>
-      <td>2533</td>
+      <td>37.348759</td>
+      <td>-121.894798</td>
+      <td>2533.0</td>
       <td>Subscriber</td>
       <td>1970</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>2789</td>
-      <td>2017-12-30 15:52:21.2220</td>
+      <td>2789.0</td>
+      <td>2017-12-30 15:52:21.222000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>15</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 16:38:50.4270</td>
-      <td>121</td>
+      <td>2017-12-30 16:38:50.427000</td>
+      <td>121.0</td>
       <td>Mission Playground</td>
-      <td>37.7592103</td>
-      <td>-122.4213392</td>
-      <td>120</td>
+      <td>37.759210</td>
+      <td>-122.421339</td>
+      <td>120.0</td>
       <td>Mission Dolores Park</td>
-      <td>37.7614205</td>
-      <td>-122.4264353</td>
-      <td>1837</td>
+      <td>37.761420</td>
+      <td>-122.426435</td>
+      <td>1837.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1380</td>
-      <td>2017-12-30 16:07:44.1080</td>
+      <td>1380.0</td>
+      <td>2017-12-30 16:07:44.108000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>16</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 16:30:44.9010</td>
-      <td>239</td>
+      <td>2017-12-30 16:30:44.901000</td>
+      <td>239.0</td>
       <td>Bancroft Way at Telegraph Ave</td>
-      <td>37.8688126</td>
+      <td>37.868813</td>
       <td>-122.258764</td>
-      <td>241</td>
+      <td>241.0</td>
       <td>Ashby BART Station</td>
-      <td>37.8524766</td>
-      <td>-122.2702132</td>
-      <td>1297</td>
+      <td>37.852477</td>
+      <td>-122.270213</td>
+      <td>1297.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>4</th>
-      <td>198</td>
-      <td>2017-12-30 16:23:49.0310</td>
+      <td>198.0</td>
+      <td>2017-12-30 16:23:49.031000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>16</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 16:27:07.7230</td>
-      <td>76</td>
+      <td>2017-12-30 16:27:07.723000</td>
+      <td>76.0</td>
       <td>McCoppin St at Valencia St</td>
-      <td>37.77166246221617</td>
-      <td>-122.42242321372034</td>
-      <td>76</td>
+      <td>37.771662</td>
+      <td>-122.422423</td>
+      <td>76.0</td>
       <td>McCoppin St at Valencia St</td>
-      <td>37.77166246221617</td>
-      <td>-122.42242321372034</td>
-      <td>364</td>
+      <td>37.771662</td>
+      <td>-122.422423</td>
+      <td>364.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>5</th>
-      <td>463</td>
-      <td>2017-12-30 15:43:11.5520</td>
+      <td>463.0</td>
+      <td>2017-12-30 15:43:11.552000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>15</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 15:50:55.0040</td>
-      <td>324</td>
+      <td>2017-12-30 15:50:55.004000</td>
+      <td>324.0</td>
       <td>Union Square (Powell St at Post St)</td>
-      <td>37.788299978150825</td>
-      <td>-122.40853071212767</td>
-      <td>44</td>
+      <td>37.788300</td>
+      <td>-122.408531</td>
+      <td>44.0</td>
       <td>Civic Center/UN Plaza BART Station (Market St ...</td>
-      <td>37.7810737</td>
-      <td>-122.4117382</td>
-      <td>762</td>
+      <td>37.781074</td>
+      <td>-122.411738</td>
+      <td>762.0</td>
       <td>Subscriber</td>
       <td>1991</td>
       <td>Female</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>1334</td>
-      <td>2017-12-30 14:21:05.3330</td>
+      <td>1334.0</td>
+      <td>2017-12-30 14:21:05.333000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>14</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 14:43:20.0360</td>
-      <td>85</td>
+      <td>2017-12-30 14:43:20.036000</td>
+      <td>85.0</td>
       <td>Church St at Duboce Ave</td>
-      <td>37.7700831</td>
-      <td>-122.4291557</td>
-      <td>17</td>
+      <td>37.770083</td>
+      <td>-122.429156</td>
+      <td>17.0</td>
       <td>Embarcadero BART Station (Beale St at Market St)</td>
       <td>37.792251</td>
       <td>-122.397086</td>
-      <td>974</td>
+      <td>974.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>7</th>
-      <td>603</td>
-      <td>2017-12-30 14:15:40.5830</td>
+      <td>603.0</td>
+      <td>2017-12-30 14:15:40.583000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>14</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 14:25:43.7850</td>
-      <td>6</td>
+      <td>2017-12-30 14:25:43.785000</td>
+      <td>6.0</td>
       <td>The Embarcadero at Sansome St</td>
-      <td>37.80477</td>
+      <td>37.804770</td>
       <td>-122.403234</td>
-      <td>323</td>
+      <td>323.0</td>
       <td>Broadway at Kearny</td>
-      <td>37.79801364395978</td>
-      <td>-122.40595042705534</td>
-      <td>2359</td>
+      <td>37.798014</td>
+      <td>-122.405950</td>
+      <td>2359.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>8</th>
-      <td>858</td>
-      <td>2017-12-30 13:52:14.7550</td>
+      <td>858.0</td>
+      <td>2017-12-30 13:52:14.755000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>13</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 14:06:32.9160</td>
-      <td>60</td>
+      <td>2017-12-30 14:06:32.916000</td>
+      <td>60.0</td>
       <td>8th St at Ringold St</td>
-      <td>37.77452040113685</td>
-      <td>-122.4094493687153</td>
-      <td>36</td>
+      <td>37.774520</td>
+      <td>-122.409449</td>
+      <td>36.0</td>
       <td>Folsom St at 3rd St</td>
-      <td>37.78383</td>
-      <td>-122.39887</td>
-      <td>276</td>
+      <td>37.783830</td>
+      <td>-122.398870</td>
+      <td>276.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>9</th>
-      <td>1720</td>
-      <td>2017-12-30 12:13:24.1740</td>
+      <td>1720.0</td>
+      <td>2017-12-30 12:13:24.174000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>12</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 12:42:04.3660</td>
-      <td>6</td>
+      <td>2017-12-30 12:42:04.366000</td>
+      <td>6.0</td>
       <td>The Embarcadero at Sansome St</td>
-      <td>37.80477</td>
+      <td>37.804770</td>
       <td>-122.403234</td>
-      <td>99</td>
+      <td>99.0</td>
       <td>Folsom St at 15th St</td>
-      <td>37.7670373</td>
-      <td>-122.4154425</td>
-      <td>617</td>
+      <td>37.767037</td>
+      <td>-122.415442</td>
+      <td>617.0</td>
       <td>Customer</td>
       <td>1972</td>
       <td>Female</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>370</td>
-      <td>2017-12-30 11:45:33.2780</td>
+      <td>370.0</td>
+      <td>2017-12-30 11:45:33.278000</td>
       <td>12</td>
       <td>30</td>
       <td>Saturday</td>
       <td>11</td>
       <td>2017-12-30</td>
-      <td>2017-12-30 11:51:44.1820</td>
-      <td>197</td>
+      <td>2017-12-30 11:51:44.182000</td>
+      <td>197.0</td>
       <td>El Embarcadero at Grand Ave</td>
-      <td>37.8088479</td>
-      <td>-122.2496799</td>
-      <td>200</td>
+      <td>37.808848</td>
+      <td>-122.249680</td>
+      <td>200.0</td>
       <td>2nd Ave at E 18th St</td>
-      <td>37.800213566969795</td>
-      <td>-122.25381016731262</td>
-      <td>1545</td>
+      <td>37.800214</td>
+      <td>-122.253810</td>
+      <td>1545.0</td>
       <td>Subscriber</td>
       <td>1974</td>
       <td>Female</td>
@@ -12904,7 +13075,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_derived</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s1">&#39;duration_sec&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
@@ -12920,7 +13091,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[12]:</div>
+<div class="prompt output_prompt">Out[19]:</div>
 
 
 
@@ -12968,256 +13139,256 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
   <tbody>
     <tr>
       <th>0</th>
-      <td>80110</td>
-      <td>2017-12-31 16:57:39.6540</td>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>16</td>
       <td>2017-12-31</td>
-      <td>2018-01-01 15:12:50.2450</td>
-      <td>74</td>
+      <td>2018-01-01 15:12:50.245000</td>
+      <td>74.0</td>
       <td>Laguna St at Hayes St</td>
-      <td>37.776434819204745</td>
-      <td>-122.42624402046204</td>
-      <td>43</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
       <td>San Francisco Public Library (Grove St at Hyde...</td>
-      <td>37.7787677</td>
-      <td>-122.4159292</td>
-      <td>96</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
       <td>Customer</td>
       <td>1987</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>1397</td>
-      <td>2017-12-31 23:55:09.6860</td>
+      <td>19738.0</td>
+      <td>2017-12-27 10:08:32.337000</td>
       <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>23</td>
-      <td>2017-12-31</td>
-      <td>2018-01-01 00:18:26.7210</td>
-      <td>78</td>
-      <td>Folsom St at 9th St</td>
-      <td>37.7737172</td>
-      <td>-122.4116467</td>
-      <td>15</td>
-      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
-      <td>37.795392</td>
-      <td>-122.394203</td>
-      <td>1667</td>
+      <td>27</td>
+      <td>Wednesday</td>
+      <td>10</td>
+      <td>2017-12-27</td>
+      <td>2017-12-27 15:37:31.208000</td>
+      <td>95.0</td>
+      <td>Sanchez St at 15th St</td>
+      <td>37.766219</td>
+      <td>-122.431060</td>
+      <td>31.0</td>
+      <td>Raymond Kimbell Playground</td>
+      <td>37.783813</td>
+      <td>-122.434559</td>
+      <td>931.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>2</th>
-      <td>2511</td>
-      <td>2017-12-31 22:58:26.5240</td>
+      <td>22442.0</td>
+      <td>2017-12-15 12:24:44.370000</td>
       <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>22</td>
-      <td>2017-12-31</td>
-      <td>2017-12-31 23:40:17.9870</td>
-      <td>30</td>
-      <td>San Francisco Caltrain (Townsend St at 4th St)</td>
-      <td>37.776598</td>
-      <td>-122.395282</td>
-      <td>6</td>
-      <td>The Embarcadero at Sansome St</td>
-      <td>37.80477</td>
-      <td>-122.403234</td>
-      <td>3329</td>
-      <td>Customer</td>
-      <td></td>
-      <td></td>
+      <td>15</td>
+      <td>Friday</td>
+      <td>12</td>
+      <td>2017-12-15</td>
+      <td>2017-12-15 18:38:47.010000</td>
+      <td>275.0</td>
+      <td>Julian St at 6th St</td>
+      <td>37.342997</td>
+      <td>-121.888889</td>
+      <td>278.0</td>
+      <td>The Alameda at Bush St</td>
+      <td>37.331932</td>
+      <td>-121.904888</td>
+      <td>1872.0</td>
+      <td>Subscriber</td>
+      <td>1983</td>
+      <td>Male</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>901</td>
-      <td>2017-12-31 22:17:39.9100</td>
-      <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>22</td>
-      <td>2017-12-31</td>
-      <td>2017-12-31 22:32:41.6300</td>
-      <td>66</td>
-      <td>3rd St at Townsend St</td>
-      <td>37.77874161153677</td>
-      <td>-122.39274082710836</td>
-      <td>23</td>
-      <td>The Embarcadero at Steuart St</td>
-      <td>37.791464</td>
-      <td>-122.391034</td>
-      <td>3569</td>
+      <td>27433.0</td>
+      <td>2017-11-06 08:33:58.415000</td>
+      <td>11</td>
+      <td>06</td>
+      <td>Monday</td>
+      <td>08</td>
+      <td>2017-11-06</td>
+      <td>2017-11-06 16:11:11.583000</td>
+      <td>75.0</td>
+      <td>Market St at Franklin St</td>
+      <td>37.773793</td>
+      <td>-122.421239</td>
+      <td>58.0</td>
+      <td>Market St at 10th St</td>
+      <td>37.776619</td>
+      <td>-122.417385</td>
+      <td>2291.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>4</th>
-      <td>853</td>
-      <td>2017-12-31 21:22:37.6430</td>
-      <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>21</td>
-      <td>2017-12-31</td>
-      <td>2017-12-31 21:36:51.1790</td>
-      <td>14</td>
-      <td>Clay St at Battery St</td>
-      <td>37.795001</td>
-      <td>-122.39997</td>
-      <td>8</td>
-      <td>The Embarcadero at Vallejo St</td>
-      <td>37.799953</td>
-      <td>-122.398525</td>
-      <td>101</td>
-      <td>Customer</td>
-      <td></td>
-      <td></td>
+      <td>28467.0</td>
+      <td>2017-10-25 22:59:12.266000</td>
+      <td>10</td>
+      <td>25</td>
+      <td>Wednesday</td>
+      <td>22</td>
+      <td>2017-10-25</td>
+      <td>2017-10-26 06:53:39.765000</td>
+      <td>108.0</td>
+      <td>16th St Mission BART</td>
+      <td>37.764710</td>
+      <td>-122.419957</td>
+      <td>119.0</td>
+      <td>18th St at Noe St</td>
+      <td>37.761047</td>
+      <td>-122.432642</td>
+      <td>2423.0</td>
+      <td>Subscriber</td>
+      <td>1973</td>
+      <td>Male</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>189</td>
-      <td>2017-12-31 20:48:37.4920</td>
-      <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>20</td>
-      <td>2017-12-31</td>
-      <td>2017-12-31 20:51:46.6580</td>
-      <td>37</td>
-      <td>2nd St at Folsom St</td>
-      <td>37.78499972833808</td>
-      <td>-122.39593561749642</td>
-      <td>48</td>
-      <td>2nd St at S Park St</td>
-      <td>37.782411189735896</td>
-      <td>-122.39270595839115</td>
-      <td>1056</td>
-      <td>Customer</td>
-      <td>1988</td>
+      <td>22532.0</td>
+      <td>2017-10-05 18:08:47.166000</td>
+      <td>10</td>
+      <td>05</td>
+      <td>Thursday</td>
+      <td>18</td>
+      <td>2017-10-05</td>
+      <td>2017-10-06 00:24:19.285000</td>
+      <td>323.0</td>
+      <td>Broadway at Kearny</td>
+      <td>37.798014</td>
+      <td>-122.405950</td>
+      <td>4.0</td>
+      <td>Cyril Magnin St at Ellis St</td>
+      <td>37.785881</td>
+      <td>-122.408915</td>
+      <td>307.0</td>
+      <td>Subscriber</td>
+      <td>1987</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>1208</td>
-      <td>2017-12-31 19:56:43.3940</td>
-      <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>19</td>
-      <td>2017-12-31</td>
-      <td>2017-12-31 20:16:51.5510</td>
-      <td>13</td>
-      <td>Commercial St at Montgomery St</td>
-      <td>37.794231</td>
-      <td>-122.402923</td>
-      <td>6</td>
-      <td>The Embarcadero at Sansome St</td>
-      <td>37.80477</td>
-      <td>-122.403234</td>
-      <td>2736</td>
-      <td>Subscriber</td>
-      <td>1994</td>
-      <td>Male</td>
+      <td>21050.0</td>
+      <td>2017-10-03 08:59:55.957000</td>
+      <td>10</td>
+      <td>03</td>
+      <td>Tuesday</td>
+      <td>08</td>
+      <td>2017-10-03</td>
+      <td>2017-10-03 14:50:46.614000</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>2818.0</td>
+      <td>Customer</td>
+      <td>None</td>
+      <td></td>
     </tr>
     <tr>
       <th>7</th>
-      <td>426</td>
-      <td>2017-12-31 17:11:48.3310</td>
-      <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>17</td>
-      <td>2017-12-31</td>
-      <td>2017-12-31 17:18:55.0010</td>
-      <td>123</td>
-      <td>Folsom St at 19th St</td>
-      <td>37.7605936</td>
-      <td>-122.4148171</td>
-      <td>134</td>
-      <td>Valencia St at 24th St</td>
-      <td>37.7524278</td>
-      <td>-122.4206278</td>
-      <td>2256</td>
-      <td>Subscriber</td>
-      <td>1991</td>
-      <td>Male</td>
+      <td>81686.0</td>
+      <td>2017-09-30 18:12:21.667000</td>
+      <td>09</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>18</td>
+      <td>2017-09-30</td>
+      <td>2017-10-01 16:53:48.361000</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>81.0</td>
+      <td>Berry St at 4th St</td>
+      <td>37.775880</td>
+      <td>-122.393170</td>
+      <td>2371.0</td>
+      <td>Customer</td>
+      <td>None</td>
+      <td></td>
     </tr>
     <tr>
       <th>8</th>
-      <td>962</td>
-      <td>2017-12-31 16:57:20.9300</td>
-      <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>16</td>
-      <td>2017-12-31</td>
-      <td>2017-12-31 17:13:23.5600</td>
-      <td>176</td>
-      <td>MacArthur BART Station</td>
-      <td>37.82840997305853</td>
-      <td>-122.26631462574005</td>
-      <td>231</td>
-      <td>14th St at Filbert St</td>
-      <td>37.80874983465997</td>
-      <td>-122.28328227996825</td>
-      <td>305</td>
+      <td>29494.0</td>
+      <td>2017-09-23 11:08:56.665000</td>
+      <td>09</td>
+      <td>23</td>
+      <td>Saturday</td>
+      <td>11</td>
+      <td>2017-09-23</td>
+      <td>2017-09-23 19:20:31.620000</td>
+      <td>4.0</td>
+      <td>Cyril Magnin St at Ellis St</td>
+      <td>37.785881</td>
+      <td>-122.408915</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>2210.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>None</td>
       <td></td>
     </tr>
     <tr>
       <th>9</th>
-      <td>204</td>
-      <td>2017-12-31 15:26:41.6630</td>
-      <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>15</td>
-      <td>2017-12-31</td>
-      <td>2017-12-31 15:30:06.1460</td>
-      <td>86</td>
-      <td>Market St at Dolores St</td>
-      <td>37.7693053</td>
-      <td>-122.4268256</td>
-      <td>95</td>
-      <td>Sanchez St at 15th St</td>
-      <td>37.7662185</td>
-      <td>-122.4310597</td>
-      <td>2183</td>
-      <td>Subscriber</td>
-      <td>1992</td>
-      <td>Male</td>
+      <td>76987.0</td>
+      <td>2017-09-20 09:22:14.400000</td>
+      <td>09</td>
+      <td>20</td>
+      <td>Wednesday</td>
+      <td>09</td>
+      <td>2017-09-20</td>
+      <td>2017-09-21 06:45:21.472000</td>
+      <td>164.0</td>
+      <td>Isabella St at San Pablo Ave</td>
+      <td>37.814988</td>
+      <td>-122.274844</td>
+      <td>164.0</td>
+      <td>Isabella St at San Pablo Ave</td>
+      <td>37.814988</td>
+      <td>-122.274844</td>
+      <td>554.0</td>
+      <td>Customer</td>
+      <td>1977</td>
+      <td>Female</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>819</td>
-      <td>2017-12-31 15:06:20.1730</td>
-      <td>12</td>
-      <td>31</td>
-      <td>Sunday</td>
-      <td>15</td>
-      <td>2017-12-31</td>
-      <td>2017-12-31 15:19:59.8640</td>
-      <td>81</td>
-      <td>Berry St at 4th St</td>
-      <td>37.77588</td>
-      <td>-122.39317</td>
-      <td>15</td>
+      <td>23040.0</td>
+      <td>2017-09-18 10:11:18.370000</td>
+      <td>09</td>
+      <td>18</td>
+      <td>Monday</td>
+      <td>10</td>
+      <td>2017-09-18</td>
+      <td>2017-09-18 16:35:18.664000</td>
+      <td>58.0</td>
+      <td>Market St at 10th St</td>
+      <td>37.776619</td>
+      <td>-122.417385</td>
+      <td>15.0</td>
       <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
       <td>37.795392</td>
       <td>-122.394203</td>
-      <td>464</td>
+      <td>2423.0</td>
       <td>Customer</td>
-      <td>1994</td>
-      <td>Female</td>
+      <td>None</td>
+      <td></td>
     </tr>
   </tbody>
 </table>
@@ -13250,7 +13421,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_appended</span> <span class="o">=</span> <span class="n">sgb_derived</span>\
@@ -13279,7 +13450,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[14]:</div>
+<div class="prompt output_prompt">Out[20]:</div>
 
 
 
@@ -13328,267 +13499,267 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
   <tbody>
     <tr>
       <th>0</th>
-      <td>80110</td>
-      <td>2017-12-31 16:57:39.6540</td>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>16</td>
       <td>2017-12-31</td>
-      <td>2018-01-01 15:12:50.2450</td>
-      <td>74</td>
+      <td>2018-01-01 15:12:50.245000</td>
+      <td>74.0</td>
       <td>Laguna St at Hayes St</td>
       <td>...</td>
-      <td>-122.42624402046204</td>
-      <td>43</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
       <td>San Francisco Public Library (Grove St at Hyde...</td>
-      <td>37.7787677</td>
-      <td>-122.4159292</td>
-      <td>96</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
       <td>Customer</td>
-      <td>1987</td>
+      <td>1987.0</td>
       <td>Male</td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>1397</td>
-      <td>2017-12-31 23:55:09.6860</td>
+      <td>1397.0</td>
+      <td>2017-12-31 23:55:09.686000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>23</td>
       <td>2017-12-31</td>
-      <td>2018-01-01 00:18:26.7210</td>
-      <td>78</td>
+      <td>2018-01-01 00:18:26.721000</td>
+      <td>78.0</td>
       <td>Folsom St at 9th St</td>
       <td>...</td>
-      <td>-122.4116467</td>
-      <td>15</td>
+      <td>-122.411647</td>
+      <td>15.0</td>
       <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
       <td>37.795392</td>
       <td>-122.394203</td>
-      <td>1667</td>
+      <td>1667.0</td>
       <td>Customer</td>
+      <td>NaN</td>
       <td></td>
-      <td></td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>2511</td>
-      <td>2017-12-31 22:58:26.5240</td>
+      <td>2511.0</td>
+      <td>2017-12-31 22:58:26.524000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>22</td>
       <td>2017-12-31</td>
-      <td>2017-12-31 23:40:17.9870</td>
-      <td>30</td>
+      <td>2017-12-31 23:40:17.987000</td>
+      <td>30.0</td>
       <td>San Francisco Caltrain (Townsend St at 4th St)</td>
       <td>...</td>
       <td>-122.395282</td>
-      <td>6</td>
+      <td>6.0</td>
       <td>The Embarcadero at Sansome St</td>
-      <td>37.80477</td>
+      <td>37.804770</td>
       <td>-122.403234</td>
-      <td>3329</td>
+      <td>3329.0</td>
       <td>Customer</td>
+      <td>NaN</td>
       <td></td>
-      <td></td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>901</td>
-      <td>2017-12-31 22:17:39.9100</td>
+      <td>901.0</td>
+      <td>2017-12-31 22:17:39.910000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>22</td>
       <td>2017-12-31</td>
-      <td>2017-12-31 22:32:41.6300</td>
-      <td>66</td>
+      <td>2017-12-31 22:32:41.630000</td>
+      <td>66.0</td>
       <td>3rd St at Townsend St</td>
       <td>...</td>
-      <td>-122.39274082710836</td>
-      <td>23</td>
+      <td>-122.392741</td>
+      <td>23.0</td>
       <td>The Embarcadero at Steuart St</td>
       <td>37.791464</td>
       <td>-122.391034</td>
-      <td>3569</td>
+      <td>3569.0</td>
       <td>Customer</td>
+      <td>NaN</td>
       <td></td>
-      <td></td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>853</td>
-      <td>2017-12-31 21:22:37.6430</td>
+      <td>853.0</td>
+      <td>2017-12-31 21:22:37.643000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>21</td>
       <td>2017-12-31</td>
-      <td>2017-12-31 21:36:51.1790</td>
-      <td>14</td>
+      <td>2017-12-31 21:36:51.179000</td>
+      <td>14.0</td>
       <td>Clay St at Battery St</td>
       <td>...</td>
-      <td>-122.39997</td>
-      <td>8</td>
+      <td>-122.399970</td>
+      <td>8.0</td>
       <td>The Embarcadero at Vallejo St</td>
       <td>37.799953</td>
       <td>-122.398525</td>
-      <td>101</td>
+      <td>101.0</td>
       <td>Customer</td>
+      <td>NaN</td>
       <td></td>
-      <td></td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>189</td>
-      <td>2017-12-31 20:48:37.4920</td>
+      <td>189.0</td>
+      <td>2017-12-31 20:48:37.492000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>20</td>
       <td>2017-12-31</td>
-      <td>2017-12-31 20:51:46.6580</td>
-      <td>37</td>
+      <td>2017-12-31 20:51:46.658000</td>
+      <td>37.0</td>
       <td>2nd St at Folsom St</td>
       <td>...</td>
-      <td>-122.39593561749642</td>
-      <td>48</td>
+      <td>-122.395936</td>
+      <td>48.0</td>
       <td>2nd St at S Park St</td>
-      <td>37.782411189735896</td>
-      <td>-122.39270595839115</td>
-      <td>1056</td>
+      <td>37.782411</td>
+      <td>-122.392706</td>
+      <td>1056.0</td>
       <td>Customer</td>
-      <td>1988</td>
+      <td>1988.0</td>
       <td>Male</td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>1208</td>
-      <td>2017-12-31 19:56:43.3940</td>
+      <td>1208.0</td>
+      <td>2017-12-31 19:56:43.394000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>19</td>
       <td>2017-12-31</td>
-      <td>2017-12-31 20:16:51.5510</td>
-      <td>13</td>
+      <td>2017-12-31 20:16:51.551000</td>
+      <td>13.0</td>
       <td>Commercial St at Montgomery St</td>
       <td>...</td>
       <td>-122.402923</td>
-      <td>6</td>
+      <td>6.0</td>
       <td>The Embarcadero at Sansome St</td>
-      <td>37.80477</td>
+      <td>37.804770</td>
       <td>-122.403234</td>
-      <td>2736</td>
+      <td>2736.0</td>
       <td>Subscriber</td>
-      <td>1994</td>
+      <td>1994.0</td>
       <td>Male</td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>426</td>
-      <td>2017-12-31 17:11:48.3310</td>
+      <td>426.0</td>
+      <td>2017-12-31 17:11:48.331000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>17</td>
       <td>2017-12-31</td>
-      <td>2017-12-31 17:18:55.0010</td>
-      <td>123</td>
+      <td>2017-12-31 17:18:55.001000</td>
+      <td>123.0</td>
       <td>Folsom St at 19th St</td>
       <td>...</td>
-      <td>-122.4148171</td>
-      <td>134</td>
+      <td>-122.414817</td>
+      <td>134.0</td>
       <td>Valencia St at 24th St</td>
-      <td>37.7524278</td>
-      <td>-122.4206278</td>
-      <td>2256</td>
+      <td>37.752428</td>
+      <td>-122.420628</td>
+      <td>2256.0</td>
       <td>Subscriber</td>
-      <td>1991</td>
+      <td>1991.0</td>
       <td>Male</td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>962</td>
-      <td>2017-12-31 16:57:20.9300</td>
+      <td>962.0</td>
+      <td>2017-12-31 16:57:20.930000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>16</td>
       <td>2017-12-31</td>
-      <td>2017-12-31 17:13:23.5600</td>
-      <td>176</td>
+      <td>2017-12-31 17:13:23.560000</td>
+      <td>176.0</td>
       <td>MacArthur BART Station</td>
       <td>...</td>
-      <td>-122.26631462574005</td>
-      <td>231</td>
+      <td>-122.266315</td>
+      <td>231.0</td>
       <td>14th St at Filbert St</td>
-      <td>37.80874983465997</td>
-      <td>-122.28328227996825</td>
-      <td>305</td>
+      <td>37.808750</td>
+      <td>-122.283282</td>
+      <td>305.0</td>
       <td>Customer</td>
+      <td>NaN</td>
       <td></td>
-      <td></td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>204</td>
-      <td>2017-12-31 15:26:41.6630</td>
+      <td>204.0</td>
+      <td>2017-12-31 15:26:41.663000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>15</td>
       <td>2017-12-31</td>
-      <td>2017-12-31 15:30:06.1460</td>
-      <td>86</td>
+      <td>2017-12-31 15:30:06.146000</td>
+      <td>86.0</td>
       <td>Market St at Dolores St</td>
       <td>...</td>
-      <td>-122.4268256</td>
-      <td>95</td>
+      <td>-122.426826</td>
+      <td>95.0</td>
       <td>Sanchez St at 15th St</td>
-      <td>37.7662185</td>
-      <td>-122.4310597</td>
-      <td>2183</td>
+      <td>37.766219</td>
+      <td>-122.431060</td>
+      <td>2183.0</td>
       <td>Subscriber</td>
-      <td>1992</td>
+      <td>1992.0</td>
       <td>Male</td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>819</td>
-      <td>2017-12-31 15:06:20.1730</td>
+      <td>819.0</td>
+      <td>2017-12-31 15:06:20.173000</td>
       <td>12</td>
       <td>31</td>
       <td>Sunday</td>
       <td>15</td>
       <td>2017-12-31</td>
-      <td>2017-12-31 15:19:59.8640</td>
-      <td>81</td>
+      <td>2017-12-31 15:19:59.864000</td>
+      <td>81.0</td>
       <td>Berry St at 4th St</td>
       <td>...</td>
-      <td>-122.39317</td>
-      <td>15</td>
+      <td>-122.393170</td>
+      <td>15.0</td>
       <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
       <td>37.795392</td>
       <td>-122.394203</td>
-      <td>464</td>
+      <td>464.0</td>
       <td>Customer</td>
-      <td>1994</td>
+      <td>1994.0</td>
       <td>Female</td>
-      <td>azureml.dataprep.native.DataPrepError("'Cannot...</td>
+      <td>5309.111111</td>
     </tr>
   </tbody>
 </table>
@@ -13613,7 +13784,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_replaced</span> <span class="o">=</span> <span class="n">sampled_gobike</span><span class="o">.</span><span class="n">replace_na</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;member_gender&#39;</span><span class="p">])</span>
@@ -13630,7 +13801,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[15]:</div>
+<div class="prompt output_prompt">Out[21]:</div>
 
 
 
@@ -13673,200 +13844,200 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
   <tbody>
     <tr>
       <th>0</th>
-      <td>80110</td>
-      <td>2017-12-31 16:57:39.6540</td>
-      <td>2018-01-01 15:12:50.2450</td>
-      <td>74</td>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654</td>
+      <td>2018-01-01 15:12:50.245</td>
+      <td>74.0</td>
       <td>Laguna St at Hayes St</td>
-      <td>37.776434819204745</td>
-      <td>-122.42624402046204</td>
-      <td>43</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
       <td>San Francisco Public Library (Grove St at Hyde...</td>
-      <td>37.7787677</td>
-      <td>-122.4159292</td>
-      <td>96</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
       <td>Customer</td>
-      <td>1987</td>
+      <td>1987.0</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>1397</td>
-      <td>2017-12-31 23:55:09.6860</td>
-      <td>2018-01-01 00:18:26.7210</td>
-      <td>78</td>
+      <td>1397.0</td>
+      <td>2017-12-31 23:55:09.686</td>
+      <td>2018-01-01 00:18:26.721</td>
+      <td>78.0</td>
       <td>Folsom St at 9th St</td>
-      <td>37.7737172</td>
-      <td>-122.4116467</td>
-      <td>15</td>
+      <td>37.773717</td>
+      <td>-122.411647</td>
+      <td>15.0</td>
       <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
       <td>37.795392</td>
       <td>-122.394203</td>
-      <td>1667</td>
+      <td>1667.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>NaN</td>
       <td>None</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>2511</td>
-      <td>2017-12-31 22:58:26.5240</td>
-      <td>2017-12-31 23:40:17.9870</td>
-      <td>30</td>
+      <td>2511.0</td>
+      <td>2017-12-31 22:58:26.524</td>
+      <td>2017-12-31 23:40:17.987</td>
+      <td>30.0</td>
       <td>San Francisco Caltrain (Townsend St at 4th St)</td>
       <td>37.776598</td>
       <td>-122.395282</td>
-      <td>6</td>
+      <td>6.0</td>
       <td>The Embarcadero at Sansome St</td>
-      <td>37.80477</td>
+      <td>37.804770</td>
       <td>-122.403234</td>
-      <td>3329</td>
+      <td>3329.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>NaN</td>
       <td>None</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>901</td>
-      <td>2017-12-31 22:17:39.9100</td>
-      <td>2017-12-31 22:32:41.6300</td>
-      <td>66</td>
+      <td>901.0</td>
+      <td>2017-12-31 22:17:39.910</td>
+      <td>2017-12-31 22:32:41.630</td>
+      <td>66.0</td>
       <td>3rd St at Townsend St</td>
-      <td>37.77874161153677</td>
-      <td>-122.39274082710836</td>
-      <td>23</td>
+      <td>37.778742</td>
+      <td>-122.392741</td>
+      <td>23.0</td>
       <td>The Embarcadero at Steuart St</td>
       <td>37.791464</td>
       <td>-122.391034</td>
-      <td>3569</td>
+      <td>3569.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>NaN</td>
       <td>None</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>853</td>
-      <td>2017-12-31 21:22:37.6430</td>
-      <td>2017-12-31 21:36:51.1790</td>
-      <td>14</td>
+      <td>853.0</td>
+      <td>2017-12-31 21:22:37.643</td>
+      <td>2017-12-31 21:36:51.179</td>
+      <td>14.0</td>
       <td>Clay St at Battery St</td>
       <td>37.795001</td>
-      <td>-122.39997</td>
-      <td>8</td>
+      <td>-122.399970</td>
+      <td>8.0</td>
       <td>The Embarcadero at Vallejo St</td>
       <td>37.799953</td>
       <td>-122.398525</td>
-      <td>101</td>
+      <td>101.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>NaN</td>
       <td>None</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>189</td>
-      <td>2017-12-31 20:48:37.4920</td>
-      <td>2017-12-31 20:51:46.6580</td>
-      <td>37</td>
+      <td>189.0</td>
+      <td>2017-12-31 20:48:37.492</td>
+      <td>2017-12-31 20:51:46.658</td>
+      <td>37.0</td>
       <td>2nd St at Folsom St</td>
-      <td>37.78499972833808</td>
-      <td>-122.39593561749642</td>
-      <td>48</td>
+      <td>37.785000</td>
+      <td>-122.395936</td>
+      <td>48.0</td>
       <td>2nd St at S Park St</td>
-      <td>37.782411189735896</td>
-      <td>-122.39270595839115</td>
-      <td>1056</td>
+      <td>37.782411</td>
+      <td>-122.392706</td>
+      <td>1056.0</td>
       <td>Customer</td>
-      <td>1988</td>
+      <td>1988.0</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>1208</td>
-      <td>2017-12-31 19:56:43.3940</td>
-      <td>2017-12-31 20:16:51.5510</td>
-      <td>13</td>
+      <td>1208.0</td>
+      <td>2017-12-31 19:56:43.394</td>
+      <td>2017-12-31 20:16:51.551</td>
+      <td>13.0</td>
       <td>Commercial St at Montgomery St</td>
       <td>37.794231</td>
       <td>-122.402923</td>
-      <td>6</td>
+      <td>6.0</td>
       <td>The Embarcadero at Sansome St</td>
-      <td>37.80477</td>
+      <td>37.804770</td>
       <td>-122.403234</td>
-      <td>2736</td>
+      <td>2736.0</td>
       <td>Subscriber</td>
-      <td>1994</td>
+      <td>1994.0</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>426</td>
-      <td>2017-12-31 17:11:48.3310</td>
-      <td>2017-12-31 17:18:55.0010</td>
-      <td>123</td>
+      <td>426.0</td>
+      <td>2017-12-31 17:11:48.331</td>
+      <td>2017-12-31 17:18:55.001</td>
+      <td>123.0</td>
       <td>Folsom St at 19th St</td>
-      <td>37.7605936</td>
-      <td>-122.4148171</td>
-      <td>134</td>
+      <td>37.760594</td>
+      <td>-122.414817</td>
+      <td>134.0</td>
       <td>Valencia St at 24th St</td>
-      <td>37.7524278</td>
-      <td>-122.4206278</td>
-      <td>2256</td>
+      <td>37.752428</td>
+      <td>-122.420628</td>
+      <td>2256.0</td>
       <td>Subscriber</td>
-      <td>1991</td>
+      <td>1991.0</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>962</td>
-      <td>2017-12-31 16:57:20.9300</td>
-      <td>2017-12-31 17:13:23.5600</td>
-      <td>176</td>
+      <td>962.0</td>
+      <td>2017-12-31 16:57:20.930</td>
+      <td>2017-12-31 17:13:23.560</td>
+      <td>176.0</td>
       <td>MacArthur BART Station</td>
-      <td>37.82840997305853</td>
-      <td>-122.26631462574005</td>
-      <td>231</td>
+      <td>37.828410</td>
+      <td>-122.266315</td>
+      <td>231.0</td>
       <td>14th St at Filbert St</td>
-      <td>37.80874983465997</td>
-      <td>-122.28328227996825</td>
-      <td>305</td>
+      <td>37.808750</td>
+      <td>-122.283282</td>
+      <td>305.0</td>
       <td>Customer</td>
-      <td></td>
+      <td>NaN</td>
       <td>None</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>204</td>
-      <td>2017-12-31 15:26:41.6630</td>
-      <td>2017-12-31 15:30:06.1460</td>
-      <td>86</td>
+      <td>204.0</td>
+      <td>2017-12-31 15:26:41.663</td>
+      <td>2017-12-31 15:30:06.146</td>
+      <td>86.0</td>
       <td>Market St at Dolores St</td>
-      <td>37.7693053</td>
-      <td>-122.4268256</td>
-      <td>95</td>
+      <td>37.769305</td>
+      <td>-122.426826</td>
+      <td>95.0</td>
       <td>Sanchez St at 15th St</td>
-      <td>37.7662185</td>
-      <td>-122.4310597</td>
-      <td>2183</td>
+      <td>37.766219</td>
+      <td>-122.431060</td>
+      <td>2183.0</td>
       <td>Subscriber</td>
-      <td>1992</td>
+      <td>1992.0</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>819</td>
-      <td>2017-12-31 15:06:20.1730</td>
-      <td>2017-12-31 15:19:59.8640</td>
-      <td>81</td>
+      <td>819.0</td>
+      <td>2017-12-31 15:06:20.173</td>
+      <td>2017-12-31 15:19:59.864</td>
+      <td>81.0</td>
       <td>Berry St at 4th St</td>
-      <td>37.77588</td>
-      <td>-122.39317</td>
-      <td>15</td>
+      <td>37.775880</td>
+      <td>-122.393170</td>
+      <td>15.0</td>
       <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
       <td>37.795392</td>
       <td>-122.394203</td>
-      <td>464</td>
+      <td>464.0</td>
       <td>Customer</td>
-      <td>1994</td>
+      <td>1994.0</td>
       <td>Female</td>
     </tr>
   </tbody>
@@ -13890,7 +14061,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gb_asserted</span> <span class="o">=</span> <span class="n">gobike</span>\
@@ -13917,7 +14088,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gb_errors</span> <span class="o">=</span> <span class="n">gb_asserted</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s1">&#39;member_birth_year&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">is_error</span><span class="p">())</span>
@@ -13934,7 +14105,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[24]:</div>
+<div class="prompt output_prompt">Out[23]:</div>
 
 
 
@@ -13977,93 +14148,93 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
   <tbody>
     <tr>
       <th>0</th>
-      <td>80110</td>
-      <td>2017-12-31 16:57:39.6540</td>
-      <td>2018-01-01 15:12:50.2450</td>
-      <td>74</td>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654</td>
+      <td>2018-01-01 15:12:50.245</td>
+      <td>74.0</td>
       <td>Laguna St at Hayes St</td>
-      <td>37.776434819204745</td>
-      <td>-122.42624402046204</td>
-      <td>43</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
       <td>San Francisco Public Library (Grove St at Hyde...</td>
-      <td>37.7787677</td>
-      <td>-122.4159292</td>
-      <td>96</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
       <td>Customer</td>
       <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>78800</td>
-      <td>2017-12-31 15:56:34.8420</td>
-      <td>2018-01-01 13:49:55.6170</td>
-      <td>284</td>
+      <td>78800.0</td>
+      <td>2017-12-31 15:56:34.842</td>
+      <td>2018-01-01 13:49:55.617</td>
+      <td>284.0</td>
       <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>96</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>96.0</td>
       <td>Dolores St at 15th St</td>
-      <td>37.7662102</td>
-      <td>-122.4266136</td>
-      <td>88</td>
+      <td>37.766210</td>
+      <td>-122.426614</td>
+      <td>88.0</td>
       <td>Customer</td>
       <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
       <td>Female</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>45768</td>
-      <td>2017-12-31 22:45:48.4110</td>
-      <td>2018-01-01 11:28:36.8830</td>
-      <td>245</td>
-      <td>Downtown Berkeley BART</td>
-      <td>37.8703477</td>
-      <td>-122.2677637</td>
-      <td>245</td>
-      <td>Downtown Berkeley BART</td>
-      <td>37.8703477</td>
-      <td>-122.2677637</td>
-      <td>1094</td>
-      <td>Customer</td>
-      <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
-      <td></td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>62172</td>
-      <td>2017-12-31 17:31:10.6360</td>
-      <td>2018-01-01 10:47:23.5310</td>
-      <td>60</td>
-      <td>8th St at Ringold St</td>
-      <td>37.77452040113685</td>
-      <td>-122.4094493687153</td>
-      <td>5</td>
-      <td>Powell St BART Station (Market St at 5th St)</td>
-      <td>37.783899357084934</td>
-      <td>-122.40844488143921</td>
-      <td>2831</td>
-      <td>Customer</td>
-      <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
-      <td></td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>43603</td>
-      <td>2017-12-31 14:23:14.0010</td>
-      <td>2018-01-01 02:29:57.5710</td>
-      <td>239</td>
+      <td>43603.0</td>
+      <td>2017-12-31 14:23:14.001</td>
+      <td>2018-01-01 02:29:57.571</td>
+      <td>239.0</td>
       <td>Bancroft Way at Telegraph Ave</td>
-      <td>37.8688126</td>
+      <td>37.868813</td>
       <td>-122.258764</td>
-      <td>247</td>
+      <td>247.0</td>
       <td>Fulton St at Bancroft Way</td>
-      <td>37.8677892</td>
-      <td>-122.2658964</td>
-      <td>3167</td>
+      <td>37.867789</td>
+      <td>-122.265896</td>
+      <td>3167.0</td>
       <td>Subscriber</td>
       <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
       <td>Female</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4507.0</td>
+      <td>2017-12-31 23:49:28.422</td>
+      <td>2018-01-01 01:04:35.619</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>3539.0</td>
+      <td>Customer</td>
+      <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2183.0</td>
+      <td>2017-12-31 23:52:55.581</td>
+      <td>2018-01-01 00:29:18.743</td>
+      <td>67.0</td>
+      <td>San Francisco Caltrain Station 2  (Townsend St...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>2311.0</td>
+      <td>Subscriber</td>
+      <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
+      <td>Male</td>
     </tr>
   </tbody>
 </table>
@@ -14087,7 +14258,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gb_errors</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
@@ -14111,7 +14282,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[25]:</div>
+<div class="prompt output_prompt">Out[24]:</div>
 
 
 
@@ -14160,267 +14331,267 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
   <tbody>
     <tr>
       <th>0</th>
-      <td>80110</td>
-      <td>2017-12-31 16:57:39.6540</td>
-      <td>2018-01-01 15:12:50.2450</td>
-      <td>74</td>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654</td>
+      <td>2018-01-01 15:12:50.245</td>
+      <td>74.0</td>
       <td>Laguna St at Hayes St</td>
-      <td>37.776434819204745</td>
-      <td>-122.42624402046204</td>
-      <td>43</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
       <td>San Francisco Public Library (Grove St at Hyde...</td>
-      <td>37.7787677</td>
+      <td>37.778768</td>
       <td>...</td>
-      <td>37.776434819204745</td>
-      <td>-122.42624402046204</td>
-      <td>43</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
       <td>San Francisco Public Library (Grove St at Hyde...</td>
-      <td>37.7787677</td>
-      <td>-122.4159292</td>
-      <td>96</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
       <td>Customer</td>
-      <td>1987</td>
+      <td>1987.0</td>
       <td>Male</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>78800</td>
-      <td>2017-12-31 15:56:34.8420</td>
-      <td>2018-01-01 13:49:55.6170</td>
-      <td>284</td>
+      <td>78800.0</td>
+      <td>2017-12-31 15:56:34.842</td>
+      <td>2018-01-01 13:49:55.617</td>
+      <td>284.0</td>
       <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>96</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>96.0</td>
       <td>Dolores St at 15th St</td>
-      <td>37.7662102</td>
+      <td>37.766210</td>
       <td>...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>96</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>96.0</td>
       <td>Dolores St at 15th St</td>
-      <td>37.7662102</td>
-      <td>-122.4266136</td>
-      <td>88</td>
+      <td>37.766210</td>
+      <td>-122.426614</td>
+      <td>88.0</td>
       <td>Customer</td>
-      <td>1965</td>
+      <td>1965.0</td>
       <td>Female</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>45768</td>
-      <td>2017-12-31 22:45:48.4110</td>
-      <td>2018-01-01 11:28:36.8830</td>
-      <td>245</td>
-      <td>Downtown Berkeley BART</td>
-      <td>37.8703477</td>
-      <td>-122.2677637</td>
-      <td>245</td>
-      <td>Downtown Berkeley BART</td>
-      <td>37.8703477</td>
-      <td>...</td>
-      <td>37.8703477</td>
-      <td>-122.2677637</td>
-      <td>245</td>
-      <td>Downtown Berkeley BART</td>
-      <td>37.8703477</td>
-      <td>-122.2677637</td>
-      <td>1094</td>
-      <td>Customer</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>62172</td>
-      <td>2017-12-31 17:31:10.6360</td>
-      <td>2018-01-01 10:47:23.5310</td>
-      <td>60</td>
-      <td>8th St at Ringold St</td>
-      <td>37.77452040113685</td>
-      <td>-122.4094493687153</td>
-      <td>5</td>
-      <td>Powell St BART Station (Market St at 5th St)</td>
-      <td>37.783899357084934</td>
-      <td>...</td>
-      <td>37.77452040113685</td>
-      <td>-122.4094493687153</td>
-      <td>5</td>
-      <td>Powell St BART Station (Market St at 5th St)</td>
-      <td>37.783899357084934</td>
-      <td>-122.40844488143921</td>
-      <td>2831</td>
-      <td>Customer</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>43603</td>
-      <td>2017-12-31 14:23:14.0010</td>
-      <td>2018-01-01 02:29:57.5710</td>
-      <td>239</td>
+      <td>43603.0</td>
+      <td>2017-12-31 14:23:14.001</td>
+      <td>2018-01-01 02:29:57.571</td>
+      <td>239.0</td>
       <td>Bancroft Way at Telegraph Ave</td>
-      <td>37.8688126</td>
+      <td>37.868813</td>
       <td>-122.258764</td>
-      <td>247</td>
+      <td>247.0</td>
       <td>Fulton St at Bancroft Way</td>
-      <td>37.8677892</td>
+      <td>37.867789</td>
       <td>...</td>
-      <td>37.8688126</td>
+      <td>37.868813</td>
       <td>-122.258764</td>
-      <td>247</td>
+      <td>247.0</td>
       <td>Fulton St at Bancroft Way</td>
-      <td>37.8677892</td>
-      <td>-122.2658964</td>
-      <td>3167</td>
+      <td>37.867789</td>
+      <td>-122.265896</td>
+      <td>3167.0</td>
       <td>Subscriber</td>
-      <td>1997</td>
+      <td>1997.0</td>
       <td>Female</td>
     </tr>
     <tr>
-      <th>5</th>
-      <td>9226</td>
-      <td>2017-12-31 22:51:00.9180</td>
-      <td>2018-01-01 01:24:47.1660</td>
-      <td>30</td>
-      <td>San Francisco Caltrain (Townsend St at 4th St)</td>
-      <td>37.776598</td>
-      <td>-122.395282</td>
-      <td>30</td>
-      <td>San Francisco Caltrain (Townsend St at 4th St)</td>
-      <td>37.776598</td>
+      <th>3</th>
+      <td>4507.0</td>
+      <td>2017-12-31 23:49:28.422</td>
+      <td>2018-01-01 01:04:35.619</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
       <td>...</td>
-      <td>37.776598</td>
-      <td>-122.395282</td>
-      <td>30</td>
-      <td>San Francisco Caltrain (Townsend St at 4th St)</td>
-      <td>37.776598</td>
-      <td>-122.395282</td>
-      <td>1487</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>3539.0</td>
       <td>Customer</td>
-      <td></td>
-      <td></td>
+      <td>1991.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2183.0</td>
+      <td>2017-12-31 23:52:55.581</td>
+      <td>2018-01-01 00:29:18.743</td>
+      <td>67.0</td>
+      <td>San Francisco Caltrain Station 2  (Townsend St...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>2311.0</td>
+      <td>Subscriber</td>
+      <td>1990.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2170.0</td>
+      <td>2017-12-31 23:52:55.937</td>
+      <td>2018-01-01 00:29:06.924</td>
+      <td>67.0</td>
+      <td>San Francisco Caltrain Station 2  (Townsend St...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>3717.0</td>
+      <td>Subscriber</td>
+      <td>1990.0</td>
+      <td>Male</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>4507</td>
-      <td>2017-12-31 23:49:28.4220</td>
-      <td>2018-01-01 01:04:35.6190</td>
-      <td>259</td>
-      <td>Addison St at Fourth St</td>
-      <td>37.866249</td>
-      <td>-122.2993708</td>
-      <td>259</td>
-      <td>Addison St at Fourth St</td>
-      <td>37.866249</td>
+      <td>1544.0</td>
+      <td>2017-12-31 23:53:38.943</td>
+      <td>2018-01-01 00:19:23.047</td>
+      <td>14.0</td>
+      <td>Clay St at Battery St</td>
+      <td>37.795001</td>
+      <td>-122.399970</td>
+      <td>27.0</td>
+      <td>Beale St at Harrison St</td>
+      <td>37.788059</td>
       <td>...</td>
-      <td>37.866249</td>
-      <td>-122.2993708</td>
-      <td>259</td>
-      <td>Addison St at Fourth St</td>
-      <td>37.866249</td>
-      <td>-122.2993708</td>
-      <td>3539</td>
-      <td>Customer</td>
-      <td>1991</td>
+      <td>37.795001</td>
+      <td>-122.399970</td>
+      <td>27.0</td>
+      <td>Beale St at Harrison St</td>
+      <td>37.788059</td>
+      <td>-122.391865</td>
+      <td>558.0</td>
+      <td>Subscriber</td>
+      <td>1980.0</td>
       <td>Female</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>4334</td>
-      <td>2017-12-31 23:46:37.1960</td>
-      <td>2018-01-01 00:58:51.2110</td>
-      <td>284</td>
-      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>284</td>
-      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
+      <td>1474.0</td>
+      <td>2017-12-31 23:54:40.146</td>
+      <td>2018-01-01 00:19:14.351</td>
+      <td>14.0</td>
+      <td>Clay St at Battery St</td>
+      <td>37.795001</td>
+      <td>-122.399970</td>
+      <td>27.0</td>
+      <td>Beale St at Harrison St</td>
+      <td>37.788059</td>
       <td>...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>284</td>
-      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>1503</td>
-      <td>Customer</td>
-      <td></td>
-      <td></td>
+      <td>37.795001</td>
+      <td>-122.399970</td>
+      <td>27.0</td>
+      <td>Beale St at Harrison St</td>
+      <td>37.788059</td>
+      <td>-122.391865</td>
+      <td>3646.0</td>
+      <td>Subscriber</td>
+      <td>1979.0</td>
+      <td>Male</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>4150</td>
-      <td>2017-12-31 23:37:07.5480</td>
-      <td>2018-01-01 00:46:18.3080</td>
-      <td>20</td>
-      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
-      <td>-122.399051</td>
-      <td>20</td>
-      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
+      <td>1532.0</td>
+      <td>2017-12-31 23:52:49.497</td>
+      <td>2018-01-01 00:18:21.953</td>
+      <td>78.0</td>
+      <td>Folsom St at 9th St</td>
+      <td>37.773717</td>
+      <td>-122.411647</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
       <td>...</td>
-      <td>37.7913</td>
-      <td>-122.399051</td>
-      <td>20</td>
-      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
-      <td>-122.399051</td>
-      <td>3125</td>
-      <td>Customer</td>
-      <td></td>
-      <td></td>
+      <td>37.773717</td>
+      <td>-122.411647</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
+      <td>-122.394203</td>
+      <td>3114.0</td>
+      <td>Subscriber</td>
+      <td>1988.0</td>
+      <td>Other</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>4238</td>
-      <td>2017-12-31 23:35:38.1450</td>
-      <td>2018-01-01 00:46:17.0530</td>
-      <td>20</td>
-      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
-      <td>-122.399051</td>
-      <td>20</td>
-      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
+      <td>1216.0</td>
+      <td>2017-12-31 23:46:33.993</td>
+      <td>2018-01-01 00:06:50.058</td>
+      <td>4.0</td>
+      <td>Cyril Magnin St at Ellis St</td>
+      <td>37.785881</td>
+      <td>-122.408915</td>
+      <td>123.0</td>
+      <td>Folsom St at 19th St</td>
+      <td>37.760594</td>
       <td>...</td>
-      <td>37.7913</td>
-      <td>-122.399051</td>
-      <td>20</td>
-      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
-      <td>37.7913</td>
-      <td>-122.399051</td>
-      <td>2543</td>
-      <td>Customer</td>
-      <td></td>
-      <td></td>
+      <td>37.785881</td>
+      <td>-122.408915</td>
+      <td>123.0</td>
+      <td>Folsom St at 19th St</td>
+      <td>37.760594</td>
+      <td>-122.414817</td>
+      <td>1473.0</td>
+      <td>Subscriber</td>
+      <td>1971.0</td>
+      <td>Male</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>3292</td>
-      <td>2017-12-31 23:46:32.4030</td>
-      <td>2018-01-01 00:41:24.6050</td>
-      <td>284</td>
-      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>22</td>
-      <td>Howard St at Beale St</td>
-      <td>37.789756</td>
+      <td>386.0</td>
+      <td>2017-12-31 23:59:01.261</td>
+      <td>2018-01-01 00:05:27.809</td>
+      <td>317.0</td>
+      <td>San Salvador St at 9th St</td>
+      <td>37.333955</td>
+      <td>-121.877349</td>
+      <td>296.0</td>
+      <td>5th St at Virginia St</td>
+      <td>37.325998</td>
       <td>...</td>
-      <td>37.78487208436062</td>
-      <td>-122.40087568759917</td>
-      <td>22</td>
-      <td>Howard St at Beale St</td>
-      <td>37.789756</td>
-      <td>-122.394643</td>
-      <td>3058</td>
-      <td>Customer</td>
-      <td></td>
-      <td></td>
+      <td>37.333955</td>
+      <td>-121.877349</td>
+      <td>296.0</td>
+      <td>5th St at Virginia St</td>
+      <td>37.325998</td>
+      <td>-121.877120</td>
+      <td>1603.0</td>
+      <td>Subscriber</td>
+      <td>1992.0</td>
+      <td>Male</td>
     </tr>
   </tbody>
 </table>
@@ -14454,7 +14625,7 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gobike</span> <span class="o">=</span> <span class="n">gobike</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;gobike&quot;</span><span class="p">)</span>
@@ -14479,14 +14650,14 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Saving package to: /tmp/tmpdwtitvt3/gobike.dprep
+<pre>Saving package to: /tmp/tmp54l1rjoe/gobike.dprep
 </pre>
 </div>
 </div>
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[26]:</div>
+<div class="prompt output_prompt">Out[25]:</div>
 
 
 
@@ -14494,11 +14665,11 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 <div class="output_text output_subarea output_execute_result">
 <pre>Package
   name: None
-  path: /tmp/tmpdwtitvt3/gobike.dprep
+  path: /tmp/tmp54l1rjoe/gobike.dprep
   dataflows: [
     Dataflow {
       name: gobike
-      steps: 3
+      steps: 4
     },
   ]</pre>
 </div>
@@ -14508,6 +14679,39 @@ Requirement already satisfied: idna&lt;2.8,&gt;=2.5 in /home/nbuser/anaconda3_50
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>On charge le package</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">package</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">Package</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;/tmp/tmp54l1rjoe/gobike.dprep&quot;</span><span class="p">)</span>
+<span class="n">dataflow_list</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">dataflows</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>&gt; Documentation
+<a href="https://docs.microsoft.com/fr-fr/python/api/overview/azure/dataprep/intro?view=azure-dataprep-py">https://docs.microsoft.com/fr-fr/python/api/overview/azure/dataprep/intro?view=azure-dataprep-py</a></p>
+
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
