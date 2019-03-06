@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>10 Distributed TensorFlow</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>13 Déploiement AKS</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11775,37 +11775,36 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="10.-Distributed-TensorFlow-with-parameter-server">10. Distributed TensorFlow with parameter server<a class="anchor-link" href="#10.-Distributed-TensorFlow-with-parameter-server">&#182;</a></h1><p>In this tutorial, you will train a TensorFlow model on the <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> dataset using native <a href="https://www.tensorflow.org/deploy/distributed">distributed TensorFlow</a>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="1.-Prerequisites">1. Prerequisites<a class="anchor-link" href="#1.-Prerequisites">&#182;</a></h2><ul>
-<li>Understand the <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture">architecture and terms</a> introduced by Azure Machine Learning (AML)</li>
-<li>Go through the <a href="https://github.com/Azure/MachineLearningNotebooks/blob/master/00.configuration.ipynb">00.configuration.ipynb</a> notebook to:<ul>
-<li>install the AML SDK</li>
-<li>create a workspace and its configuration file (<code>config.json</code>)</li>
-</ul>
-</li>
-<li>Review the <a href="https://aka.ms/aml-notebook-hyperdrive">tutorial</a> on single-node TensorFlow training using the SDK</li>
-</ul>
+<h1 id="D&#233;ploiement-d'un-mod&#232;le-de-ML-dans-Azure-Kubernetes-Service-(AKS)">D&#233;ploiement d'un mod&#232;le de ML dans Azure Kubernetes Service (AKS)<a class="anchor-link" href="#D&#233;ploiement-d'un-mod&#232;le-de-ML-dans-Azure-Kubernetes-Service-(AKS)">&#182;</a></h1><p><br></p>
+<p><img src="https://tse3.mm.bing.net/th?id=OIP.SbDe38X6ihrd_7mG-eeb_wHaC1&pid=Api"></p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check core SDK version number</span>
-<span class="kn">import</span> <span class="nn">azureml.core</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core</span> <span class="k">import</span> <span class="n">Workspace</span>
+<span class="kn">from</span> <span class="nn">azureml.core.compute</span> <span class="k">import</span> <span class="n">AksCompute</span><span class="p">,</span> <span class="n">ComputeTarget</span>
+<span class="kn">from</span> <span class="nn">azureml.core.webservice</span> <span class="k">import</span> <span class="n">Webservice</span><span class="p">,</span> <span class="n">AksWebservice</span>
+<span class="kn">from</span> <span class="nn">azureml.core.image</span> <span class="k">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">azureml.core.model</span> <span class="k">import</span> <span class="n">Model</span>
+</pre></div>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SDK version:&quot;</span><span class="p">,</span> <span class="n">azureml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">VERSION</span><span class="p">)</span>
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">azureml.core</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">azureml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">VERSION</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11822,7 +11821,7 @@ div#notebook {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>SDK version: 1.0.17
+<pre>1.0.17
 </pre>
 </div>
 </div>
@@ -11835,64 +11834,20 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Diagnostics">Diagnostics<a class="anchor-link" href="#Diagnostics">&#182;</a></h2><p>Opt-in diagnostics for better experience, quality, and security of future releases.</p>
+<h1 id="1.-Connexion-workspace-Azure-ML-service">1. Connexion workspace Azure ML service<a class="anchor-link" href="#1.-Connexion-workspace-Azure-ML-service">&#182;</a></h1><p>Load existing workspace from the config file info.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.telemetry</span> <span class="k">import</span> <span class="n">set_diagnostics_collection</span>
-
-<span class="n">set_diagnostics_collection</span><span class="p">(</span><span class="n">send_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Turning diagnostics collection on. 
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Initialize-workspace">Initialize workspace<a class="anchor-link" href="#Initialize-workspace">&#182;</a></h2><p>Initialize a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#workspace">Workspace</a> object from the existing workspace you created in the Prerequisites step. <code>Workspace.from_config()</code> creates a workspace object from the details stored in <code>config.json</code>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.workspace</span> <span class="k">import</span> <span class="n">Workspace</span>
 
 <span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="o">.</span><span class="n">from_config</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Workspace name: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
-      <span class="s1">&#39;Azure region: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> 
-      <span class="s1">&#39;Resource group: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ws</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span><span class="p">,</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="n">ws</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11910,9 +11865,10 @@ div#notebook {
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Found the config file in: C:\Users\seretkow\notebooks\Labs Azure ML service\aml_config\config.json
-Workspace name: MLServiceWorkspace
-Azure region: westeurope
-Resource group: mlserviceresourcegroup
+MLServiceWorkspace
+mlserviceresourcegroup
+westeurope
+70b8f39e-8863-49f7-b6ba-34a80799550c
 </pre>
 </div>
 </div>
@@ -11925,38 +11881,25 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="2.-Create-a-remote-compute-target">2. Create a remote compute target<a class="anchor-link" href="#2.-Create-a-remote-compute-target">&#182;</a></h2><p>You will need to create a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#compute-target">compute target</a> to execute your training script on. In this tutorial, you create an <code>AmlCompute</code> cluster as your training compute resource. This code creates a cluster for you if it does not already exist in your workspace.</p>
-<p><strong>Creation of the cluster takes approximately 5 minutes.</strong> If the cluster is already in your workspace this code will skip the cluster creation process.</p>
+<h1 id="2.-Enregistrement-du-mod&#232;le-de-ML">2. Enregistrement du mod&#232;le de ML<a class="anchor-link" href="#2.-Enregistrement-du-mod&#232;le-de-ML">&#182;</a></h1><p>Register an existing trained model, add descirption and tags.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.compute</span> <span class="k">import</span> <span class="n">ComputeTarget</span><span class="p">,</span> <span class="n">AmlCompute</span>
-<span class="kn">from</span> <span class="nn">azureml.core.compute_target</span> <span class="k">import</span> <span class="n">ComputeTargetException</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#Register the model</span>
+<span class="kn">from</span> <span class="nn">azureml.core.model</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">model_path</span> <span class="o">=</span> <span class="s2">&quot;sklearn_regression_model.pkl&quot;</span><span class="p">,</span> <span class="c1"># this points to a local file</span>
+                       <span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;sklearn_regression_model.pkl&quot;</span><span class="p">,</span> <span class="c1"># this is the name the model is registered as</span>
+                       <span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;area&#39;</span><span class="p">:</span> <span class="s2">&quot;diabetes&quot;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s2">&quot;regression&quot;</span><span class="p">},</span>
+                       <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Ridge regression model to predict diabetes&quot;</span><span class="p">,</span>
+                       <span class="n">workspace</span> <span class="o">=</span> <span class="n">ws</span><span class="p">)</span>
 
-<span class="c1"># choose a name for your cluster</span>
-<span class="n">cluster_name</span> <span class="o">=</span> <span class="s2">&quot;gpucluster&quot;</span>
-
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">cluster_name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found existing compute target.&#39;</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">ComputeTargetException</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating a new compute target...&#39;</span><span class="p">)</span>
-    <span class="n">compute_config</span> <span class="o">=</span> <span class="n">AmlCompute</span><span class="o">.</span><span class="n">provisioning_configuration</span><span class="p">(</span><span class="n">vm_size</span><span class="o">=</span><span class="s1">&#39;STANDARD_NC6&#39;</span><span class="p">,</span> 
-                                                           <span class="n">max_nodes</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-
-    <span class="c1"># create the cluster</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">cluster_name</span><span class="p">,</span> <span class="n">compute_config</span><span class="p">)</span>
-
-    <span class="n">compute_target</span><span class="o">.</span><span class="n">wait_for_completion</span><span class="p">(</span><span class="n">show_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Use the &#39;status&#39; property to get a detailed status for the current cluster. </span>
-<span class="nb">print</span><span class="p">(</span><span class="n">compute_target</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">serialize</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11973,8 +11916,8 @@ Resource group: mlserviceresourcegroup
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Found existing compute target.
-{&#39;allocationState&#39;: &#39;Steady&#39;, &#39;allocationStateTransitionTime&#39;: &#39;2019-02-22T14:28:25.671000+00:00&#39;, &#39;creationTime&#39;: &#39;2018-11-23T16:53:14.040220+00:00&#39;, &#39;currentNodeCount&#39;: 0, &#39;errors&#39;: None, &#39;modifiedTime&#39;: &#39;2018-11-23T16:53:56.988534+00:00&#39;, &#39;nodeStateCounts&#39;: {&#39;idleNodeCount&#39;: 0, &#39;leavingNodeCount&#39;: 0, &#39;preemptedNodeCount&#39;: 0, &#39;preparingNodeCount&#39;: 0, &#39;runningNodeCount&#39;: 0, &#39;unusableNodeCount&#39;: 0}, &#39;provisioningState&#39;: &#39;Succeeded&#39;, &#39;provisioningStateTransitionTime&#39;: None, &#39;scaleSettings&#39;: {&#39;minNodeCount&#39;: 0, &#39;maxNodeCount&#39;: 4, &#39;nodeIdleTimeBeforeScaleDown&#39;: &#39;&#39;}, &#39;targetNodeCount&#39;: None, &#39;vmPriority&#39;: &#39;Dedicated&#39;, &#39;vmSize&#39;: &#39;STANDARD_NC6&#39;}
+<pre>Registering model sklearn_regression_model.pkl
+sklearn_regression_model.pkl Ridge regression model to predict diabetes 5
 </pre>
 </div>
 </div>
@@ -11987,58 +11930,43 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="3.-Train-model-on-the-remote-compute">3. Train model on the remote compute<a class="anchor-link" href="#3.-Train-model-on-the-remote-compute">&#182;</a></h2><p>Now that we have the cluster ready to go, let's run our distributed training job.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.1-Create-a-project-directory">3.1 Create a project directory<a class="anchor-link" href="#3.1-Create-a-project-directory">&#182;</a></h3><p>Create a directory that will contain all the necessary code from your local machine that you will need access to on the remote resource. This includes the training script, and any additional files your training script depends on3.1.</p>
+<h1 id="3.-Cr&#233;ation-de-l'image">3. Cr&#233;ation de l'image<a class="anchor-link" href="#3.-Cr&#233;ation-de-l'image">&#182;</a></h1><p>Create an image using the registered model the script that will load and run the model.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">writefile</span> score.py
+import pickle
+import json
+import numpy
+from sklearn.externals import joblib
+from sklearn.linear_model import Ridge
+from azureml.core.model import Model
 
-<span class="n">project_folder</span> <span class="o">=</span> <span class="s1">&#39;./tf-distr-ps&#39;</span>
-<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">project_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
+def init():
+    global model
+    # note here &quot;sklearn_regression_model.pkl&quot; is the name of the model registered under
+    # this is a different behavior than before when the code is run locally, even though the code is the same.
+    model_path = Model.get_model_path(&#39;sklearn_regression_model.pkl&#39;)
+    # deserialize the model file back into a sklearn model
+    model = joblib.load(model_path)
 
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Copy the training script `tf_mnist_replica.py` into this project directory.</span>
-<span class="c1"># https://github.com/Azure/MachineLearningNotebooks/tree/master/how-to-use-azureml/training-with-deep-learning/distributed-tensorflow-with-parameter-server</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">shutil</span>
-
-<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span> <span class="n">project_folder</span><span class="p">)</span>
+# note you can pass in multiple rows for scoring
+def run(raw_data):
+    try:
+        data = json.loads(raw_data)[&#39;data&#39;]
+        data = numpy.array(data)
+        result = model.predict(data)
+        # you can return any data type as long as it is JSON-serializable
+        return result.tolist()
+    except Exception as e:
+        error = str(e)
+        return error
 </pre></div>
 
 </div>
@@ -12051,13 +11979,201 @@ Resource group: mlserviceresourcegroup
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[8]:</div>
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Overwriting score.py
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.conda_dependencies</span> <span class="k">import</span> <span class="n">CondaDependencies</span> 
+
+<span class="n">myenv</span> <span class="o">=</span> <span class="n">CondaDependencies</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">conda_packages</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;numpy&#39;</span><span class="p">,</span><span class="s1">&#39;scikit-learn&#39;</span><span class="p">])</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;myenv.yml&quot;</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">myenv</span><span class="o">.</span><span class="n">serialize_to_string</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">time</span>
+# Prévoir 5 min environ
+
+from azureml.core.image import ContainerImage
+
+image_config = ContainerImage.image_configuration(execution_script = &quot;score.py&quot;,
+                                                  runtime = &quot;python&quot;,
+                                                  conda_file = &quot;myenv.yml&quot;,
+                                                  description = &quot;Image with ridge regression model&quot;,
+                                                  tags = {&#39;area&#39;: &quot;diabetes&quot;, &#39;type&#39;: &quot;regression&quot;}
+                                                 )
+
+image = ContainerImage.create(name = &quot;myimage1&quot;,
+                              # this is the model object
+                              models = [model],
+                              image_config = image_config,
+                              workspace = ws)
+
+image.wait_for_creation(show_output = True)
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Creating image
+Running......................................................
+SucceededImage creation operation finished for image myimage1:5, operation &#34;Succeeded&#34;
+Wall time: 4min 51s
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="4.-Provisionnement-Azure-Kubernetes-Service-(AKS)">4. Provisionnement Azure Kubernetes Service (AKS)<a class="anchor-link" href="#4.-Provisionnement-Azure-Kubernetes-Service-(AKS)">&#182;</a></h1><p>This is a one time setup. You can reuse this cluster for multiple deployments after it has been created. If you delete the cluster or the resource group that contains it, then you would have to recreate it.</p>
+<blockquote><p><a href="https://docs.microsoft.com/en-us/azure/aks/">https://docs.microsoft.com/en-us/azure/aks/</a></p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Configuration AKS</span>
+<span class="n">prov_config</span> <span class="o">=</span> <span class="n">AksCompute</span><span class="o">.</span><span class="n">provisioning_configuration</span><span class="p">()</span>
+
+<span class="n">aks_name</span> <span class="o">=</span> <span class="s1">&#39;my-aks-9&#39;</span> 
+
+<span class="n">aks_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">workspace</span> <span class="o">=</span> <span class="n">ws</span><span class="p">,</span> 
+                                  <span class="n">name</span> <span class="o">=</span> <span class="n">aks_name</span><span class="p">,</span> 
+                                  <span class="n">provisioning_configuration</span> <span class="o">=</span> <span class="n">prov_config</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">time</span>
+aks_target.wait_for_completion(show_output = True)
+print(aks_target.provisioning_state)
+print(aks_target.provisioning_errors)
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>SucceededProvisioning operation finished, operation &#34;Succeeded&#34;
+Succeeded
+None
+Wall time: 484 ms
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="4.2-Etape-optionnelle-:-attachement-&#224;-une-instance-AKS-existante">4.2 Etape optionnelle : attachement &#224; une instance AKS existante<a class="anchor-link" href="#4.2-Etape-optionnelle-:-attachement-&#224;-une-instance-AKS-existante">&#182;</a></h2><p>If you have existing AKS cluster in your Azure subscription, you can attach it to the Workspace.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd"># Use the default configuration (can also provide parameters to customize)</span>
+<span class="sd">resource_id = &#39;/subscriptions/92c76a2f-0e1c-4216-b65e-abf7a3f34c1e/resourcegroups/raymondsdk0604/providers/Microsoft.ContainerService/managedClusters/my-aks-0605d37425356b7d01&#39;</span>
+
+<span class="sd">create_name=&#39;my-existing-aks&#39; </span>
+<span class="sd"># Create the cluster</span>
+<span class="sd">attach_config = AksCompute.attach_configuration(resource_id=resource_id)</span>
+<span class="sd">aks_target = ComputeTarget.attach(workspace=ws, name=create_name, attach_configuration=attach_config)</span>
+<span class="sd"># Wait for the operation to complete</span>
+<span class="sd">aks_target.wait_for_completion(True)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[48]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;./tf-distr-ps\\tf_mnist_replica.py&#39;</pre>
+<pre>&#34;\n# Use the default configuration (can also provide parameters to customize)\nresource_id = &#39;/subscriptions/92c76a2f-0e1c-4216-b65e-abf7a3f34c1e/resourcegroups/raymondsdk0604/providers/Microsoft.ContainerService/managedClusters/my-aks-0605d37425356b7d01&#39;\n\ncreate_name=&#39;my-existing-aks&#39; \n# Create the cluster\nattach_config = AksCompute.attach_configuration(resource_id=resource_id)\naks_target = ComputeTarget.attach(workspace=ws, name=create_name, attach_configuration=attach_config)\n# Wait for the operation to complete\naks_target.wait_for_completion(True)\n&#34;</pre>
 </div>
 
 </div>
@@ -12070,20 +12186,16 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.2-Create-an-experiment">3.2 Create an experiment<a class="anchor-link" href="#3.2-Create-an-experiment">&#182;</a></h3><p>Create an <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#experiment">Experiment</a> to track all the runs in your workspace for this distributed TensorFlow tutorial.</p>
-
+<h1 id="5.-D&#233;ploiement-du-Web-Service-dans-Azure-Kubernetes-Service">5. D&#233;ploiement du Web Service dans Azure Kubernetes Service<a class="anchor-link" href="#5.-D&#233;ploiement-du-Web-Service-dans-Azure-Kubernetes-Service">&#182;</a></h1>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core</span> <span class="k">import</span> <span class="n">Experiment</span>
-
-<span class="n">experiment_name</span> <span class="o">=</span> <span class="s1">&#39;tf-distr-ps&#39;</span>
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">experiment_name</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">aks_config</span> <span class="o">=</span> <span class="n">AksWebservice</span><span class="o">.</span><span class="n">deploy_configuration</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12091,68 +12203,22 @@ Resource group: mlserviceresourcegroup
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.3-Create-a-TensorFlow-estimator">3.3 Create a TensorFlow estimator<a class="anchor-link" href="#3.3-Create-a-TensorFlow-estimator">&#182;</a></h3><p>The AML SDK's TensorFlow estimator enables you to easily submit TensorFlow training jobs for both single-node and distributed runs. For more information on the TensorFlow estimator, refer <a href="https://docs.microsoft.com/azure/machine-learning/service/how-to-train-tensorflow">here</a>.</p>
-
-</div>
-</div>
-</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.train.dnn</span> <span class="k">import</span> <span class="n">TensorFlow</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">time</span>
+# Compter entre 1 à 2 minutes pour déployer
+aks_service_name =&#39;aks-service-1&#39;
 
-<span class="n">script_params</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;--num_gpus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s1">&#39;--train_steps&#39;</span><span class="p">:</span> <span class="mi">500</span>
-<span class="p">}</span>
-
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">TensorFlow</span><span class="p">(</span><span class="n">source_directory</span><span class="o">=</span><span class="n">project_folder</span><span class="p">,</span>
-                       <span class="n">compute_target</span><span class="o">=</span><span class="n">compute_target</span><span class="p">,</span>
-                       <span class="n">script_params</span><span class="o">=</span><span class="n">script_params</span><span class="p">,</span>
-                       <span class="n">entry_script</span><span class="o">=</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span>
-                       <span class="n">node_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">worker_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">parameter_server_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>   
-                       <span class="n">distributed_backend</span><span class="o">=</span><span class="s1">&#39;ps&#39;</span><span class="p">,</span>
-                       <span class="n">use_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The above code specifies that we will run our training script on <code>2</code> nodes, with two workers and one parameter server. In order to execute a native distributed TensorFlow run, you must provide the argument <code>distributed_backend='ps'</code>. Using this estimator with these settings, TensorFlow and its dependencies will be installed for you. However, if your script also uses other packages, make sure to install them via the <code>TensorFlow</code> constructor's <code>pip_packages</code> or <code>conda_packages</code> parameters.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.4-Submit-job">3.4 Submit job<a class="anchor-link" href="#3.4-Submit-job">&#182;</a></h3><p>Run your experiment by submitting your estimator object. Note that this call is asynchronous.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">run</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+aks_service = Webservice.deploy_from_image(workspace = ws, 
+                                           name = aks_service_name,
+                                           image = image,
+                                           deployment_config = aks_config,
+                                           deployment_target = aks_target)
+aks_service.wait_for_deployment(show_output = True)
+print(aks_service.state)
 </pre></div>
 
 </div>
@@ -12169,10 +12235,11 @@ Resource group: mlserviceresourcegroup
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Run(Experiment: tf-distr-ps,
-Id: tf-distr-ps_1551699379_3e846b68,
-Type: azureml.scriptrun,
-Status: Starting)
+<pre>Creating service
+Running.........
+SucceededAKS service creation operation finished, operation &#34;Succeeded&#34;
+Healthy
+Wall time: 1min 2s
 </pre>
 </div>
 </div>
@@ -12185,19 +12252,30 @@ Status: Starting)
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.5-Monitor-your-run">3.5 Monitor your run<a class="anchor-link" href="#3.5-Monitor-your-run">&#182;</a></h3><p>You can monitor the progress of the run with a Jupyter widget. Like the run submission, the widget is asynchronous and provides live updates every 10-15 seconds until the job completes.</p>
-
+<h1 id="6.-Test-du-Web-Service-d&#233;ploy&#233;">6. Test du Web Service d&#233;ploy&#233;<a class="anchor-link" href="#6.-Test-du-Web-Service-d&#233;ploy&#233;">&#182;</a></h1>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.widgets</span> <span class="k">import</span> <span class="n">RunDetails</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">time</span>
+import json
 
-<span class="n">RunDetails</span><span class="p">(</span><span class="n">run</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+test_sample = json.dumps({&#39;data&#39;: [
+    [1,2,3,4,5,6,7,8,9,10]
+]})
+test_sample = bytes(test_sample,encoding = &#39;utf8&#39;)
+
+print(&quot;- Entrées fournies au web service :&quot;)
+print(test_sample)
+print()
+prediction = aks_service.run(input_data = test_sample)
+print(&quot;- Prédictions obtenues par le web service :&quot;)
+print(prediction)
+print()
 </pre></div>
 
 </div>
@@ -12213,21 +12291,16 @@ Status: Starting)
 <div class="prompt"></div>
 
 
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>- Entrées fournies au web service :
+b&#39;{&#34;data&#34;: [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]}&#39;
 
+- Prédictions obtenues par le web service :
+[5215.1981315798685]
 
-
- 
- 
-<div id="d5862377-a157-4229-8080-b7c4ba5cd67d"></div>
-<div class="output_subarea output_widget_view ">
-<script type="text/javascript">
-var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
-</script>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "a6bd35794e3b49b68bd413be0403c049", "version_major": 2, "version_minor": 0}
-</script>
+Wall time: 251 ms
+</pre>
 </div>
-
 </div>
 
 </div>
@@ -12238,17 +12311,19 @@ var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Alternatively, you can block until the script has completed training before running more code.</p>
+<h1 id="7.-Nettoyage">7. Nettoyage<a class="anchor-link" href="#7.-Nettoyage">&#182;</a></h1><p>Supression AKS, image et modèle</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># run.wait_for_completion(show_output=True) # this provides a verbose log</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#aks_service.delete()</span>
+<span class="c1">#image.delete()</span>
+<span class="c1">#model.delete()</span>
 </pre></div>
 
 </div>

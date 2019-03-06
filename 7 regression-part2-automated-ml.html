@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>10 Distributed TensorFlow</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>7 regression-part2-automated-ml</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11775,7 +11775,28 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="10.-Distributed-TensorFlow-with-parameter-server">10. Distributed TensorFlow with parameter server<a class="anchor-link" href="#10.-Distributed-TensorFlow-with-parameter-server">&#182;</a></h1><p>In this tutorial, you will train a TensorFlow model on the <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> dataset using native <a href="https://www.tensorflow.org/deploy/distributed">distributed TensorFlow</a>.</p>
+<h1 id="Tutorial-#2:-Train-a-regression-model-with-automated-machine-learning">Tutorial #2: Train a regression model with automated machine learning<a class="anchor-link" href="#Tutorial-#2:-Train-a-regression-model-with-automated-machine-learning">&#182;</a></h1><p>This tutorial is <strong>part two of a two-part tutorial series</strong>. In the previous tutorial, you <a href="regression-part1-data-prep.ipynb">prepared the NYC taxi data for regression modeling</a>.</p>
+<p>Now, you're ready to start building your model with Azure Machine Learning service. In this part of the tutorial, you will use the prepared data and automatically generate a regression model to predict taxi fare prices. Using the automated ML capabilities of the service, you define your machine learning goals and constraints, launch the automated machine learning process and then allow the algorithm selection and hyperparameter-tuning to happen for you. The automated ML technique iterates over many combinations of algorithms and hyperparameters until it finds the best model based on your criterion.</p>
+<p>In this tutorial, you learn how to:</p>
+<blockquote><ul>
+<li>Setup a Python environment and import the SDK packages</li>
+<li>Configure an Azure Machine Learning service workspace</li>
+<li>Auto-train a regression model </li>
+<li>Run the model locally with custom parameters</li>
+<li>Explore the results</li>
+<li>Register the best model</li>
+</ul>
+</blockquote>
+<p>If you don’t have an Azure subscription, create a <a href="https://aka.ms/AMLfree">free account</a> before you begin.</p>
+<blockquote><p>Code in this article was tested with Azure Machine Learning SDK version 1.0.0</p>
+</blockquote>
+<h2 id="Prerequisites">Prerequisites<a class="anchor-link" href="#Prerequisites">&#182;</a></h2><blockquote><ul>
+<li><p><a href="regression-part1-data-prep.ipynb">Run the data preparation tutorial</a></p>
+</li>
+<li><p>Automated machine learning configured environment e.g. Azure notebooks, Local Python environment or Data Science Virtual Machine. <a href="https://docs.microsoft.com/azure/machine-learning/service/samples-notebooks">Setup</a> automated machine learning.</p>
+</li>
+</ul>
+</blockquote>
 
 </div>
 </div>
@@ -11784,15 +11805,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="1.-Prerequisites">1. Prerequisites<a class="anchor-link" href="#1.-Prerequisites">&#182;</a></h2><ul>
-<li>Understand the <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture">architecture and terms</a> introduced by Azure Machine Learning (AML)</li>
-<li>Go through the <a href="https://github.com/Azure/MachineLearningNotebooks/blob/master/00.configuration.ipynb">00.configuration.ipynb</a> notebook to:<ul>
-<li>install the AML SDK</li>
-<li>create a workspace and its configuration file (<code>config.json</code>)</li>
-</ul>
-</li>
-<li>Review the <a href="https://aka.ms/aml-notebook-hyperdrive">tutorial</a> on single-node TensorFlow training using the SDK</li>
-</ul>
+<h3 id="Import-packages">Import packages<a class="anchor-link" href="#Import-packages">&#182;</a></h3><p>Import Python packages you need in this tutorial.</p>
 
 </div>
 </div>
@@ -11802,31 +11815,15 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check core SDK version number</span>
-<span class="kn">import</span> <span class="nn">azureml.core</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SDK version:&quot;</span><span class="p">,</span> <span class="n">azureml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">VERSION</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">azureml.core</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">azureml.core.workspace</span> <span class="k">import</span> <span class="n">Workspace</span>
+<span class="kn">from</span> <span class="nn">azureml.train.automl.run</span> <span class="k">import</span> <span class="n">AutoMLRun</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>SDK version: 1.0.17
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -11835,7 +11832,8 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Diagnostics">Diagnostics<a class="anchor-link" href="#Diagnostics">&#182;</a></h2><p>Opt-in diagnostics for better experience, quality, and security of future releases.</p>
+<h3 id="Configure-workspace">Configure workspace<a class="anchor-link" href="#Configure-workspace">&#182;</a></h3><p>Create a workspace object from the existing workspace. A <code>Workspace</code> is a class that accepts your Azure subscription and resource information, and creates a cloud resource to monitor and track your model runs. <code>Workspace.from_config()</code> reads the file <strong>aml_config/config.json</strong> and loads the details into an object named <code>ws</code>.  <code>ws</code> is used throughout the rest of the code in this tutorial.</p>
+<p>Once you have a workspace object, specify a name for the experiment and create and register a local directory with the workspace. The history of all runs is recorded under the specified experiment.</p>
 
 </div>
 </div>
@@ -11845,9 +11843,23 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.telemetry</span> <span class="k">import</span> <span class="n">set_diagnostics_collection</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="o">.</span><span class="n">from_config</span><span class="p">()</span>
+<span class="c1"># choose a name for the run history container in the workspace</span>
+<span class="n">experiment_name</span> <span class="o">=</span> <span class="s1">&#39;automated-ml-regression&#39;</span>
+<span class="c1"># project folder</span>
+<span class="n">project_folder</span> <span class="o">=</span> <span class="s1">&#39;./automated-ml-regression&#39;</span>
 
-<span class="n">set_diagnostics_collection</span><span class="p">(</span><span class="n">send_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">output</span><span class="p">[</span><span class="s1">&#39;SDK version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">azureml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">VERSION</span>
+<span class="n">output</span><span class="p">[</span><span class="s1">&#39;Subscription ID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">subscription_id</span>
+<span class="n">output</span><span class="p">[</span><span class="s1">&#39;Workspace&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">name</span>
+<span class="n">output</span><span class="p">[</span><span class="s1">&#39;Resource Group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span>
+<span class="n">output</span><span class="p">[</span><span class="s1">&#39;Location&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span>
+<span class="n">output</span><span class="p">[</span><span class="s1">&#39;Project Directory&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project_folder</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;display.max_colwidth&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">output</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
 </pre></div>
 
 </div>
@@ -11863,10 +11875,83 @@ div#notebook {
 <div class="prompt"></div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Turning diagnostics collection on. 
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Warning: Falling back to use azure cli login credentials.
+If you run your code in unattended mode, i.e., where you can&#39;t give a user input, then we recommend to use ServicePrincipalAuthentication or MsiAuthentication.
+Please refer to aka.ms/aml-notebook-auth for different authentication mechanisms in azureml-sdk.
 </pre>
 </div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Found the config file in: C:\Users\seretkow\notebooks\Labs Azure ML service\aml_config\config.json
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[2]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>SDK version</th>
+      <td>1.0.17</td>
+    </tr>
+    <tr>
+      <th>Subscription ID</th>
+      <td>70b8f39e-8863-49f7-b6ba-34a80799550c</td>
+    </tr>
+    <tr>
+      <th>Workspace</th>
+      <td>MLServiceWorkspace</td>
+    </tr>
+    <tr>
+      <th>Resource Group</th>
+      <td>mlserviceresourcegroup</td>
+    </tr>
+    <tr>
+      <th>Location</th>
+      <td>westeurope</td>
+    </tr>
+    <tr>
+      <th>Project Directory</th>
+      <td>./automated-ml-regression</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
 </div>
 
 </div>
@@ -11877,7 +11962,498 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Initialize-workspace">Initialize workspace<a class="anchor-link" href="#Initialize-workspace">&#182;</a></h2><p>Initialize a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#workspace">Workspace</a> object from the existing workspace you created in the Prerequisites step. <code>Workspace.from_config()</code> creates a workspace object from the details stored in <code>config.json</code>.</p>
+<h2 id="Explore-data">Explore data<a class="anchor-link" href="#Explore-data">&#182;</a></h2><p>Utilize the data flow object created in the previous tutorial. Open and execute the data flow and review the results.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">azureml.dataprep</span> <span class="k">as</span> <span class="nn">dprep</span>
+<span class="n">package_saved</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">Package</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;dflows&quot;</span><span class="p">)</span>
+<span class="n">dflow_prepared</span> <span class="o">=</span> <span class="n">package_saved</span><span class="o">.</span><span class="n">dataflows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">dflow_prepared</span><span class="o">.</span><span class="n">get_profile</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[3]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Type</th>
+      <th>Min</th>
+      <th>Max</th>
+      <th>Count</th>
+      <th>Missing Count</th>
+      <th>Not Missing Count</th>
+      <th>Percent missing</th>
+      <th>Error Count</th>
+      <th>Empty count</th>
+      <th>0.1% Quantile</th>
+      <th>1% Quantile</th>
+      <th>5% Quantile</th>
+      <th>25% Quantile</th>
+      <th>50% Quantile</th>
+      <th>75% Quantile</th>
+      <th>95% Quantile</th>
+      <th>99% Quantile</th>
+      <th>99.9% Quantile</th>
+      <th>Mean</th>
+      <th>Standard Deviation</th>
+      <th>Variance</th>
+      <th>Skewness</th>
+      <th>Kurtosis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>vendor</th>
+      <td>FieldType.STRING</td>
+      <td>1</td>
+      <td>VTS</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_weekday</th>
+      <td>FieldType.STRING</td>
+      <td>Friday</td>
+      <td>Wednesday</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_hour</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0.00</td>
+      <td>23.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>3.58</td>
+      <td>3.00</td>
+      <td>9.91</td>
+      <td>15.93</td>
+      <td>19.00</td>
+      <td>22.02</td>
+      <td>23.00</td>
+      <td>23.00</td>
+      <td>14.23</td>
+      <td>6.35</td>
+      <td>40.31</td>
+      <td>-0.69</td>
+      <td>-0.46</td>
+    </tr>
+    <tr>
+      <th>pickup_minute</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0.00</td>
+      <td>59.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>5.32</td>
+      <td>4.92</td>
+      <td>14.22</td>
+      <td>29.52</td>
+      <td>44.64</td>
+      <td>56.38</td>
+      <td>58.98</td>
+      <td>59.00</td>
+      <td>29.46</td>
+      <td>17.44</td>
+      <td>304.14</td>
+      <td>0.00</td>
+      <td>-1.20</td>
+    </tr>
+    <tr>
+      <th>pickup_second</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0.00</td>
+      <td>59.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>4.99</td>
+      <td>4.92</td>
+      <td>14.61</td>
+      <td>29.92</td>
+      <td>44.52</td>
+      <td>56.68</td>
+      <td>59.00</td>
+      <td>59.00</td>
+      <td>29.62</td>
+      <td>17.39</td>
+      <td>302.30</td>
+      <td>-0.02</td>
+      <td>-1.19</td>
+    </tr>
+    <tr>
+      <th>dropoff_weekday</th>
+      <td>FieldType.STRING</td>
+      <td>Friday</td>
+      <td>Wednesday</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>dropoff_hour</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0.00</td>
+      <td>23.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>3.23</td>
+      <td>2.93</td>
+      <td>9.92</td>
+      <td>15.91</td>
+      <td>19.00</td>
+      <td>22.27</td>
+      <td>23.00</td>
+      <td>23.00</td>
+      <td>14.18</td>
+      <td>6.46</td>
+      <td>41.68</td>
+      <td>-0.69</td>
+      <td>-0.50</td>
+    </tr>
+    <tr>
+      <th>dropoff_minute</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0.00</td>
+      <td>59.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>5.11</td>
+      <td>5.00</td>
+      <td>14.21</td>
+      <td>29.08</td>
+      <td>44.29</td>
+      <td>56.63</td>
+      <td>59.00</td>
+      <td>59.00</td>
+      <td>29.35</td>
+      <td>17.42</td>
+      <td>303.60</td>
+      <td>0.01</td>
+      <td>-1.22</td>
+    </tr>
+    <tr>
+      <th>dropoff_second</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0.00</td>
+      <td>59.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>5.03</td>
+      <td>5.00</td>
+      <td>14.75</td>
+      <td>29.60</td>
+      <td>45.32</td>
+      <td>56.10</td>
+      <td>58.97</td>
+      <td>59.00</td>
+      <td>29.79</td>
+      <td>17.48</td>
+      <td>305.59</td>
+      <td>-0.03</td>
+      <td>-1.22</td>
+    </tr>
+    <tr>
+      <th>store_forward</th>
+      <td>FieldType.BOOLEAN</td>
+      <td>False</td>
+      <td>True</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-74.08</td>
+      <td>-73.74</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>-74.08</td>
+      <td>-73.96</td>
+      <td>-73.96</td>
+      <td>-73.95</td>
+      <td>-73.93</td>
+      <td>-73.87</td>
+      <td>-73.83</td>
+      <td>-73.82</td>
+      <td>-73.77</td>
+      <td>-73.91</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.40</td>
+      <td>-0.61</td>
+    </tr>
+    <tr>
+      <th>pickup_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>40.58</td>
+      <td>40.88</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>40.63</td>
+      <td>40.71</td>
+      <td>40.71</td>
+      <td>40.72</td>
+      <td>40.76</td>
+      <td>40.81</td>
+      <td>40.85</td>
+      <td>40.87</td>
+      <td>40.88</td>
+      <td>40.77</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.23</td>
+      <td>-0.60</td>
+    </tr>
+    <tr>
+      <th>dropoff_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-74.09</td>
+      <td>-73.72</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>-74.08</td>
+      <td>-73.99</td>
+      <td>-73.99</td>
+      <td>-73.96</td>
+      <td>-73.94</td>
+      <td>-73.88</td>
+      <td>-73.82</td>
+      <td>-73.78</td>
+      <td>-73.73</td>
+      <td>-73.92</td>
+      <td>0.06</td>
+      <td>0.00</td>
+      <td>0.65</td>
+      <td>0.02</td>
+    </tr>
+    <tr>
+      <th>dropoff_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>40.58</td>
+      <td>40.88</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>40.60</td>
+      <td>40.70</td>
+      <td>40.70</td>
+      <td>40.73</td>
+      <td>40.76</td>
+      <td>40.79</td>
+      <td>40.85</td>
+      <td>40.87</td>
+      <td>40.88</td>
+      <td>40.76</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.05</td>
+      <td>-0.04</td>
+    </tr>
+    <tr>
+      <th>passengers</th>
+      <td>FieldType.DECIMAL</td>
+      <td>1.00</td>
+      <td>6.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>5.00</td>
+      <td>5.00</td>
+      <td>6.00</td>
+      <td>6.00</td>
+      <td>2.33</td>
+      <td>1.80</td>
+      <td>3.24</td>
+      <td>0.83</td>
+      <td>-1.11</td>
+    </tr>
+    <tr>
+      <th>cost</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0.00</td>
+      <td>444.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>7059.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>3.02</td>
+      <td>3.01</td>
+      <td>5.92</td>
+      <td>9.49</td>
+      <td>16.58</td>
+      <td>33.56</td>
+      <td>51.99</td>
+      <td>81.14</td>
+      <td>12.91</td>
+      <td>11.64</td>
+      <td>135.60</td>
+      <td>8.68</td>
+      <td>269.82</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You prepare the data for the experiment by adding columns to <code>dflow_X</code> to be features for our model creation. You define <code>dflow_y</code> to be our prediction value; cost.</p>
 
 </div>
 </div>
@@ -11887,36 +12463,11 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.workspace</span> <span class="k">import</span> <span class="n">Workspace</span>
-
-<span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="o">.</span><span class="n">from_config</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Workspace name: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
-      <span class="s1">&#39;Azure region: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> 
-      <span class="s1">&#39;Resource group: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dflow_X</span> <span class="o">=</span> <span class="n">dflow_prepared</span><span class="o">.</span><span class="n">keep_columns</span><span class="p">([</span><span class="s1">&#39;pickup_weekday&#39;</span><span class="p">,</span> <span class="s1">&#39;dropoff_latitude&#39;</span><span class="p">,</span> <span class="s1">&#39;dropoff_longitude&#39;</span><span class="p">,</span><span class="s1">&#39;pickup_hour&#39;</span><span class="p">,</span><span class="s1">&#39;pickup_longitude&#39;</span><span class="p">,</span><span class="s1">&#39;pickup_latitude&#39;</span><span class="p">,</span><span class="s1">&#39;passengers&#39;</span><span class="p">])</span>
+<span class="n">dflow_y</span> <span class="o">=</span> <span class="n">dflow_prepared</span><span class="o">.</span><span class="n">keep_columns</span><span class="p">(</span><span class="s1">&#39;cost&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Found the config file in: C:\Users\seretkow\notebooks\Labs Azure ML service\aml_config\config.json
-Workspace name: MLServiceWorkspace
-Azure region: westeurope
-Resource group: mlserviceresourcegroup
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -11925,8 +12476,7 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="2.-Create-a-remote-compute-target">2. Create a remote compute target<a class="anchor-link" href="#2.-Create-a-remote-compute-target">&#182;</a></h2><p>You will need to create a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#compute-target">compute target</a> to execute your training script on. In this tutorial, you create an <code>AmlCompute</code> cluster as your training compute resource. This code creates a cluster for you if it does not already exist in your workspace.</p>
-<p><strong>Creation of the cluster takes approximately 5 minutes.</strong> If the cluster is already in your workspace this code will skip the cluster creation process.</p>
+<h3 id="Split-data-into-train-and-test-sets">Split data into train and test sets<a class="anchor-link" href="#Split-data-into-train-and-test-sets">&#182;</a></h3><p>Now you split the data into training and test sets using the <code>train_test_split</code> function in the <code>sklearn</code> library. This function segregates the data into the x (features) data set for model training and the y (values to predict) data set for testing. The <code>test_size</code> parameter determines the percentage of data to allocate to testing. The <code>random_state</code> parameter sets a seed to the random generator, so that your train-test splits are always deterministic.</p>
 
 </div>
 </div>
@@ -11936,27 +12486,15 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.compute</span> <span class="k">import</span> <span class="n">ComputeTarget</span><span class="p">,</span> <span class="n">AmlCompute</span>
-<span class="kn">from</span> <span class="nn">azureml.core.compute_target</span> <span class="k">import</span> <span class="n">ComputeTargetException</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">train_test_split</span>
 
-<span class="c1"># choose a name for your cluster</span>
-<span class="n">cluster_name</span> <span class="o">=</span> <span class="s2">&quot;gpucluster&quot;</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">cluster_name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found existing compute target.&#39;</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">ComputeTargetException</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating a new compute target...&#39;</span><span class="p">)</span>
-    <span class="n">compute_config</span> <span class="o">=</span> <span class="n">AmlCompute</span><span class="o">.</span><span class="n">provisioning_configuration</span><span class="p">(</span><span class="n">vm_size</span><span class="o">=</span><span class="s1">&#39;STANDARD_NC6&#39;</span><span class="p">,</span> 
-                                                           <span class="n">max_nodes</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">x_df</span> <span class="o">=</span> <span class="n">dflow_X</span><span class="o">.</span><span class="n">to_pandas_dataframe</span><span class="p">()</span>
+<span class="n">y_df</span> <span class="o">=</span> <span class="n">dflow_y</span><span class="o">.</span><span class="n">to_pandas_dataframe</span><span class="p">()</span>
 
-    <span class="c1"># create the cluster</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">cluster_name</span><span class="p">,</span> <span class="n">compute_config</span><span class="p">)</span>
-
-    <span class="n">compute_target</span><span class="o">.</span><span class="n">wait_for_completion</span><span class="p">(</span><span class="n">show_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Use the &#39;status&#39; property to get a detailed status for the current cluster. </span>
-<span class="nb">print</span><span class="p">(</span><span class="n">compute_target</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">serialize</span><span class="p">())</span>
+<span class="n">x_train</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">x_df</span><span class="p">,</span> <span class="n">y_df</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+<span class="c1"># flatten y_train to 1d array</span>
+<span class="n">y_train</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -11969,95 +12507,13 @@ Resource group: mlserviceresourcegroup
 
 <div class="output_area">
 
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Found existing compute target.
-{&#39;allocationState&#39;: &#39;Steady&#39;, &#39;allocationStateTransitionTime&#39;: &#39;2019-02-22T14:28:25.671000+00:00&#39;, &#39;creationTime&#39;: &#39;2018-11-23T16:53:14.040220+00:00&#39;, &#39;currentNodeCount&#39;: 0, &#39;errors&#39;: None, &#39;modifiedTime&#39;: &#39;2018-11-23T16:53:56.988534+00:00&#39;, &#39;nodeStateCounts&#39;: {&#39;idleNodeCount&#39;: 0, &#39;leavingNodeCount&#39;: 0, &#39;preemptedNodeCount&#39;: 0, &#39;preparingNodeCount&#39;: 0, &#39;runningNodeCount&#39;: 0, &#39;unusableNodeCount&#39;: 0}, &#39;provisioningState&#39;: &#39;Succeeded&#39;, &#39;provisioningStateTransitionTime&#39;: None, &#39;scaleSettings&#39;: {&#39;minNodeCount&#39;: 0, &#39;maxNodeCount&#39;: 4, &#39;nodeIdleTimeBeforeScaleDown&#39;: &#39;&#39;}, &#39;targetNodeCount&#39;: None, &#39;vmPriority&#39;: &#39;Dedicated&#39;, &#39;vmSize&#39;: &#39;STANDARD_NC6&#39;}
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="3.-Train-model-on-the-remote-compute">3. Train model on the remote compute<a class="anchor-link" href="#3.-Train-model-on-the-remote-compute">&#182;</a></h2><p>Now that we have the cluster ready to go, let's run our distributed training job.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.1-Create-a-project-directory">3.1 Create a project directory<a class="anchor-link" href="#3.1-Create-a-project-directory">&#182;</a></h3><p>Create a directory that will contain all the necessary code from your local machine that you will need access to on the remote resource. This includes the training script, and any additional files your training script depends on3.1.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-
-<span class="n">project_folder</span> <span class="o">=</span> <span class="s1">&#39;./tf-distr-ps&#39;</span>
-<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">project_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Copy the training script `tf_mnist_replica.py` into this project directory.</span>
-<span class="c1"># https://github.com/Azure/MachineLearningNotebooks/tree/master/how-to-use-azureml/training-with-deep-learning/distributed-tensorflow-with-parameter-server</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">shutil</span>
-
-<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span> <span class="n">project_folder</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[8]:</div>
+<div class="prompt output_prompt">Out[5]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;./tf-distr-ps\\tf_mnist_replica.py&#39;</pre>
+<pre>array([19. ,  8.5, 15.5, ...,  6. ,  7. ,  2.5])</pre>
 </div>
 
 </div>
@@ -12070,57 +12526,91 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.2-Create-an-experiment">3.2 Create an experiment<a class="anchor-link" href="#3.2-Create-an-experiment">&#182;</a></h3><p>Create an <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#experiment">Experiment</a> to track all the runs in your workspace for this distributed TensorFlow tutorial.</p>
+<p>You now have the necessary packages and data ready for auto training for your model.</p>
+<h2 id="Automatically-train-a-model">Automatically train a model<a class="anchor-link" href="#Automatically-train-a-model">&#182;</a></h2><p>To automatically train a model:</p>
+<ol>
+<li>Define settings for the experiment run</li>
+<li>Submit the experiment for model tuning</li>
+</ol>
+<h3 id="Define-settings-for-autogeneration-and-tuning">Define settings for autogeneration and tuning<a class="anchor-link" href="#Define-settings-for-autogeneration-and-tuning">&#182;</a></h3><p>Define the experiment parameters and models settings for autogeneration and tuning. View the full list of <a href="https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-configure-auto-train">settings</a>.</p>
+<table>
+<thead><tr>
+<th>Property</th>
+<th>Value in this tutorial</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>iteration_timeout_minutes</strong></td>
+<td>10</td>
+<td>Time limit in minutes for each iteration</td>
+</tr>
+<tr>
+<td><strong>iterations</strong></td>
+<td>30</td>
+<td>Number of iterations. In each iteration, the model trains with the data with a specific pipeline</td>
+</tr>
+<tr>
+<td><strong>primary_metric</strong></td>
+<td>spearman_correlation</td>
+<td>Metric that you want to optimize.</td>
+</tr>
+<tr>
+<td><strong>preprocess</strong></td>
+<td>True</td>
+<td>True enables experiment to perform preprocessing on the input.</td>
+</tr>
+<tr>
+<td><strong>verbosity</strong></td>
+<td>logging.INFO</td>
+<td>Controls the level of logging.</td>
+</tr>
+<tr>
+<td><strong>n_cross_validationss</strong></td>
+<td>5</td>
+<td>Number of cross validation splits</td>
+</tr>
+</tbody>
+</table>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core</span> <span class="k">import</span> <span class="n">Experiment</span>
-
-<span class="n">experiment_name</span> <span class="o">=</span> <span class="s1">&#39;tf-distr-ps&#39;</span>
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">experiment_name</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.3-Create-a-TensorFlow-estimator">3.3 Create a TensorFlow estimator<a class="anchor-link" href="#3.3-Create-a-TensorFlow-estimator">&#182;</a></h3><p>The AML SDK's TensorFlow estimator enables you to easily submit TensorFlow training jobs for both single-node and distributed runs. For more information on the TensorFlow estimator, refer <a href="https://docs.microsoft.com/azure/machine-learning/service/how-to-train-tensorflow">here</a>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.train.dnn</span> <span class="k">import</span> <span class="n">TensorFlow</span>
-
-<span class="n">script_params</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;--num_gpus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s1">&#39;--train_steps&#39;</span><span class="p">:</span> <span class="mi">500</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">automl_settings</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;iteration_timeout_minutes&quot;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">&quot;iterations&quot;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">&quot;primary_metric&quot;</span> <span class="p">:</span> <span class="s1">&#39;spearman_correlation&#39;</span><span class="p">,</span>
+    <span class="s2">&quot;preprocess&quot;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;verbosity&quot;</span> <span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="s2">&quot;n_cross_validations&quot;</span><span class="p">:</span> <span class="mi">3</span>
 <span class="p">}</span>
+</pre></div>
 
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">TensorFlow</span><span class="p">(</span><span class="n">source_directory</span><span class="o">=</span><span class="n">project_folder</span><span class="p">,</span>
-                       <span class="n">compute_target</span><span class="o">=</span><span class="n">compute_target</span><span class="p">,</span>
-                       <span class="n">script_params</span><span class="o">=</span><span class="n">script_params</span><span class="p">,</span>
-                       <span class="n">entry_script</span><span class="o">=</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span>
-                       <span class="n">node_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">worker_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">parameter_server_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>   
-                       <span class="n">distributed_backend</span><span class="o">=</span><span class="s1">&#39;ps&#39;</span><span class="p">,</span>
-                       <span class="n">use_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.train.automl</span> <span class="k">import</span> <span class="n">AutoMLConfig</span>
+
+<span class="c1"># local compute </span>
+<span class="n">automated_ml_config</span> <span class="o">=</span> <span class="n">AutoMLConfig</span><span class="p">(</span><span class="n">task</span> <span class="o">=</span> <span class="s1">&#39;regression&#39;</span><span class="p">,</span>
+                             <span class="n">debug_log</span> <span class="o">=</span> <span class="s1">&#39;automated_ml_errors.log&#39;</span><span class="p">,</span>
+                             <span class="n">path</span> <span class="o">=</span> <span class="n">project_folder</span><span class="p">,</span>
+                             <span class="n">X</span> <span class="o">=</span> <span class="n">x_train</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                             <span class="n">y</span> <span class="o">=</span> <span class="n">y_train</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+                             <span class="o">**</span><span class="n">automl_settings</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12132,27 +12622,19 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The above code specifies that we will run our training script on <code>2</code> nodes, with two workers and one parameter server. In order to execute a native distributed TensorFlow run, you must provide the argument <code>distributed_backend='ps'</code>. Using this estimator with these settings, TensorFlow and its dependencies will be installed for you. However, if your script also uses other packages, make sure to install them via the <code>TensorFlow</code> constructor's <code>pip_packages</code> or <code>conda_packages</code> parameters.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.4-Submit-job">3.4 Submit job<a class="anchor-link" href="#3.4-Submit-job">&#182;</a></h3><p>Run your experiment by submitting your estimator object. Note that this call is asynchronous.</p>
+<h3 id="Train-the-automatic-regression-model">Train the automatic regression model<a class="anchor-link" href="#Train-the-automatic-regression-model">&#182;</a></h3><p>Start the experiment to run locally. Pass the defined <code>automated_ml_config</code> object to the experiment, and set the output to <code>true</code> to view progress during the experiment.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">run</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.experiment</span> <span class="k">import</span> <span class="n">Experiment</span>
+<span class="n">experiment</span><span class="o">=</span><span class="n">Experiment</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">experiment_name</span><span class="p">)</span>
+<span class="n">local_run</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">automated_ml_config</span><span class="p">,</span> <span class="n">show_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12169,10 +12651,28 @@ Resource group: mlserviceresourcegroup
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Run(Experiment: tf-distr-ps,
-Id: tf-distr-ps_1551699379_3e846b68,
-Type: azureml.scriptrun,
-Status: Starting)
+<pre>Running on local machine
+Parent Run ID: AutoML_379d733f-6e6a-4682-b926-7c16ee0b7342
+********************************************************************************************************************
+ITERATION: The iteration being evaluated.
+PIPELINE: A summary description of the pipeline being evaluated.
+SAMPLING %: Percent of the training data to sample.
+DURATION: Time taken for the current iteration.
+METRIC: The result of computing score on the fitted pipeline.
+BEST: The best observed score thus far.
+********************************************************************************************************************
+
+ ITERATION   PIPELINE                                       SAMPLING %  DURATION      METRIC      BEST
+         0   MaxAbsScaler RandomForest                      100.0000    0:00:08       0.6640    0.6640
+         1   StandardScalerWrapper DecisionTree             100.0000    0:00:06       0.6692    0.6692
+         2   StandardScalerWrapper LightGBM                 100.0000    0:00:07       0.7173    0.7173
+         3   StandardScalerWrapper LightGBM                 100.0000    0:00:08       0.7566    0.7566
+         4   StandardScalerWrapper DecisionTree             100.0000    0:00:07       0.7079    0.7566
+         5   MaxAbsScaler LightGBM                          100.0000    0:00:07       0.7257    0.7566
+         6   StandardScalerWrapper DecisionTree             100.0000    0:00:08       0.6750    0.7566
+         7   MaxAbsScaler ExtremeRandomTrees                100.0000    0:00:07       0.5443    0.7566
+         8   StandardScalerWrapper GradientBoosting         100.0000    0:00:08       0.6989    0.7566
+         9   Ensemble                                       100.0000    0:00:14       0.7737    0.7737
 </pre>
 </div>
 </div>
@@ -12185,19 +12685,19 @@ Status: Starting)
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.5-Monitor-your-run">3.5 Monitor your run<a class="anchor-link" href="#3.5-Monitor-your-run">&#182;</a></h3><p>You can monitor the progress of the run with a Jupyter widget. Like the run submission, the widget is asynchronous and provides live updates every 10-15 seconds until the job completes.</p>
+<h2 id="Explore-the-results">Explore the results<a class="anchor-link" href="#Explore-the-results">&#182;</a></h2><p>Explore the results of automatic training with a Jupyter widget or by examining the experiment history.</p>
+<h3 id="Option-1:-Add-a-Jupyter-widget-to-see-results">Option 1: Add a Jupyter widget to see results<a class="anchor-link" href="#Option-1:-Add-a-Jupyter-widget-to-see-results">&#182;</a></h3><p>Use the Jupyter notebook widget to see a graph and a table of all results.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.widgets</span> <span class="k">import</span> <span class="n">RunDetails</span>
-
-<span class="n">RunDetails</span><span class="p">(</span><span class="n">run</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">RunDetails</span><span class="p">(</span><span class="n">local_run</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12218,13 +12718,13 @@ Status: Starting)
 
  
  
-<div id="d5862377-a157-4229-8080-b7c4ba5cd67d"></div>
+<div id="113d5cdb-1ff3-42c7-aec1-aad734368235"></div>
 <div class="output_subarea output_widget_view ">
 <script type="text/javascript">
-var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
+var element = $('#113d5cdb-1ff3-42c7-aec1-aad734368235');
 </script>
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "a6bd35794e3b49b68bd413be0403c049", "version_major": 2, "version_minor": 0}
+{"model_id": "bfcf3c9a9f7249e787a17e0bc46137b4", "version_major": 2, "version_minor": 0}
 </script>
 </div>
 
@@ -12238,20 +12738,487 @@ var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Alternatively, you can block until the script has completed training before running more code.</p>
+<h3 id="Option-2:-Get-and-examine-all-run-iterations-in-Python">Option 2: Get and examine all run iterations in Python<a class="anchor-link" href="#Option-2:-Get-and-examine-all-run-iterations-in-Python">&#182;</a></h3><p>Alternatively, you can retrieve the history of each experiment and explore the individual metrics for each iteration run.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># run.wait_for_completion(show_output=True) # this provides a verbose log</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">children</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">local_run</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span>
+<span class="n">metricslist</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">run</span><span class="o">.</span><span class="n">get_metrics</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">float</span><span class="p">)}</span>
+    <span class="n">metricslist</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;iteration&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="n">metrics</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">rundata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">metricslist</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">rundata</span>
 </pre></div>
 
 </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[20]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>6</th>
+      <th>7</th>
+      <th>8</th>
+      <th>9</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>explained_variance</th>
+      <td>0.29</td>
+      <td>0.35</td>
+      <td>0.31</td>
+      <td>0.44</td>
+      <td>0.33</td>
+      <td>0.41</td>
+      <td>0.36</td>
+      <td>0.16</td>
+      <td>0.29</td>
+      <td>0.43</td>
+    </tr>
+    <tr>
+      <th>mean_absolute_error</th>
+      <td>5.59</td>
+      <td>4.80</td>
+      <td>5.62</td>
+      <td>3.94</td>
+      <td>4.52</td>
+      <td>4.62</td>
+      <td>4.70</td>
+      <td>6.74</td>
+      <td>5.71</td>
+      <td>4.50</td>
+    </tr>
+    <tr>
+      <th>median_absolute_error</th>
+      <td>4.04</td>
+      <td>3.07</td>
+      <td>4.22</td>
+      <td>2.47</td>
+      <td>2.46</td>
+      <td>3.36</td>
+      <td>2.90</td>
+      <td>5.43</td>
+      <td>4.53</td>
+      <td>3.20</td>
+    </tr>
+    <tr>
+      <th>normalized_mean_absolute_error</th>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.02</td>
+      <td>0.01</td>
+      <td>0.01</td>
+    </tr>
+    <tr>
+      <th>normalized_median_absolute_error</th>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>0.01</td>
+    </tr>
+    <tr>
+      <th>normalized_root_mean_squared_error</th>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>0.02</td>
+    </tr>
+    <tr>
+      <th>normalized_root_mean_squared_log_error</th>
+      <td>0.09</td>
+      <td>0.09</td>
+      <td>0.10</td>
+      <td>0.08</td>
+      <td>0.09</td>
+      <td>0.09</td>
+      <td>0.09</td>
+      <td>0.11</td>
+      <td>0.10</td>
+      <td>0.08</td>
+    </tr>
+    <tr>
+      <th>r2_score</th>
+      <td>0.29</td>
+      <td>0.35</td>
+      <td>0.31</td>
+      <td>0.44</td>
+      <td>0.33</td>
+      <td>0.41</td>
+      <td>0.36</td>
+      <td>0.16</td>
+      <td>0.29</td>
+      <td>0.42</td>
+    </tr>
+    <tr>
+      <th>root_mean_squared_error</th>
+      <td>10.07</td>
+      <td>9.61</td>
+      <td>9.95</td>
+      <td>8.95</td>
+      <td>9.81</td>
+      <td>9.20</td>
+      <td>9.60</td>
+      <td>10.89</td>
+      <td>10.05</td>
+      <td>9.09</td>
+    </tr>
+    <tr>
+      <th>root_mean_squared_log_error</th>
+      <td>0.57</td>
+      <td>0.53</td>
+      <td>0.58</td>
+      <td>0.48</td>
+      <td>0.52</td>
+      <td>0.53</td>
+      <td>0.53</td>
+      <td>0.66</td>
+      <td>0.60</td>
+      <td>0.52</td>
+    </tr>
+    <tr>
+      <th>spearman_correlation</th>
+      <td>0.66</td>
+      <td>0.67</td>
+      <td>0.72</td>
+      <td>0.76</td>
+      <td>0.71</td>
+      <td>0.73</td>
+      <td>0.67</td>
+      <td>0.54</td>
+      <td>0.70</td>
+      <td>0.77</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Retrieve-the-best-model">Retrieve the best model<a class="anchor-link" href="#Retrieve-the-best-model">&#182;</a></h2><p>Select the best pipeline from our iterations. The <code>get_output</code> method on <code>automl_classifier</code> returns the best run and the fitted model for the last fit invocation. There are overloads on <code>get_output</code> that allow you to retrieve the best run and fitted model for any logged metric or a particular iteration.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">best_run</span><span class="p">,</span> <span class="n">fitted_model</span> <span class="o">=</span> <span class="n">local_run</span><span class="o">.</span><span class="n">get_output</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">best_run</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fitted_model</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Run(Experiment: automated-ml-regression,
+Id: AutoML_379d733f-6e6a-4682-b926-7c16ee0b7342_9,
+Type: None,
+Status: Completed)
+Pipeline(memory=None,
+     steps=[(&#39;datatransformer&#39;, DataTransformer(logger=None, task=None)), (&#39;prefittedsoftvotingregressor&#39;, PreFittedSoftVotingRegressor(estimators=[(&#39;DecisionTree&#39;, Pipeline(memory=None,
+     steps=[(&#39;standardscalerwrapper&#39;, &lt;automl.client.core.common.model_wrappers.StandardScalerWrapper object at 0x0000...               flatten_transform=None,
+               weights=[0.1, 0.2, 0.1, 0.3, 0.1, 0.1, 0.1]))])
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Register-the-model">Register the model<a class="anchor-link" href="#Register-the-model">&#182;</a></h2><p>Register the model in your Azure Machine Learning Workspace.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Automated Machine Learning Model&#39;</span>
+<span class="n">tags</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">local_run</span><span class="o">.</span><span class="n">register_model</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">)</span>
+<span class="n">local_run</span><span class="o">.</span><span class="n">model_id</span> <span class="c1"># Use this id to deploy the model as a web service in Azure</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Registering model AutoML379d733f6best
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[22]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;AutoML379d733f6best&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Test-the-best-model-accuracy">Test the best model accuracy<a class="anchor-link" href="#Test-the-best-model-accuracy">&#182;</a></h2><p>Use the best model to run predictions on the test data set. The function <code>predict</code> uses the best model, and predicts the values of y (trip cost) from the <code>x_test</code> data set. Print the first 10 predicted cost values from <code>y_predict</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">y_predict</span> <span class="o">=</span> <span class="n">fitted_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_test</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> 
+<span class="nb">print</span><span class="p">(</span><span class="n">y_predict</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[10.41880979  9.64845145 10.27577337 10.75205403  8.98335262  9.02800604
+ 13.44479113 29.33367775  9.24920144 23.27953432]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Compare the predicted cost values with the actual cost values. Use the <code>y_test</code> dataframe, and convert it to a list to compare to the predicted values. The function <code>mean_absolute_error</code> takes two arrays of values, and calculates the average absolute value error between them. In this example, a mean absolute error of 3.5 would mean that on average, the model predicts the cost within plus or minus 3.5 of the actual value.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">mean_absolute_error</span>
+
+<span class="n">y_actual</span> <span class="o">=</span> <span class="n">y_test</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mean Absolute Error :&quot;</span><span class="p">)</span>
+<span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_actual</span><span class="p">,</span> <span class="n">y_predict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Mean Absolute Error :
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[24]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>4.038714087719105</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Run the following code to calculate MAPE (mean absolute percent error) using the full <code>y_actual</code> and <code>y_predict</code> data sets. This metric calculates an absolute difference between each predicted and actual value, sums all the differences, and then expresses that sum as a percent of the total of the actual values.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sum_actuals</span> <span class="o">=</span> <span class="n">sum_errors</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">for</span> <span class="n">actual_val</span><span class="p">,</span> <span class="n">predict_val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">y_actual</span><span class="p">,</span> <span class="n">y_predict</span><span class="p">):</span>
+    <span class="n">abs_error</span> <span class="o">=</span> <span class="n">actual_val</span> <span class="o">-</span> <span class="n">predict_val</span>
+    <span class="k">if</span> <span class="n">abs_error</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">abs_error</span> <span class="o">=</span> <span class="n">abs_error</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">sum_errors</span> <span class="o">=</span> <span class="n">sum_errors</span> <span class="o">+</span> <span class="n">abs_error</span>
+    <span class="n">sum_actuals</span> <span class="o">=</span> <span class="n">sum_actuals</span> <span class="o">+</span> <span class="n">actual_val</span>
+    
+<span class="n">mean_abs_percent_error</span> <span class="o">=</span> <span class="n">sum_errors</span> <span class="o">/</span> <span class="n">sum_actuals</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model MAPE :&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mean_abs_percent_error</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model Accuracy :&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mean_abs_percent_error</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Model MAPE :
+0.32057791136279645
+
+Model Accuracy :
+0.6794220886372035
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 

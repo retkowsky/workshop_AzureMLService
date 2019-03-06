@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>10 Distributed TensorFlow</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>2. Azure ML notebook</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11775,24 +11775,8 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="10.-Distributed-TensorFlow-with-parameter-server">10. Distributed TensorFlow with parameter server<a class="anchor-link" href="#10.-Distributed-TensorFlow-with-parameter-server">&#182;</a></h1><p>In this tutorial, you will train a TensorFlow model on the <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> dataset using native <a href="https://www.tensorflow.org/deploy/distributed">distributed TensorFlow</a>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="1.-Prerequisites">1. Prerequisites<a class="anchor-link" href="#1.-Prerequisites">&#182;</a></h2><ul>
-<li>Understand the <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture">architecture and terms</a> introduced by Azure Machine Learning (AML)</li>
-<li>Go through the <a href="https://github.com/Azure/MachineLearningNotebooks/blob/master/00.configuration.ipynb">00.configuration.ipynb</a> notebook to:<ul>
-<li>install the AML SDK</li>
-<li>create a workspace and its configuration file (<code>config.json</code>)</li>
-</ul>
-</li>
-<li>Review the <a href="https://aka.ms/aml-notebook-hyperdrive">tutorial</a> on single-node TensorFlow training using the SDK</li>
-</ul>
+<h1 id="Mod&#233;lisation-avec-Azure-ML-service">Mod&#233;lisation avec Azure ML service<a class="anchor-link" href="#Mod&#233;lisation-avec-Azure-ML-service">&#182;</a></h1><blockquote><p><a href="https://docs.microsoft.com/en-us/azure/machine-learning/">https://docs.microsoft.com/en-us/azure/machine-learning/</a></p>
+</blockquote>
 
 </div>
 </div>
@@ -11802,10 +11786,11 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check core SDK version number</span>
-<span class="kn">import</span> <span class="nn">azureml.core</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">azureml.core</span>
+<span class="kn">from</span> <span class="nn">azureml.core</span> <span class="k">import</span> <span class="n">Experiment</span><span class="p">,</span> <span class="n">Workspace</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SDK version:&quot;</span><span class="p">,</span> <span class="n">azureml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">VERSION</span><span class="p">)</span>
+<span class="c1"># Check core SDK version number</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Version Azure ML service : &quot;</span><span class="p">,</span> <span class="n">azureml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">VERSION</span><span class="p">,</span> <span class="s2">&quot; (Version actuelle au 04/03/2019 : 10.0.17)&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11822,7 +11807,7 @@ div#notebook {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>SDK version: 1.0.17
+<pre>Version Azure ML service :  1.0.17  (Version actuelle au 04/03/2019 : 10.0.17)
 </pre>
 </div>
 </div>
@@ -11830,24 +11815,17 @@ div#notebook {
 </div>
 </div>
 
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Diagnostics">Diagnostics<a class="anchor-link" href="#Diagnostics">&#182;</a></h2><p>Opt-in diagnostics for better experience, quality, and security of future releases.</p>
-
-</div>
-</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.telemetry</span> <span class="k">import</span> <span class="n">set_diagnostics_collection</span>
-
-<span class="n">set_diagnostics_collection</span><span class="p">(</span><span class="n">send_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># workspace</span>
+<span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="o">.</span><span class="n">from_config</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Workspace name: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
+      <span class="s1">&#39;Azure region: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> 
+      <span class="s1">&#39;Resource group: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11863,45 +11841,13 @@ div#notebook {
 <div class="prompt"></div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Turning diagnostics collection on. 
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Warning: Falling back to use azure cli login credentials.
+If you run your code in unattended mode, i.e., where you can&#39;t give a user input, then we recommend to use ServicePrincipalAuthentication or MsiAuthentication.
+Please refer to aka.ms/aml-notebook-auth for different authentication mechanisms in azureml-sdk.
 </pre>
 </div>
 </div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Initialize-workspace">Initialize workspace<a class="anchor-link" href="#Initialize-workspace">&#182;</a></h2><p>Initialize a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#workspace">Workspace</a> object from the existing workspace you created in the Prerequisites step. <code>Workspace.from_config()</code> creates a workspace object from the details stored in <code>config.json</code>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.workspace</span> <span class="k">import</span> <span class="n">Workspace</span>
-
-<span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="o">.</span><span class="n">from_config</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Workspace name: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
-      <span class="s1">&#39;Azure region: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> 
-      <span class="s1">&#39;Resource group: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
 
 <div class="output_area">
 
@@ -11925,38 +11871,31 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="2.-Create-a-remote-compute-target">2. Create a remote compute target<a class="anchor-link" href="#2.-Create-a-remote-compute-target">&#182;</a></h2><p>You will need to create a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#compute-target">compute target</a> to execute your training script on. In this tutorial, you create an <code>AmlCompute</code> cluster as your training compute resource. This code creates a cluster for you if it does not already exist in your workspace.</p>
-<p><strong>Creation of the cluster takes approximately 5 minutes.</strong> If the cluster is already in your workspace this code will skip the cluster creation process.</p>
-
+<h2 id="Chargement-des-donn&#233;es">Chargement des donn&#233;es<a class="anchor-link" href="#Chargement-des-donn&#233;es">&#182;</a></h2>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.compute</span> <span class="k">import</span> <span class="n">ComputeTarget</span><span class="p">,</span> <span class="n">AmlCompute</span>
-<span class="kn">from</span> <span class="nn">azureml.core.compute_target</span> <span class="k">import</span> <span class="n">ComputeTargetException</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">time</span>
+from sklearn.datasets import load_diabetes
+from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.externals import joblib
 
-<span class="c1"># choose a name for your cluster</span>
-<span class="n">cluster_name</span> <span class="o">=</span> <span class="s2">&quot;gpucluster&quot;</span>
+X, y = load_diabetes(return_X_y = True)
+columns = [&#39;age&#39;, &#39;gender&#39;, &#39;bmi&#39;, &#39;bp&#39;, &#39;s1&#39;, &#39;s2&#39;, &#39;s3&#39;, &#39;s4&#39;, &#39;s5&#39;, &#39;s6&#39;]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+data = {
+    &quot;train&quot;:{&quot;X&quot;: X_train, &quot;y&quot;: y_train},        
+    &quot;test&quot;:{&quot;X&quot;: X_test, &quot;y&quot;: y_test}
+}
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">cluster_name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found existing compute target.&#39;</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">ComputeTargetException</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating a new compute target...&#39;</span><span class="p">)</span>
-    <span class="n">compute_config</span> <span class="o">=</span> <span class="n">AmlCompute</span><span class="o">.</span><span class="n">provisioning_configuration</span><span class="p">(</span><span class="n">vm_size</span><span class="o">=</span><span class="s1">&#39;STANDARD_NC6&#39;</span><span class="p">,</span> 
-                                                           <span class="n">max_nodes</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-
-    <span class="c1"># create the cluster</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">cluster_name</span><span class="p">,</span> <span class="n">compute_config</span><span class="p">)</span>
-
-    <span class="n">compute_target</span><span class="o">.</span><span class="n">wait_for_completion</span><span class="p">(</span><span class="n">show_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Use the &#39;status&#39; property to get a detailed status for the current cluster. </span>
-<span class="nb">print</span><span class="p">(</span><span class="n">compute_target</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">serialize</span><span class="p">())</span>
+print (&quot;Data contains&quot;, len(data[&#39;train&#39;][&#39;X&#39;]), &quot;training samples and&quot;,len(data[&#39;test&#39;][&#39;X&#39;]), &quot;test samples&quot;)
 </pre></div>
 
 </div>
@@ -11973,8 +11912,8 @@ Resource group: mlserviceresourcegroup
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Found existing compute target.
-{&#39;allocationState&#39;: &#39;Steady&#39;, &#39;allocationStateTransitionTime&#39;: &#39;2019-02-22T14:28:25.671000+00:00&#39;, &#39;creationTime&#39;: &#39;2018-11-23T16:53:14.040220+00:00&#39;, &#39;currentNodeCount&#39;: 0, &#39;errors&#39;: None, &#39;modifiedTime&#39;: &#39;2018-11-23T16:53:56.988534+00:00&#39;, &#39;nodeStateCounts&#39;: {&#39;idleNodeCount&#39;: 0, &#39;leavingNodeCount&#39;: 0, &#39;preemptedNodeCount&#39;: 0, &#39;preparingNodeCount&#39;: 0, &#39;runningNodeCount&#39;: 0, &#39;unusableNodeCount&#39;: 0}, &#39;provisioningState&#39;: &#39;Succeeded&#39;, &#39;provisioningStateTransitionTime&#39;: None, &#39;scaleSettings&#39;: {&#39;minNodeCount&#39;: 0, &#39;maxNodeCount&#39;: 4, &#39;nodeIdleTimeBeforeScaleDown&#39;: &#39;&#39;}, &#39;targetNodeCount&#39;: None, &#39;vmPriority&#39;: &#39;Dedicated&#39;, &#39;vmSize&#39;: &#39;STANDARD_NC6&#39;}
+<pre>Data contains 353 training samples and 89 test samples
+Wall time: 1.5 s
 </pre>
 </div>
 </div>
@@ -11987,58 +11926,186 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="3.-Train-model-on-the-remote-compute">3. Train model on the remote compute<a class="anchor-link" href="#3.-Train-model-on-the-remote-compute">&#182;</a></h2><p>Now that we have the cluster ready to go, let's run our distributed training job.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.1-Create-a-project-directory">3.1 Create a project directory<a class="anchor-link" href="#3.1-Create-a-project-directory">&#182;</a></h3><p>Create a directory that will contain all the necessary code from your local machine that you will need access to on the remote resource. This includes the training script, and any additional files your training script depends on3.1.</p>
-
+<h2 id="Mod&#233;lisation">Mod&#233;lisation<a class="anchor-link" href="#Mod&#233;lisation">&#182;</a></h2>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">time</span>
+# Get an experiment object from Azure Machine Learning
+experiment = Experiment(workspace=ws, name=&quot;ExempleDiabete&quot;)
 
-<span class="n">project_folder</span> <span class="o">=</span> <span class="s1">&#39;./tf-distr-ps&#39;</span>
-<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">project_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+# Create a run object in the experiment
+run = experiment.start_logging()
+# Log the algorithm parameter alpha to the run
+run.log(&#39;alpha&#39;, 0.03)
+
+# Create, fit, and test the scikit-learn Ridge regression model
+regression_model = Ridge(alpha=0.03)
+regression_model.fit(data[&#39;train&#39;][&#39;X&#39;], data[&#39;train&#39;][&#39;y&#39;])
+preds = regression_model.predict(data[&#39;test&#39;][&#39;X&#39;])
+
+# Output the Mean Squared Error to the notebook and to the run
+print(&#39;Mean Squared Error is&#39;, mean_squared_error(data[&#39;test&#39;][&#39;y&#39;], preds))
+run.log(&#39;mse&#39;, mean_squared_error(data[&#39;test&#39;][&#39;y&#39;], preds))
+
+# Save the model to the outputs directory for capture
+joblib.dump(value=regression_model, filename=&#39;outputs/monmodele.pkl&#39;)
+
+# Take a snapshot of the directory containing this notebook
+#run.take_snapshot(&#39;./&#39;)
+
+# Complete the run
+run.complete()
 </pre></div>
 
 </div>
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Mean Squared Error is 3424.9003158960168
+Wall time: 9.94 s
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Visualisation-de-l'exp&#233;rimentation-sur-le-portail-Azure">Visualisation de l'exp&#233;rimentation sur le portail Azure<a class="anchor-link" href="#Visualisation-de-l'exp&#233;rimentation-sur-le-portail-Azure">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">run</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[5]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table style="width:100%"><tr><th>Experiment</th><th>Id</th><th>Type</th><th>Status</th><th>Details Page</th><th>Docs Page</th></tr><tr><td>ExempleDiabete</td><td>7365efec-c485-4f0d-a604-caac764caa68</td><td></td><td>Completed</td><td><a href="https://mlworkspace.azure.ai/portal/subscriptions/70b8f39e-8863-49f7-b6ba-34a80799550c/resourceGroups/mlserviceresourcegroup/providers/Microsoft.MachineLearningServices/workspaces/MLServiceWorkspace/experiments/ExempleDiabete/runs/7365efec-c485-4f0d-a604-caac764caa68" target="_blank" rel="noopener">Link to Azure Portal</a></td><td><a href="https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.run.Run?view=azure-ml-py" target="_blank" rel="noopener">Link to Documentation</a></td></tr></table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Recherche-du-param&#233;tre-optimal">Recherche du param&#233;tre optimal<a class="anchor-link" href="#Recherche-du-param&#233;tre-optimal">&#182;</a></h2>
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Copy the training script `tf_mnist_replica.py` into this project directory.</span>
-<span class="c1"># https://github.com/Azure/MachineLearningNotebooks/tree/master/how-to-use-azureml/training-with-deep-learning/distributed-tensorflow-with-parameter-server</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+<span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;monmodele.pkl&quot;</span>
+
+<span class="c1"># list of numbers from 0 to 1.0 with a 0.05 interval</span>
+<span class="n">alphas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+
+<span class="c1"># try a bunch of alpha values in a Linear Regression (Ridge) model</span>
+<span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">alphas</span><span class="p">):</span>
+    <span class="c1"># create a bunch of runs, each train a model with a different alpha value</span>
+    <span class="k">with</span> <span class="n">experiment</span><span class="o">.</span><span class="n">start_logging</span><span class="p">()</span> <span class="k">as</span> <span class="n">run</span><span class="p">:</span>
+        <span class="c1"># Use Ridge algorithm to build a regression model</span>
+        <span class="n">regression_model</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">regression_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="s2">&quot;X&quot;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">regression_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">][</span><span class="s2">&quot;X&quot;</span><span class="p">])</span>
+        <span class="n">mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">preds</span><span class="p">)</span>
+
+        <span class="c1"># log alpha, mean_squared_error and feature names in run history</span>
+        <span class="n">run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;mse&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">mse</span><span class="p">)</span>
+
+        <span class="c1"># Save the model to the outputs directory for capture</span>
+        <span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">regression_model</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;outputs/monmodele.pkl&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Capture this notebook with the run</span>
+        <span class="c1">#run.take_snapshot(&#39;./&#39;)</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████████████████████████████████████████████████████████████████████████████| 20/20 [00:46&lt;00:00,  2.07s/it]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Visualisation-de-l'exp&#233;rimentation-Azure-ML-service-sur-le-portail-Azure">Visualisation de l'exp&#233;rimentation Azure ML service sur le portail Azure<a class="anchor-link" href="#Visualisation-de-l'exp&#233;rimentation-Azure-ML-service-sur-le-portail-Azure">&#182;</a></h2>
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">shutil</span>
-
-<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span> <span class="n">project_folder</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">experiment</span>
 </pre></div>
 
 </div>
@@ -12055,9 +12122,8 @@ Resource group: mlserviceresourcegroup
 
 
 
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;./tf-distr-ps\\tf_mnist_replica.py&#39;</pre>
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table style="width:100%"><tr><th>Name</th><th>Workspace</th><th>Report Page</th><th>Docs Page</th></tr><tr><td>ExempleDiabete</td><td>MLServiceWorkspace</td><td><a href="https://mlworkspace.azure.ai/portal/subscriptions/70b8f39e-8863-49f7-b6ba-34a80799550c/resourceGroups/mlserviceresourcegroup/providers/Microsoft.MachineLearningServices/workspaces/MLServiceWorkspace/experiments/ExempleDiabete" target="_blank" rel="noopener">Link to Azure Portal</a></td><td><a href="https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.experiment.Experiment?view=azure-ml-py" target="_blank" rel="noopener">Link to Documentation</a></td></tr></table>
 </div>
 
 </div>
@@ -12070,8 +12136,7 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.2-Create-an-experiment">3.2 Create an experiment<a class="anchor-link" href="#3.2-Create-an-experiment">&#182;</a></h3><p>Create an <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#experiment">Experiment</a> to track all the runs in your workspace for this distributed TensorFlow tutorial.</p>
-
+<h2 id="Visualisation-des-r&#233;sultats">Visualisation des r&#233;sultats<a class="anchor-link" href="#Visualisation-des-r&#233;sultats">&#182;</a></h2>
 </div>
 </div>
 </div>
@@ -12080,79 +12145,72 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core</span> <span class="k">import</span> <span class="n">Experiment</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">run_metrics</span> <span class="o">=</span> <span class="p">{}</span>
 
-<span class="n">experiment_name</span> <span class="o">=</span> <span class="s1">&#39;tf-distr-ps&#39;</span>
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">experiment_name</span><span class="p">)</span>
+<span class="c1"># Create dictionaries containing the runs and the metrics for all runs containing the &#39;mse&#39; metric</span>
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">experiment</span><span class="o">.</span><span class="n">get_runs</span><span class="p">()):</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">get_metrics</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s1">&#39;mse&#39;</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">runs</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+        <span class="n">run_metrics</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics</span>
+
+<span class="c1"># Find the run with the best (lowest) mean squared error and display the id and metrics</span>
+<span class="n">best_run_id</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">run_metrics</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">run_metrics</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;mse&#39;</span><span class="p">])</span>
+<span class="n">best_run</span> <span class="o">=</span> <span class="n">runs</span><span class="p">[</span><span class="n">best_run_id</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best run is:&#39;</span><span class="p">,</span> <span class="n">best_run_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Metrics:&#39;</span><span class="p">,</span> <span class="n">run_metrics</span><span class="p">[</span><span class="n">best_run_id</span><span class="p">])</span>
+
+<span class="c1"># Tag the best run for identification later</span>
+<span class="n">best_run</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="s2">&quot;Best Run&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>88it [00:09,  9.46it/s]
+</pre>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.3-Create-a-TensorFlow-estimator">3.3 Create a TensorFlow estimator<a class="anchor-link" href="#3.3-Create-a-TensorFlow-estimator">&#182;</a></h3><p>The AML SDK's TensorFlow estimator enables you to easily submit TensorFlow training jobs for both single-node and distributed runs. For more information on the TensorFlow estimator, refer <a href="https://docs.microsoft.com/azure/machine-learning/service/how-to-train-tensorflow">here</a>.</p>
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Best run is: d2b3cd32-21a8-478c-a007-861abe3cba32
+Metrics: {&#39;alpha&#39;: 0.4, &#39;mse&#39;: 3295.741064355809}
+</pre>
+</div>
+</div>
 
 </div>
 </div>
+
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.train.dnn</span> <span class="k">import</span> <span class="n">TensorFlow</span>
-
-<span class="n">script_params</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;--num_gpus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s1">&#39;--train_steps&#39;</span><span class="p">:</span> <span class="mi">500</span>
-<span class="p">}</span>
-
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">TensorFlow</span><span class="p">(</span><span class="n">source_directory</span><span class="o">=</span><span class="n">project_folder</span><span class="p">,</span>
-                       <span class="n">compute_target</span><span class="o">=</span><span class="n">compute_target</span><span class="p">,</span>
-                       <span class="n">script_params</span><span class="o">=</span><span class="n">script_params</span><span class="p">,</span>
-                       <span class="n">entry_script</span><span class="o">=</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span>
-                       <span class="n">node_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">worker_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">parameter_server_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>   
-                       <span class="n">distributed_backend</span><span class="o">=</span><span class="s1">&#39;ps&#39;</span><span class="p">,</span>
-                       <span class="n">use_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The above code specifies that we will run our training script on <code>2</code> nodes, with two workers and one parameter server. In order to execute a native distributed TensorFlow run, you must provide the argument <code>distributed_backend='ps'</code>. Using this estimator with these settings, TensorFlow and its dependencies will be installed for you. However, if your script also uses other packages, make sure to install them via the <code>TensorFlow</code> constructor's <code>pip_packages</code> or <code>conda_packages</code> parameters.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.4-Submit-job">3.4 Submit job<a class="anchor-link" href="#3.4-Submit-job">&#182;</a></h3><p>Run your experiment by submitting your estimator object. Note that this call is asynchronous.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">run</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># View the files in the run</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">best_run</span><span class="o">.</span><span class="n">get_file_names</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    
+<span class="c1"># Register the model with the workspace</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">best_run</span><span class="o">.</span><span class="n">register_model</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;best_model&#39;</span><span class="p">,</span> <span class="n">model_path</span><span class="o">=</span><span class="s1">&#39;outputs/monmodele.pkl&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12169,89 +12227,12 @@ Resource group: mlserviceresourcegroup
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Run(Experiment: tf-distr-ps,
-Id: tf-distr-ps_1551699379_3e846b68,
-Type: azureml.scriptrun,
-Status: Starting)
+<pre>outputs/model.pkl
+outputs/monmodele.pkl
 </pre>
 </div>
 </div>
 
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.5-Monitor-your-run">3.5 Monitor your run<a class="anchor-link" href="#3.5-Monitor-your-run">&#182;</a></h3><p>You can monitor the progress of the run with a Jupyter widget. Like the run submission, the widget is asynchronous and provides live updates every 10-15 seconds until the job completes.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.widgets</span> <span class="k">import</span> <span class="n">RunDetails</span>
-
-<span class="n">RunDetails</span><span class="p">(</span><span class="n">run</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-
-
-
- 
- 
-<div id="d5862377-a157-4229-8080-b7c4ba5cd67d"></div>
-<div class="output_subarea output_widget_view ">
-<script type="text/javascript">
-var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
-</script>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "a6bd35794e3b49b68bd413be0403c049", "version_major": 2, "version_minor": 0}
-</script>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Alternatively, you can block until the script has completed training before running more code.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># run.wait_for_completion(show_output=True) # this provides a verbose log</span>
-</pre></div>
-
-</div>
 </div>
 </div>
 

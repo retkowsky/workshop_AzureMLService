@@ -1,8 +1,64 @@
+
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8" />
-<title>10 Distributed TensorFlow</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<title>1 Azure ML Service Data Preparation slides</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- General and theme style sheets -->
+<link rel="stylesheet" href="reveal.js/css/reveal.css">
+<link rel="stylesheet" href="reveal.js/css/theme/simple.css" id="theme">
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+}
+
+</script>
+
+<!--[if lt IE 9]>
+<script src="reveal.js/lib/js/html5shiv.js"></script>
+<![endif]-->
+
+<!-- Loading the mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+<!-- Get Font-awesome from cdn -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.css">
 
 <style type="text/css">
     /*!
@@ -11718,64 +11774,147 @@ ul.typeahead-list > li > a {
 
 <style type="text/css">
 /* Overrides of notebook CSS for static HTML export */
-body {
-  overflow: visible;
-  padding: 8px;
+.reveal {
+  font-size: 160%;
 }
-
-div#notebook {
-  overflow: visible;
-  border-top: none;
-}@media print {
-  div.cell {
-    display: block;
-    page-break-inside: avoid;
-  } 
-  div.output_wrapper { 
-    display: block;
-    page-break-inside: avoid; 
-  }
-  div.output { 
-    display: block;
-    page-break-inside: avoid; 
-  }
+.reveal pre {
+  width: inherit;
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+}
+.reveal pre code {
+  padding: 0px;
+}
+.reveal section img {
+  border: 0px solid black;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+}
+.reveal i {
+  font-style: normal;
+  font-family: FontAwesome;
+  font-size: 2em;
+}
+.reveal .slides {
+  text-align: left;
+}
+.reveal.fade {
+  opacity: 1;
+}
+.reveal .progress {
+  position: static;
+}
+.reveal .controls .navigate-left,
+.reveal .controls .navigate-left.enabled {
+  border-right-color: #727272;
+}
+.reveal .controls .navigate-left.enabled:hover,
+.reveal .controls .navigate-left.enabled.enabled:hover {
+  border-right-color: #dfdfdf;
+}
+.reveal .controls .navigate-right,
+.reveal .controls .navigate-right.enabled {
+  border-left-color: #727272;
+}
+.reveal .controls .navigate-right.enabled:hover,
+.reveal .controls .navigate-right.enabled.enabled:hover {
+  border-left-color: #dfdfdf;
+}
+.reveal .controls .navigate-up,
+.reveal .controls .navigate-up.enabled {
+  border-bottom-color: #727272;
+}
+.reveal .controls .navigate-up.enabled:hover,
+.reveal .controls .navigate-up.enabled.enabled:hover {
+  border-bottom-color: #dfdfdf;
+}
+.reveal .controls .navigate-down,
+.reveal .controls .navigate-down.enabled {
+  border-top-color: #727272;
+}
+.reveal .controls .navigate-down.enabled:hover,
+.reveal .controls .navigate-down.enabled.enabled:hover {
+  border-top-color: #dfdfdf;
+}
+.reveal .progress span {
+  background: #727272;
+}
+div.input_area {
+  padding: 0.06em;
+}
+div.code_cell {
+  background-color: transparent;
+}
+div.prompt {
+  width: 11ex;
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+  text-align: right;
+}
+div.output_area pre {
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+}
+div.output_prompt {
+  /* 5px right shift to account for margin in parent container */
+  margin: 5px 5px 0 0;
+}
+div.text_cell.rendered .rendered_html {
+  /* The H1 height seems miscalculated, we are just hidding the scrollbar */
+  overflow-y: hidden;
+}
+a.anchor-link {
+  /* There is still an anchor, we are only hidding it */
+  display: none;
+}
+.rendered_html p {
+  text-align: inherit;
+}
+::-webkit-scrollbar
+{
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar *
+{
+  background:transparent;
+}
+::-webkit-scrollbar-thumb
+{
+  background: #727272 !important;
 }
 </style>
 
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
 <link rel="stylesheet" href="custom.css">
 
-<!-- Loading mathjax macro -->
-<!-- Load mathjax -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
-    <!-- MathJax configuration -->
-    <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-            processEscapes: true,
-            processEnvironments: true
-        },
-        // Center justify equations in code and markdown cells. Elsewhere
-        // we use CSS to left justify single line equations in code cells.
-        displayAlign: 'center',
-        "HTML-CSS": {
-            styles: {'.MathJax_Display': {"margin": 0}},
-            linebreaks: { automatic: true }
-        }
-    });
-    </script>
-    <!-- End of mathjax configuration --></head>
+</head>
+
+
 <body>
-  <div tabindex="-1" id="notebook" class="border-box-sizing">
-    <div class="container" id="notebook-container">
 
+
+<div class="reveal">
+<div class="slides">
+<section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="10.-Distributed-TensorFlow-with-parameter-server">10. Distributed TensorFlow with parameter server<a class="anchor-link" href="#10.-Distributed-TensorFlow-with-parameter-server">&#182;</a></h1><p>In this tutorial, you will train a TensorFlow model on the <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> dataset using native <a href="https://www.tensorflow.org/deploy/distributed">distributed TensorFlow</a>.</p>
+<h1 id="1.-Pr&#233;paration-des-donn&#233;es-avec-Azure-ML-Service">1. Pr&#233;paration des donn&#233;es avec Azure ML Service<a class="anchor-link" href="#1.-Pr&#233;paration-des-donn&#233;es-avec-Azure-ML-Service">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><a href="https://docs.microsoft.com/fr-fr/python/api/overview/azure/dataprep/intro?view=azure-dataprep-py">https://docs.microsoft.com/fr-fr/python/api/overview/azure/dataprep/intro?view=azure-dataprep-py</a></p>
+</blockquote>
 
 </div>
 </div>
@@ -11784,16 +11923,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="1.-Prerequisites">1. Prerequisites<a class="anchor-link" href="#1.-Prerequisites">&#182;</a></h2><ul>
-<li>Understand the <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture">architecture and terms</a> introduced by Azure Machine Learning (AML)</li>
-<li>Go through the <a href="https://github.com/Azure/MachineLearningNotebooks/blob/master/00.configuration.ipynb">00.configuration.ipynb</a> notebook to:<ul>
-<li>install the AML SDK</li>
-<li>create a workspace and its configuration file (<code>config.json</code>)</li>
-</ul>
-</li>
-<li>Review the <a href="https://aka.ms/aml-notebook-hyperdrive">tutorial</a> on single-node TensorFlow training using the SDK</li>
-</ul>
-
+<h2 id="1.1-Param&#233;trage">1.1 Param&#233;trage<a class="anchor-link" href="#1.1-Param&#233;trage">&#182;</a></h2>
 </div>
 </div>
 </div>
@@ -11802,10 +11932,8 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check core SDK version number</span>
-<span class="kn">import</span> <span class="nn">azureml.core</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SDK version:&quot;</span><span class="p">,</span> <span class="n">azureml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">VERSION</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">azureml.core</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Version Azure ML Service :&quot;</span><span class="p">,</span> <span class="n">azureml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">VERSION</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11822,7 +11950,7 @@ div#notebook {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>SDK version: 1.0.17
+<pre>Version Azure ML Service : 1.0.17
 </pre>
 </div>
 </div>
@@ -11830,45 +11958,21 @@ div#notebook {
 </div>
 </div>
 
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Diagnostics">Diagnostics<a class="anchor-link" href="#Diagnostics">&#182;</a></h2><p>Opt-in diagnostics for better experience, quality, and security of future releases.</p>
-
-</div>
-</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.telemetry</span> <span class="k">import</span> <span class="n">set_diagnostics_collection</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">display</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">mkdtemp</span>
 
-<span class="n">set_diagnostics_collection</span><span class="p">(</span><span class="n">send_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">azureml.dataprep</span> <span class="k">as</span> <span class="nn">dprep</span>
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Turning diagnostics collection on. 
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -11877,22 +11981,30 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Initialize-workspace">Initialize workspace<a class="anchor-link" href="#Initialize-workspace">&#182;</a></h2><p>Initialize a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#workspace">Workspace</a> object from the existing workspace you created in the Prerequisites step. <code>Workspace.from_config()</code> creates a workspace object from the details stored in <code>config.json</code>.</p>
+<h2 id="2.-Importation-des-donn&#233;es">2. Importation des donn&#233;es<a class="anchor-link" href="#2.-Importation-des-donn&#233;es">&#182;</a></h2><p>Azure ML Data Prep supports many different file reading formats (i.e. CSV, Excel, Parquet), and also offers the ability to infer column types automatically.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gobike</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">auto_read_file</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;https://dprepdata.blob.core.windows.net/demo/ford_gobike/2017-fordgobike-tripdata.csv&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
 <div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.workspace</span> <span class="k">import</span> <span class="n">Workspace</span>
-
-<span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="o">.</span><span class="n">from_config</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Workspace name: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
-      <span class="s1">&#39;Azure region: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> 
-      <span class="s1">&#39;Resource group: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gobike</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11905,16 +12017,232 @@ div#notebook {
 
 <div class="output_area">
 
-<div class="prompt"></div>
+<div class="prompt output_prompt">Out[4]:</div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Found the config file in: C:\Users\seretkow\notebooks\Labs Azure ML service\aml_config\config.json
-Workspace name: MLServiceWorkspace
-Azure region: westeurope
-Resource group: mlserviceresourcegroup
-</pre>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>duration_sec</th>
+      <th>start_time</th>
+      <th>end_time</th>
+      <th>start_station_id</th>
+      <th>start_station_name</th>
+      <th>start_station_latitude</th>
+      <th>start_station_longitude</th>
+      <th>end_station_id</th>
+      <th>end_station_name</th>
+      <th>end_station_latitude</th>
+      <th>end_station_longitude</th>
+      <th>bike_id</th>
+      <th>user_type</th>
+      <th>member_birth_year</th>
+      <th>member_gender</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654</td>
+      <td>2018-01-01 15:12:50.245</td>
+      <td>74.0</td>
+      <td>Laguna St at Hayes St</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
+      <td>San Francisco Public Library (Grove St at Hyde...</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
+      <td>Customer</td>
+      <td>1987.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>78800.0</td>
+      <td>2017-12-31 15:56:34.842</td>
+      <td>2018-01-01 13:49:55.617</td>
+      <td>284.0</td>
+      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>96.0</td>
+      <td>Dolores St at 15th St</td>
+      <td>37.766210</td>
+      <td>-122.426614</td>
+      <td>88.0</td>
+      <td>Customer</td>
+      <td>1965.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>45768.0</td>
+      <td>2017-12-31 22:45:48.411</td>
+      <td>2018-01-01 11:28:36.883</td>
+      <td>245.0</td>
+      <td>Downtown Berkeley BART</td>
+      <td>37.870348</td>
+      <td>-122.267764</td>
+      <td>245.0</td>
+      <td>Downtown Berkeley BART</td>
+      <td>37.870348</td>
+      <td>-122.267764</td>
+      <td>1094.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>62172.0</td>
+      <td>2017-12-31 17:31:10.636</td>
+      <td>2018-01-01 10:47:23.531</td>
+      <td>60.0</td>
+      <td>8th St at Ringold St</td>
+      <td>37.774520</td>
+      <td>-122.409449</td>
+      <td>5.0</td>
+      <td>Powell St BART Station (Market St at 5th St)</td>
+      <td>37.783899</td>
+      <td>-122.408445</td>
+      <td>2831.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>43603.0</td>
+      <td>2017-12-31 14:23:14.001</td>
+      <td>2018-01-01 02:29:57.571</td>
+      <td>239.0</td>
+      <td>Bancroft Way at Telegraph Ave</td>
+      <td>37.868813</td>
+      <td>-122.258764</td>
+      <td>247.0</td>
+      <td>Fulton St at Bancroft Way</td>
+      <td>37.867789</td>
+      <td>-122.265896</td>
+      <td>3167.0</td>
+      <td>Subscriber</td>
+      <td>1997.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>9226.0</td>
+      <td>2017-12-31 22:51:00.918</td>
+      <td>2018-01-01 01:24:47.166</td>
+      <td>30.0</td>
+      <td>San Francisco Caltrain (Townsend St at 4th St)</td>
+      <td>37.776598</td>
+      <td>-122.395282</td>
+      <td>30.0</td>
+      <td>San Francisco Caltrain (Townsend St at 4th St)</td>
+      <td>37.776598</td>
+      <td>-122.395282</td>
+      <td>1487.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>4507.0</td>
+      <td>2017-12-31 23:49:28.422</td>
+      <td>2018-01-01 01:04:35.619</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>3539.0</td>
+      <td>Customer</td>
+      <td>1991.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>4334.0</td>
+      <td>2017-12-31 23:46:37.196</td>
+      <td>2018-01-01 00:58:51.211</td>
+      <td>284.0</td>
+      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>284.0</td>
+      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>1503.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>4150.0</td>
+      <td>2017-12-31 23:37:07.548</td>
+      <td>2018-01-01 00:46:18.308</td>
+      <td>20.0</td>
+      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
+      <td>37.791300</td>
+      <td>-122.399051</td>
+      <td>20.0</td>
+      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
+      <td>37.791300</td>
+      <td>-122.399051</td>
+      <td>3125.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>4238.0</td>
+      <td>2017-12-31 23:35:38.145</td>
+      <td>2018-01-01 00:46:17.053</td>
+      <td>20.0</td>
+      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
+      <td>37.791300</td>
+      <td>-122.399051</td>
+      <td>20.0</td>
+      <td>Mechanics Monument Plaza (Market St at Bush St)</td>
+      <td>37.791300</td>
+      <td>-122.399051</td>
+      <td>2543.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
 </div>
+</div>
+
 </div>
 
 </div>
@@ -11925,8 +12253,7 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="2.-Create-a-remote-compute-target">2. Create a remote compute target<a class="anchor-link" href="#2.-Create-a-remote-compute-target">&#182;</a></h2><p>You will need to create a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#compute-target">compute target</a> to execute your training script on. In this tutorial, you create an <code>AmlCompute</code> cluster as your training compute resource. This code creates a cluster for you if it does not already exist in your workspace.</p>
-<p><strong>Creation of the cluster takes approximately 5 minutes.</strong> If the cluster is already in your workspace this code will skip the cluster creation process.</p>
+<p>In order to iterate more quickly, we can take a sample of our data. Later, we can then apply the same transformations to the entire dataset.</p>
 
 </div>
 </div>
@@ -11936,67 +12263,19 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.compute</span> <span class="k">import</span> <span class="n">ComputeTarget</span><span class="p">,</span> <span class="n">AmlCompute</span>
-<span class="kn">from</span> <span class="nn">azureml.core.compute_target</span> <span class="k">import</span> <span class="n">ComputeTargetException</span>
-
-<span class="c1"># choose a name for your cluster</span>
-<span class="n">cluster_name</span> <span class="o">=</span> <span class="s2">&quot;gpucluster&quot;</span>
-
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">cluster_name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found existing compute target.&#39;</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">ComputeTargetException</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating a new compute target...&#39;</span><span class="p">)</span>
-    <span class="n">compute_config</span> <span class="o">=</span> <span class="n">AmlCompute</span><span class="o">.</span><span class="n">provisioning_configuration</span><span class="p">(</span><span class="n">vm_size</span><span class="o">=</span><span class="s1">&#39;STANDARD_NC6&#39;</span><span class="p">,</span> 
-                                                           <span class="n">max_nodes</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-
-    <span class="c1"># create the cluster</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">cluster_name</span><span class="p">,</span> <span class="n">compute_config</span><span class="p">)</span>
-
-    <span class="n">compute_target</span><span class="o">.</span><span class="n">wait_for_completion</span><span class="p">(</span><span class="n">show_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Use the &#39;status&#39; property to get a detailed status for the current cluster. </span>
-<span class="nb">print</span><span class="p">(</span><span class="n">compute_target</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">serialize</span><span class="p">())</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sampled_gobike</span> <span class="o">=</span> <span class="n">gobike</span><span class="o">.</span><span class="n">take_sample</span><span class="p">(</span><span class="n">probability</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Found existing compute target.
-{&#39;allocationState&#39;: &#39;Steady&#39;, &#39;allocationStateTransitionTime&#39;: &#39;2019-02-22T14:28:25.671000+00:00&#39;, &#39;creationTime&#39;: &#39;2018-11-23T16:53:14.040220+00:00&#39;, &#39;currentNodeCount&#39;: 0, &#39;errors&#39;: None, &#39;modifiedTime&#39;: &#39;2018-11-23T16:53:56.988534+00:00&#39;, &#39;nodeStateCounts&#39;: {&#39;idleNodeCount&#39;: 0, &#39;leavingNodeCount&#39;: 0, &#39;preemptedNodeCount&#39;: 0, &#39;preparingNodeCount&#39;: 0, &#39;runningNodeCount&#39;: 0, &#39;unusableNodeCount&#39;: 0}, &#39;provisioningState&#39;: &#39;Succeeded&#39;, &#39;provisioningStateTransitionTime&#39;: None, &#39;scaleSettings&#39;: {&#39;minNodeCount&#39;: 0, &#39;maxNodeCount&#39;: 4, &#39;nodeIdleTimeBeforeScaleDown&#39;: &#39;&#39;}, &#39;targetNodeCount&#39;: None, &#39;vmPriority&#39;: &#39;Dedicated&#39;, &#39;vmSize&#39;: &#39;STANDARD_NC6&#39;}
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="3.-Train-model-on-the-remote-compute">3. Train model on the remote compute<a class="anchor-link" href="#3.-Train-model-on-the-remote-compute">&#182;</a></h2><p>Now that we have the cluster ready to go, let's run our distributed training job.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.1-Create-a-project-directory">3.1 Create a project directory<a class="anchor-link" href="#3.1-Create-a-project-directory">&#182;</a></h3><p>Create a directory that will contain all the necessary code from your local machine that you will need access to on the remote resource. This includes the training script, and any additional files your training script depends on3.1.</p>
+<h2 id="3.-Audit-des-donn&#233;es">3. Audit des donn&#233;es<a class="anchor-link" href="#3.-Audit-des-donn&#233;es">&#182;</a></h2><p>Let's understand what our data looks like. Azure ML Data Prep facilitates this process by offering data profiles that help us glimpse into column types and column summary statistics.</p>
 
 </div>
 </div>
@@ -12006,10 +12285,8 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-
-<span class="n">project_folder</span> <span class="o">=</span> <span class="s1">&#39;./tf-distr-ps&#39;</span>
-<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">project_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Audit sur l&#39;ensemble des données</span>
+<span class="c1">#gobike.get_profile()</span>
 </pre></div>
 
 </div>
@@ -12022,23 +12299,8 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Copy the training script `tf_mnist_replica.py` into this project directory.</span>
-<span class="c1"># https://github.com/Azure/MachineLearningNotebooks/tree/master/how-to-use-azureml/training-with-deep-learning/distributed-tensorflow-with-parameter-server</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">shutil</span>
-
-<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span> <span class="n">project_folder</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Audit sur l&#39;échantillon</span>
+<span class="n">sampled_gobike</span><span class="o">.</span><span class="n">get_profile</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12051,13 +12313,433 @@ Resource group: mlserviceresourcegroup
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[8]:</div>
+<div class="prompt output_prompt">Out[7]:</div>
 
 
 
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;./tf-distr-ps\\tf_mnist_replica.py&#39;</pre>
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Type</th>
+      <th>Min</th>
+      <th>Max</th>
+      <th>Count</th>
+      <th>Missing Count</th>
+      <th>Not Missing Count</th>
+      <th>Percent missing</th>
+      <th>Error Count</th>
+      <th>Empty count</th>
+      <th>0.1% Quantile</th>
+      <th>1% Quantile</th>
+      <th>5% Quantile</th>
+      <th>25% Quantile</th>
+      <th>50% Quantile</th>
+      <th>75% Quantile</th>
+      <th>95% Quantile</th>
+      <th>99% Quantile</th>
+      <th>99.9% Quantile</th>
+      <th>Mean</th>
+      <th>Standard Deviation</th>
+      <th>Variance</th>
+      <th>Skewness</th>
+      <th>Kurtosis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>duration_sec</th>
+      <td>FieldType.DECIMAL</td>
+      <td>61</td>
+      <td>81686</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>79.9623</td>
+      <td>256.069</td>
+      <td>250.957</td>
+      <td>382.902</td>
+      <td>595.069</td>
+      <td>936.276</td>
+      <td>2273.98</td>
+      <td>13244.8</td>
+      <td>56320.1</td>
+      <td>1096.7</td>
+      <td>3332.52</td>
+      <td>1.11057e+07</td>
+      <td>14.3611</td>
+      <td>267.013</td>
+    </tr>
+    <tr>
+      <th>start_time</th>
+      <td>FieldType.DATE</td>
+      <td>2017-06-28 13:48:12.389000+00:00</td>
+      <td>2017-12-31 23:55:09.686000+00:00</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>end_time</th>
+      <td>FieldType.DATE</td>
+      <td>2017-06-28 14:00:04.925000+00:00</td>
+      <td>2018-01-01 15:12:50.245000+00:00</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>start_station_id</th>
+      <td>FieldType.DECIMAL</td>
+      <td>3</td>
+      <td>340</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3</td>
+      <td>11.2005</td>
+      <td>10.8108</td>
+      <td>23.4783</td>
+      <td>66.6362</td>
+      <td>141.088</td>
+      <td>288.461</td>
+      <td>323.68</td>
+      <td>324.759</td>
+      <td>94.8958</td>
+      <td>86.5886</td>
+      <td>7497.59</td>
+      <td>1.08634</td>
+      <td>0.269416</td>
+    </tr>
+    <tr>
+      <th>start_station_name</th>
+      <td>FieldType.STRING</td>
+      <td>10th Ave at E 15th St</td>
+      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>start_station_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>37.323</td>
+      <td>37.8802</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>37.3252</td>
+      <td>37.7612</td>
+      <td>37.7609</td>
+      <td>37.7738</td>
+      <td>37.7837</td>
+      <td>37.7954</td>
+      <td>37.8319</td>
+      <td>37.8692</td>
+      <td>37.8738</td>
+      <td>37.7715</td>
+      <td>0.0868063</td>
+      <td>0.00753533</td>
+      <td>-4.47498</td>
+      <td>19.8988</td>
+    </tr>
+    <tr>
+      <th>start_station_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-122.444</td>
+      <td>-121.877</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-122.444</td>
+      <td>-122.423</td>
+      <td>-122.423</td>
+      <td>-122.411</td>
+      <td>-122.399</td>
+      <td>-122.391</td>
+      <td>-122.25</td>
+      <td>-121.886</td>
+      <td>-121.877</td>
+      <td>-122.364</td>
+      <td>0.106098</td>
+      <td>0.0112567</td>
+      <td>3.21728</td>
+      <td>11.149</td>
+    </tr>
+    <tr>
+      <th>end_station_id</th>
+      <td>FieldType.DECIMAL</td>
+      <td>3</td>
+      <td>337</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3</td>
+      <td>9.55321</td>
+      <td>9</td>
+      <td>22.8194</td>
+      <td>65.7664</td>
+      <td>137.809</td>
+      <td>290.327</td>
+      <td>323.878</td>
+      <td>324.759</td>
+      <td>93.3768</td>
+      <td>86.306</td>
+      <td>7448.72</td>
+      <td>1.11127</td>
+      <td>0.330681</td>
+    </tr>
+    <tr>
+      <th>end_station_name</th>
+      <td>FieldType.STRING</td>
+      <td>10th Ave at E 15th St</td>
+      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>end_station_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>37.323</td>
+      <td>37.874</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>37.3256</td>
+      <td>37.761</td>
+      <td>37.7606</td>
+      <td>37.7745</td>
+      <td>37.7834</td>
+      <td>37.7954</td>
+      <td>37.83</td>
+      <td>37.8685</td>
+      <td>37.8731</td>
+      <td>37.7713</td>
+      <td>0.0868062</td>
+      <td>0.00753531</td>
+      <td>-4.50761</td>
+      <td>20.0773</td>
+    </tr>
+    <tr>
+      <th>end_station_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-122.444</td>
+      <td>-121.876</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-122.444</td>
+      <td>-122.421</td>
+      <td>-122.421</td>
+      <td>-122.411</td>
+      <td>-122.399</td>
+      <td>-122.391</td>
+      <td>-122.249</td>
+      <td>-121.886</td>
+      <td>-121.877</td>
+      <td>-122.363</td>
+      <td>0.105636</td>
+      <td>0.0111589</td>
+      <td>3.23597</td>
+      <td>11.2536</td>
+    </tr>
+    <tr>
+      <th>bike_id</th>
+      <td>FieldType.DECIMAL</td>
+      <td>12</td>
+      <td>3720</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>16.8547</td>
+      <td>309.234</td>
+      <td>278.68</td>
+      <td>799.394</td>
+      <td>1735.41</td>
+      <td>2520.68</td>
+      <td>3104.47</td>
+      <td>3388.85</td>
+      <td>3680.57</td>
+      <td>1676.64</td>
+      <td>968.357</td>
+      <td>937715</td>
+      <td>-0.0713108</td>
+      <td>-1.22184</td>
+    </tr>
+    <tr>
+      <th>user_type</th>
+      <td>FieldType.STRING</td>
+      <td>Customer</td>
+      <td>Subscriber</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>member_birth_year</th>
+      <td>FieldType.DECIMAL</td>
+      <td>1924</td>
+      <td>1999</td>
+      <td>5268.0</td>
+      <td>654.0</td>
+      <td>4614.0</td>
+      <td>0.124146</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1941.69</td>
+      <td>1965.71</td>
+      <td>1965.43</td>
+      <td>1974.51</td>
+      <td>1982.86</td>
+      <td>1987.99</td>
+      <td>1993.49</td>
+      <td>1996.68</td>
+      <td>1999</td>
+      <td>1980.6</td>
+      <td>10.0674</td>
+      <td>101.352</td>
+      <td>-0.857213</td>
+      <td>0.498278</td>
+    </tr>
+    <tr>
+      <th>member_gender</th>
+      <td>FieldType.STRING</td>
+      <td></td>
+      <td>Other</td>
+      <td>5268.0</td>
+      <td>0.0</td>
+      <td>5268.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>652.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
 </div>
 
 </div>
@@ -12070,20 +12752,54 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.2-Create-an-experiment">3.2 Create an experiment<a class="anchor-link" href="#3.2-Create-an-experiment">&#182;</a></h3><p>Create an <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#experiment">Experiment</a> to track all the runs in your workspace for this distributed TensorFlow tutorial.</p>
+<p>It appears that we have quite a few missing values in <code>member_birth_year</code>. We also immediately see that we have some empty strings in our <code>member_gender</code> column. With the data profiler, we can quickly do a sanity check on our dataset and see where we might need to start data cleaning.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="4.-Transformation-des-donn&#233;es-par-l'exemple">4. Transformation des donn&#233;es par l'exemple<a class="anchor-link" href="#4.-Transformation-des-donn&#233;es-par-l'exemple">&#182;</a></h2><p>Azure ML Data Prep comes with additional "smart" transforms created by Microsoft Research. Here, we'll look at how you can derive a new column by providing examples of input-output pairs. Rather than explicitly using regular expressions to extract dates or hours from datetimes, we can provide examples for Azure ML Data Prep to learn what the pattern is. In fact, these smart transformations can also handle more complex derivations like inferring the day of the week from datetimes.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core</span> <span class="k">import</span> <span class="n">Experiment</span>
-
-<span class="n">experiment_name</span> <span class="o">=</span> <span class="s1">&#39;tf-distr-ps&#39;</span>
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">experiment_name</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_derived</span> <span class="o">=</span> <span class="n">sampled_gobike</span>\
+    <span class="o">.</span><span class="n">to_string</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">,</span> <span class="s1">&#39;end_time&#39;</span><span class="p">]</span>
+    <span class="p">)</span>\
+    <span class="o">.</span><span class="n">derive_column_by_example</span><span class="p">(</span>
+        <span class="n">source_columns</span><span class="o">=</span><span class="s1">&#39;start_time&#39;</span><span class="p">,</span>
+        <span class="n">new_column_name</span><span class="o">=</span><span class="s1">&#39;date&#39;</span><span class="p">,</span>
+        <span class="n">example_data</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;2017-12-31 16:57:39.6540&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-12-31&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;2017-12-31 16:57:39&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-12-31&#39;</span><span class="p">)]</span>
+    <span class="p">)</span>\
+    <span class="o">.</span><span class="n">derive_column_by_example</span><span class="p">(</span>
+        <span class="n">source_columns</span><span class="o">=</span><span class="s1">&#39;start_time&#39;</span><span class="p">,</span>
+        <span class="n">new_column_name</span><span class="o">=</span><span class="s1">&#39;hour&#39;</span><span class="p">,</span>
+        <span class="n">example_data</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;2017-12-31 16:57:39.6540&#39;</span><span class="p">,</span> <span class="s1">&#39;16&#39;</span><span class="p">)]</span>
+    <span class="p">)</span>\
+    <span class="o">.</span><span class="n">derive_column_by_example</span><span class="p">(</span>
+        <span class="n">source_columns</span><span class="o">=</span><span class="s1">&#39;start_time&#39;</span><span class="p">,</span>
+        <span class="n">new_column_name</span><span class="o">=</span><span class="s1">&#39;wday&#39;</span><span class="p">,</span>
+        <span class="n">example_data</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;2017-12-31 16:57:39.6540&#39;</span><span class="p">,</span> <span class="s1">&#39;Sunday&#39;</span><span class="p">)]</span>
+    <span class="p">)</span>\
+    <span class="o">.</span><span class="n">derive_column_by_example</span><span class="p">(</span>
+        <span class="n">source_columns</span><span class="o">=</span><span class="s1">&#39;start_time&#39;</span><span class="p">,</span>
+        <span class="n">new_column_name</span><span class="o">=</span><span class="s1">&#39;day&#39;</span><span class="p">,</span>
+        <span class="n">example_data</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;2017-12-31 16:57:39.6540&#39;</span><span class="p">,</span> <span class="s1">&#39;31&#39;</span><span class="p">)]</span>
+    <span class="p">)</span>\
+      <span class="o">.</span><span class="n">derive_column_by_example</span><span class="p">(</span>
+        <span class="n">source_columns</span><span class="o">=</span><span class="s1">&#39;start_time&#39;</span><span class="p">,</span>
+        <span class="n">new_column_name</span><span class="o">=</span><span class="s1">&#39;month&#39;</span><span class="p">,</span>
+        <span class="n">example_data</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;2017-12-31 16:57:39.6540&#39;</span><span class="p">,</span> <span class="s1">&#39;12&#39;</span><span class="p">)]</span>
+    <span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12091,11 +12807,339 @@ Resource group: mlserviceresourcegroup
 </div>
 
 </div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_derived</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s1">&#39;wday&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;Sunday&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[9]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>duration_sec</th>
+      <th>start_time</th>
+      <th>month</th>
+      <th>day</th>
+      <th>wday</th>
+      <th>hour</th>
+      <th>date</th>
+      <th>end_time</th>
+      <th>start_station_id</th>
+      <th>start_station_name</th>
+      <th>start_station_latitude</th>
+      <th>start_station_longitude</th>
+      <th>end_station_id</th>
+      <th>end_station_name</th>
+      <th>end_station_latitude</th>
+      <th>end_station_longitude</th>
+      <th>bike_id</th>
+      <th>user_type</th>
+      <th>member_birth_year</th>
+      <th>member_gender</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>572.0</td>
+      <td>2017-12-30 18:19:05.731000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>18</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 18:28:37.825000</td>
+      <td>323.0</td>
+      <td>Broadway at Kearny</td>
+      <td>37.798014</td>
+      <td>-122.405950</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
+      <td>-122.394203</td>
+      <td>3033.0</td>
+      <td>Customer</td>
+      <td>1996.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>821.0</td>
+      <td>2017-12-30 18:13:05.124000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>18</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 18:26:46.365000</td>
+      <td>317.0</td>
+      <td>San Salvador St at 9th St</td>
+      <td>37.333955</td>
+      <td>-121.877349</td>
+      <td>304.0</td>
+      <td>Jackson St at 5th St</td>
+      <td>37.348759</td>
+      <td>-121.894798</td>
+      <td>2533.0</td>
+      <td>Subscriber</td>
+      <td>1970.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2789.0</td>
+      <td>2017-12-30 15:52:21.222000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>15</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 16:38:50.427000</td>
+      <td>121.0</td>
+      <td>Mission Playground</td>
+      <td>37.759210</td>
+      <td>-122.421339</td>
+      <td>120.0</td>
+      <td>Mission Dolores Park</td>
+      <td>37.761420</td>
+      <td>-122.426435</td>
+      <td>1837.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1380.0</td>
+      <td>2017-12-30 16:07:44.108000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>16</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 16:30:44.901000</td>
+      <td>239.0</td>
+      <td>Bancroft Way at Telegraph Ave</td>
+      <td>37.868813</td>
+      <td>-122.258764</td>
+      <td>241.0</td>
+      <td>Ashby BART Station</td>
+      <td>37.852477</td>
+      <td>-122.270213</td>
+      <td>1297.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>198.0</td>
+      <td>2017-12-30 16:23:49.031000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>16</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 16:27:07.723000</td>
+      <td>76.0</td>
+      <td>McCoppin St at Valencia St</td>
+      <td>37.771662</td>
+      <td>-122.422423</td>
+      <td>76.0</td>
+      <td>McCoppin St at Valencia St</td>
+      <td>37.771662</td>
+      <td>-122.422423</td>
+      <td>364.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>463.0</td>
+      <td>2017-12-30 15:43:11.552000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>15</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 15:50:55.004000</td>
+      <td>324.0</td>
+      <td>Union Square (Powell St at Post St)</td>
+      <td>37.788300</td>
+      <td>-122.408531</td>
+      <td>44.0</td>
+      <td>Civic Center/UN Plaza BART Station (Market St ...</td>
+      <td>37.781074</td>
+      <td>-122.411738</td>
+      <td>762.0</td>
+      <td>Subscriber</td>
+      <td>1991.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1334.0</td>
+      <td>2017-12-30 14:21:05.333000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>14</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 14:43:20.036000</td>
+      <td>85.0</td>
+      <td>Church St at Duboce Ave</td>
+      <td>37.770083</td>
+      <td>-122.429156</td>
+      <td>17.0</td>
+      <td>Embarcadero BART Station (Beale St at Market St)</td>
+      <td>37.792251</td>
+      <td>-122.397086</td>
+      <td>974.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>603.0</td>
+      <td>2017-12-30 14:15:40.583000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>14</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 14:25:43.785000</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>323.0</td>
+      <td>Broadway at Kearny</td>
+      <td>37.798014</td>
+      <td>-122.405950</td>
+      <td>2359.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>858.0</td>
+      <td>2017-12-30 13:52:14.755000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>13</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 14:06:32.916000</td>
+      <td>60.0</td>
+      <td>8th St at Ringold St</td>
+      <td>37.774520</td>
+      <td>-122.409449</td>
+      <td>36.0</td>
+      <td>Folsom St at 3rd St</td>
+      <td>37.783830</td>
+      <td>-122.398870</td>
+      <td>276.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>1720.0</td>
+      <td>2017-12-30 12:13:24.174000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>12</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 12:42:04.366000</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>99.0</td>
+      <td>Folsom St at 15th St</td>
+      <td>37.767037</td>
+      <td>-122.415442</td>
+      <td>617.0</td>
+      <td>Customer</td>
+      <td>1972.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>370.0</td>
+      <td>2017-12-30 11:45:33.278000</td>
+      <td>12</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>11</td>
+      <td>2017-12-30</td>
+      <td>2017-12-30 11:51:44.182000</td>
+      <td>197.0</td>
+      <td>El Embarcadero at Grand Ave</td>
+      <td>37.808848</td>
+      <td>-122.249680</td>
+      <td>200.0</td>
+      <td>2nd Ave at E 18th St</td>
+      <td>37.800214</td>
+      <td>-122.253810</td>
+      <td>1545.0</td>
+      <td>Subscriber</td>
+      <td>1974.0</td>
+      <td>Female</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.3-Create-a-TensorFlow-estimator">3.3 Create a TensorFlow estimator<a class="anchor-link" href="#3.3-Create-a-TensorFlow-estimator">&#182;</a></h3><p>The AML SDK's TensorFlow estimator enables you to easily submit TensorFlow training jobs for both single-node and distributed runs. For more information on the TensorFlow estimator, refer <a href="https://docs.microsoft.com/azure/machine-learning/service/how-to-train-tensorflow">here</a>.</p>
+<p>We can also filter on other column types; let's take a peek at rides that lasted over 5 hours.</p>
 
 </div>
 </div>
@@ -12105,22 +13149,998 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.train.dnn</span> <span class="k">import</span> <span class="n">TensorFlow</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_derived</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s1">&#39;duration_sec&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+</pre></div>
 
-<span class="n">script_params</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;--num_gpus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s1">&#39;--train_steps&#39;</span><span class="p">:</span> <span class="mi">500</span>
-<span class="p">}</span>
+</div>
+</div>
+</div>
 
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">TensorFlow</span><span class="p">(</span><span class="n">source_directory</span><span class="o">=</span><span class="n">project_folder</span><span class="p">,</span>
-                       <span class="n">compute_target</span><span class="o">=</span><span class="n">compute_target</span><span class="p">,</span>
-                       <span class="n">script_params</span><span class="o">=</span><span class="n">script_params</span><span class="p">,</span>
-                       <span class="n">entry_script</span><span class="o">=</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span>
-                       <span class="n">node_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">worker_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">parameter_server_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>   
-                       <span class="n">distributed_backend</span><span class="o">=</span><span class="s1">&#39;ps&#39;</span><span class="p">,</span>
-                       <span class="n">use_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[10]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>duration_sec</th>
+      <th>start_time</th>
+      <th>month</th>
+      <th>day</th>
+      <th>wday</th>
+      <th>hour</th>
+      <th>date</th>
+      <th>end_time</th>
+      <th>start_station_id</th>
+      <th>start_station_name</th>
+      <th>start_station_latitude</th>
+      <th>start_station_longitude</th>
+      <th>end_station_id</th>
+      <th>end_station_name</th>
+      <th>end_station_latitude</th>
+      <th>end_station_longitude</th>
+      <th>bike_id</th>
+      <th>user_type</th>
+      <th>member_birth_year</th>
+      <th>member_gender</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>16</td>
+      <td>2017-12-31</td>
+      <td>2018-01-01 15:12:50.245000</td>
+      <td>74.0</td>
+      <td>Laguna St at Hayes St</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
+      <td>San Francisco Public Library (Grove St at Hyde...</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
+      <td>Customer</td>
+      <td>1987.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>19738.0</td>
+      <td>2017-12-27 10:08:32.337000</td>
+      <td>12</td>
+      <td>27</td>
+      <td>Wednesday</td>
+      <td>10</td>
+      <td>2017-12-27</td>
+      <td>2017-12-27 15:37:31.208000</td>
+      <td>95.0</td>
+      <td>Sanchez St at 15th St</td>
+      <td>37.766219</td>
+      <td>-122.431060</td>
+      <td>31.0</td>
+      <td>Raymond Kimbell Playground</td>
+      <td>37.783813</td>
+      <td>-122.434559</td>
+      <td>931.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>22442.0</td>
+      <td>2017-12-15 12:24:44.370000</td>
+      <td>12</td>
+      <td>15</td>
+      <td>Friday</td>
+      <td>12</td>
+      <td>2017-12-15</td>
+      <td>2017-12-15 18:38:47.010000</td>
+      <td>275.0</td>
+      <td>Julian St at 6th St</td>
+      <td>37.342997</td>
+      <td>-121.888889</td>
+      <td>278.0</td>
+      <td>The Alameda at Bush St</td>
+      <td>37.331932</td>
+      <td>-121.904888</td>
+      <td>1872.0</td>
+      <td>Subscriber</td>
+      <td>1983.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>27433.0</td>
+      <td>2017-11-06 08:33:58.415000</td>
+      <td>11</td>
+      <td>06</td>
+      <td>Monday</td>
+      <td>08</td>
+      <td>2017-11-06</td>
+      <td>2017-11-06 16:11:11.583000</td>
+      <td>75.0</td>
+      <td>Market St at Franklin St</td>
+      <td>37.773793</td>
+      <td>-122.421239</td>
+      <td>58.0</td>
+      <td>Market St at 10th St</td>
+      <td>37.776619</td>
+      <td>-122.417385</td>
+      <td>2291.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>28467.0</td>
+      <td>2017-10-25 22:59:12.266000</td>
+      <td>10</td>
+      <td>25</td>
+      <td>Wednesday</td>
+      <td>22</td>
+      <td>2017-10-25</td>
+      <td>2017-10-26 06:53:39.765000</td>
+      <td>108.0</td>
+      <td>16th St Mission BART</td>
+      <td>37.764710</td>
+      <td>-122.419957</td>
+      <td>119.0</td>
+      <td>18th St at Noe St</td>
+      <td>37.761047</td>
+      <td>-122.432642</td>
+      <td>2423.0</td>
+      <td>Subscriber</td>
+      <td>1973.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>22532.0</td>
+      <td>2017-10-05 18:08:47.166000</td>
+      <td>10</td>
+      <td>05</td>
+      <td>Thursday</td>
+      <td>18</td>
+      <td>2017-10-05</td>
+      <td>2017-10-06 00:24:19.285000</td>
+      <td>323.0</td>
+      <td>Broadway at Kearny</td>
+      <td>37.798014</td>
+      <td>-122.405950</td>
+      <td>4.0</td>
+      <td>Cyril Magnin St at Ellis St</td>
+      <td>37.785881</td>
+      <td>-122.408915</td>
+      <td>307.0</td>
+      <td>Subscriber</td>
+      <td>1987.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>21050.0</td>
+      <td>2017-10-03 08:59:55.957000</td>
+      <td>10</td>
+      <td>03</td>
+      <td>Tuesday</td>
+      <td>08</td>
+      <td>2017-10-03</td>
+      <td>2017-10-03 14:50:46.614000</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>2818.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>81686.0</td>
+      <td>2017-09-30 18:12:21.667000</td>
+      <td>09</td>
+      <td>30</td>
+      <td>Saturday</td>
+      <td>18</td>
+      <td>2017-09-30</td>
+      <td>2017-10-01 16:53:48.361000</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>81.0</td>
+      <td>Berry St at 4th St</td>
+      <td>37.775880</td>
+      <td>-122.393170</td>
+      <td>2371.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>29494.0</td>
+      <td>2017-09-23 11:08:56.665000</td>
+      <td>09</td>
+      <td>23</td>
+      <td>Saturday</td>
+      <td>11</td>
+      <td>2017-09-23</td>
+      <td>2017-09-23 19:20:31.620000</td>
+      <td>4.0</td>
+      <td>Cyril Magnin St at Ellis St</td>
+      <td>37.785881</td>
+      <td>-122.408915</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>2210.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>76987.0</td>
+      <td>2017-09-20 09:22:14.400000</td>
+      <td>09</td>
+      <td>20</td>
+      <td>Wednesday</td>
+      <td>09</td>
+      <td>2017-09-20</td>
+      <td>2017-09-21 06:45:21.472000</td>
+      <td>164.0</td>
+      <td>Isabella St at San Pablo Ave</td>
+      <td>37.814988</td>
+      <td>-122.274844</td>
+      <td>164.0</td>
+      <td>Isabella St at San Pablo Ave</td>
+      <td>37.814988</td>
+      <td>-122.274844</td>
+      <td>554.0</td>
+      <td>Customer</td>
+      <td>1977.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>23040.0</td>
+      <td>2017-09-18 10:11:18.370000</td>
+      <td>09</td>
+      <td>18</td>
+      <td>Monday</td>
+      <td>10</td>
+      <td>2017-09-18</td>
+      <td>2017-09-18 16:35:18.664000</td>
+      <td>58.0</td>
+      <td>Market St at 10th St</td>
+      <td>37.776619</td>
+      <td>-122.417385</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
+      <td>-122.394203</td>
+      <td>2423.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="5.-Transformation-des-donn&#233;es">5. Transformation des donn&#233;es<a class="anchor-link" href="#5.-Transformation-des-donn&#233;es">&#182;</a></h2><p>In addition to "smart" transformations, Azure ML Data Prep also supports many common data science transforms familiar to other industry-standard data science libraries. Here, we'll explore the ability to <code>summarize</code> and <code>replace</code>. We'll also get to use <code>join</code> when we handle assertions.</p>
+<h4 id="Agr&#233;gation">Agr&#233;gation<a class="anchor-link" href="#Agr&#233;gation">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Azure Data Prep also makes it easy to append this output of <code>summarize</code> to the original table based on the grouping variable.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_appended</span> <span class="o">=</span> <span class="n">sgb_derived</span>\
+    <span class="o">.</span><span class="n">summarize</span><span class="p">(</span>
+        <span class="n">summary_columns</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">dprep</span>\
+                <span class="o">.</span><span class="n">SummaryColumnsValue</span><span class="p">(</span>
+                    <span class="n">column_id</span><span class="o">=</span><span class="s1">&#39;duration_sec&#39;</span><span class="p">,</span> 
+                    <span class="n">summary_column_name</span><span class="o">=</span><span class="s1">&#39;duration_sec_mean&#39;</span><span class="p">,</span> 
+                    <span class="n">summary_function</span><span class="o">=</span><span class="n">dprep</span><span class="o">.</span><span class="n">SummaryFunction</span><span class="o">.</span><span class="n">MEAN</span>
+                <span class="p">)</span>
+        <span class="p">],</span>
+        <span class="n">group_by_columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span>
+        <span class="n">join_back</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+<span class="n">sgb_appended</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[11]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>duration_sec</th>
+      <th>start_time</th>
+      <th>month</th>
+      <th>day</th>
+      <th>wday</th>
+      <th>hour</th>
+      <th>date</th>
+      <th>end_time</th>
+      <th>start_station_id</th>
+      <th>start_station_name</th>
+      <th>...</th>
+      <th>start_station_longitude</th>
+      <th>end_station_id</th>
+      <th>end_station_name</th>
+      <th>end_station_latitude</th>
+      <th>end_station_longitude</th>
+      <th>bike_id</th>
+      <th>user_type</th>
+      <th>member_birth_year</th>
+      <th>member_gender</th>
+      <th>duration_sec_mean</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>16</td>
+      <td>2017-12-31</td>
+      <td>2018-01-01 15:12:50.245000</td>
+      <td>74.0</td>
+      <td>Laguna St at Hayes St</td>
+      <td>...</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
+      <td>San Francisco Public Library (Grove St at Hyde...</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
+      <td>Customer</td>
+      <td>1987.0</td>
+      <td>Male</td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1397.0</td>
+      <td>2017-12-31 23:55:09.686000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>23</td>
+      <td>2017-12-31</td>
+      <td>2018-01-01 00:18:26.721000</td>
+      <td>78.0</td>
+      <td>Folsom St at 9th St</td>
+      <td>...</td>
+      <td>-122.411647</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
+      <td>-122.394203</td>
+      <td>1667.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2511.0</td>
+      <td>2017-12-31 22:58:26.524000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>22</td>
+      <td>2017-12-31</td>
+      <td>2017-12-31 23:40:17.987000</td>
+      <td>30.0</td>
+      <td>San Francisco Caltrain (Townsend St at 4th St)</td>
+      <td>...</td>
+      <td>-122.395282</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>3329.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>901.0</td>
+      <td>2017-12-31 22:17:39.910000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>22</td>
+      <td>2017-12-31</td>
+      <td>2017-12-31 22:32:41.630000</td>
+      <td>66.0</td>
+      <td>3rd St at Townsend St</td>
+      <td>...</td>
+      <td>-122.392741</td>
+      <td>23.0</td>
+      <td>The Embarcadero at Steuart St</td>
+      <td>37.791464</td>
+      <td>-122.391034</td>
+      <td>3569.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>853.0</td>
+      <td>2017-12-31 21:22:37.643000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>21</td>
+      <td>2017-12-31</td>
+      <td>2017-12-31 21:36:51.179000</td>
+      <td>14.0</td>
+      <td>Clay St at Battery St</td>
+      <td>...</td>
+      <td>-122.399970</td>
+      <td>8.0</td>
+      <td>The Embarcadero at Vallejo St</td>
+      <td>37.799953</td>
+      <td>-122.398525</td>
+      <td>101.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>189.0</td>
+      <td>2017-12-31 20:48:37.492000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>20</td>
+      <td>2017-12-31</td>
+      <td>2017-12-31 20:51:46.658000</td>
+      <td>37.0</td>
+      <td>2nd St at Folsom St</td>
+      <td>...</td>
+      <td>-122.395936</td>
+      <td>48.0</td>
+      <td>2nd St at S Park St</td>
+      <td>37.782411</td>
+      <td>-122.392706</td>
+      <td>1056.0</td>
+      <td>Customer</td>
+      <td>1988.0</td>
+      <td>Male</td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1208.0</td>
+      <td>2017-12-31 19:56:43.394000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>19</td>
+      <td>2017-12-31</td>
+      <td>2017-12-31 20:16:51.551000</td>
+      <td>13.0</td>
+      <td>Commercial St at Montgomery St</td>
+      <td>...</td>
+      <td>-122.402923</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>2736.0</td>
+      <td>Subscriber</td>
+      <td>1994.0</td>
+      <td>Male</td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>426.0</td>
+      <td>2017-12-31 17:11:48.331000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>17</td>
+      <td>2017-12-31</td>
+      <td>2017-12-31 17:18:55.001000</td>
+      <td>123.0</td>
+      <td>Folsom St at 19th St</td>
+      <td>...</td>
+      <td>-122.414817</td>
+      <td>134.0</td>
+      <td>Valencia St at 24th St</td>
+      <td>37.752428</td>
+      <td>-122.420628</td>
+      <td>2256.0</td>
+      <td>Subscriber</td>
+      <td>1991.0</td>
+      <td>Male</td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>962.0</td>
+      <td>2017-12-31 16:57:20.930000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>16</td>
+      <td>2017-12-31</td>
+      <td>2017-12-31 17:13:23.560000</td>
+      <td>176.0</td>
+      <td>MacArthur BART Station</td>
+      <td>...</td>
+      <td>-122.266315</td>
+      <td>231.0</td>
+      <td>14th St at Filbert St</td>
+      <td>37.808750</td>
+      <td>-122.283282</td>
+      <td>305.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td></td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>204.0</td>
+      <td>2017-12-31 15:26:41.663000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>15</td>
+      <td>2017-12-31</td>
+      <td>2017-12-31 15:30:06.146000</td>
+      <td>86.0</td>
+      <td>Market St at Dolores St</td>
+      <td>...</td>
+      <td>-122.426826</td>
+      <td>95.0</td>
+      <td>Sanchez St at 15th St</td>
+      <td>37.766219</td>
+      <td>-122.431060</td>
+      <td>2183.0</td>
+      <td>Subscriber</td>
+      <td>1992.0</td>
+      <td>Male</td>
+      <td>5309.111111</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>819.0</td>
+      <td>2017-12-31 15:06:20.173000</td>
+      <td>12</td>
+      <td>31</td>
+      <td>Sunday</td>
+      <td>15</td>
+      <td>2017-12-31</td>
+      <td>2017-12-31 15:19:59.864000</td>
+      <td>81.0</td>
+      <td>Berry St at 4th St</td>
+      <td>...</td>
+      <td>-122.393170</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
+      <td>-122.394203</td>
+      <td>464.0</td>
+      <td>Customer</td>
+      <td>1994.0</td>
+      <td>Female</td>
+      <td>5309.111111</td>
+    </tr>
+  </tbody>
+</table>
+<p>11 rows × 21 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Remplacement-des-valeurs-manquantes">Remplacement des valeurs manquantes<a class="anchor-link" href="#Remplacement-des-valeurs-manquantes">&#182;</a></h4><p>Recall that our <code>member_gender</code> column had empty strings that stood in place of <code>None</code>. Let's use our <code>replace</code> function to properly recode them as <code>None</code>s.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sgb_replaced</span> <span class="o">=</span> <span class="n">sampled_gobike</span><span class="o">.</span><span class="n">replace_na</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;member_gender&#39;</span><span class="p">])</span>
+<span class="n">sgb_replaced</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[12]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>duration_sec</th>
+      <th>start_time</th>
+      <th>end_time</th>
+      <th>start_station_id</th>
+      <th>start_station_name</th>
+      <th>start_station_latitude</th>
+      <th>start_station_longitude</th>
+      <th>end_station_id</th>
+      <th>end_station_name</th>
+      <th>end_station_latitude</th>
+      <th>end_station_longitude</th>
+      <th>bike_id</th>
+      <th>user_type</th>
+      <th>member_birth_year</th>
+      <th>member_gender</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654</td>
+      <td>2018-01-01 15:12:50.245</td>
+      <td>74.0</td>
+      <td>Laguna St at Hayes St</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
+      <td>San Francisco Public Library (Grove St at Hyde...</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
+      <td>Customer</td>
+      <td>1987.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1397.0</td>
+      <td>2017-12-31 23:55:09.686</td>
+      <td>2018-01-01 00:18:26.721</td>
+      <td>78.0</td>
+      <td>Folsom St at 9th St</td>
+      <td>37.773717</td>
+      <td>-122.411647</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
+      <td>-122.394203</td>
+      <td>1667.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2511.0</td>
+      <td>2017-12-31 22:58:26.524</td>
+      <td>2017-12-31 23:40:17.987</td>
+      <td>30.0</td>
+      <td>San Francisco Caltrain (Townsend St at 4th St)</td>
+      <td>37.776598</td>
+      <td>-122.395282</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>3329.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>901.0</td>
+      <td>2017-12-31 22:17:39.910</td>
+      <td>2017-12-31 22:32:41.630</td>
+      <td>66.0</td>
+      <td>3rd St at Townsend St</td>
+      <td>37.778742</td>
+      <td>-122.392741</td>
+      <td>23.0</td>
+      <td>The Embarcadero at Steuart St</td>
+      <td>37.791464</td>
+      <td>-122.391034</td>
+      <td>3569.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>853.0</td>
+      <td>2017-12-31 21:22:37.643</td>
+      <td>2017-12-31 21:36:51.179</td>
+      <td>14.0</td>
+      <td>Clay St at Battery St</td>
+      <td>37.795001</td>
+      <td>-122.399970</td>
+      <td>8.0</td>
+      <td>The Embarcadero at Vallejo St</td>
+      <td>37.799953</td>
+      <td>-122.398525</td>
+      <td>101.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>189.0</td>
+      <td>2017-12-31 20:48:37.492</td>
+      <td>2017-12-31 20:51:46.658</td>
+      <td>37.0</td>
+      <td>2nd St at Folsom St</td>
+      <td>37.785000</td>
+      <td>-122.395936</td>
+      <td>48.0</td>
+      <td>2nd St at S Park St</td>
+      <td>37.782411</td>
+      <td>-122.392706</td>
+      <td>1056.0</td>
+      <td>Customer</td>
+      <td>1988.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1208.0</td>
+      <td>2017-12-31 19:56:43.394</td>
+      <td>2017-12-31 20:16:51.551</td>
+      <td>13.0</td>
+      <td>Commercial St at Montgomery St</td>
+      <td>37.794231</td>
+      <td>-122.402923</td>
+      <td>6.0</td>
+      <td>The Embarcadero at Sansome St</td>
+      <td>37.804770</td>
+      <td>-122.403234</td>
+      <td>2736.0</td>
+      <td>Subscriber</td>
+      <td>1994.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>426.0</td>
+      <td>2017-12-31 17:11:48.331</td>
+      <td>2017-12-31 17:18:55.001</td>
+      <td>123.0</td>
+      <td>Folsom St at 19th St</td>
+      <td>37.760594</td>
+      <td>-122.414817</td>
+      <td>134.0</td>
+      <td>Valencia St at 24th St</td>
+      <td>37.752428</td>
+      <td>-122.420628</td>
+      <td>2256.0</td>
+      <td>Subscriber</td>
+      <td>1991.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>962.0</td>
+      <td>2017-12-31 16:57:20.930</td>
+      <td>2017-12-31 17:13:23.560</td>
+      <td>176.0</td>
+      <td>MacArthur BART Station</td>
+      <td>37.828410</td>
+      <td>-122.266315</td>
+      <td>231.0</td>
+      <td>14th St at Filbert St</td>
+      <td>37.808750</td>
+      <td>-122.283282</td>
+      <td>305.0</td>
+      <td>Customer</td>
+      <td>NaN</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>204.0</td>
+      <td>2017-12-31 15:26:41.663</td>
+      <td>2017-12-31 15:30:06.146</td>
+      <td>86.0</td>
+      <td>Market St at Dolores St</td>
+      <td>37.769305</td>
+      <td>-122.426826</td>
+      <td>95.0</td>
+      <td>Sanchez St at 15th St</td>
+      <td>37.766219</td>
+      <td>-122.431060</td>
+      <td>2183.0</td>
+      <td>Subscriber</td>
+      <td>1992.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>819.0</td>
+      <td>2017-12-31 15:06:20.173</td>
+      <td>2017-12-31 15:19:59.864</td>
+      <td>81.0</td>
+      <td>Berry St at 4th St</td>
+      <td>37.775880</td>
+      <td>-122.393170</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
+      <td>-122.394203</td>
+      <td>464.0</td>
+      <td>Customer</td>
+      <td>1994.0</td>
+      <td>Female</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Assert-on-invalid-data">Assert on invalid data<a class="anchor-link" href="#Assert-on-invalid-data">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gb_asserted</span> <span class="o">=</span> <span class="n">gobike</span>\
+    <span class="o">.</span><span class="n">assert_value</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;member_birth_year&#39;</span><span class="p">,</span> 
+        <span class="n">expression</span><span class="o">=</span><span class="n">dprep</span><span class="o">.</span><span class="n">f_or</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">is_null</span><span class="p">(),</span> <span class="n">dprep</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">1920</span><span class="p">),</span>
+        <span class="n">error_code</span><span class="o">=</span><span class="s1">&#39;InvalidDate&#39;</span>
+    <span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12132,7 +14152,535 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The above code specifies that we will run our training script on <code>2</code> nodes, with two workers and one parameter server. In order to execute a native distributed TensorFlow run, you must provide the argument <code>distributed_backend='ps'</code>. Using this estimator with these settings, TensorFlow and its dependencies will be installed for you. However, if your script also uses other packages, make sure to install them via the <code>TensorFlow</code> constructor's <code>pip_packages</code> or <code>conda_packages</code> parameters.</p>
+<p>Now, we can filter to see what caused the errors above:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gb_errors</span> <span class="o">=</span> <span class="n">gb_asserted</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s1">&#39;member_birth_year&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">is_error</span><span class="p">())</span>
+<span class="n">gb_errors</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[14]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>duration_sec</th>
+      <th>start_time</th>
+      <th>end_time</th>
+      <th>start_station_id</th>
+      <th>start_station_name</th>
+      <th>start_station_latitude</th>
+      <th>start_station_longitude</th>
+      <th>end_station_id</th>
+      <th>end_station_name</th>
+      <th>end_station_latitude</th>
+      <th>end_station_longitude</th>
+      <th>bike_id</th>
+      <th>user_type</th>
+      <th>member_birth_year</th>
+      <th>member_gender</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654</td>
+      <td>2018-01-01 15:12:50.245</td>
+      <td>74.0</td>
+      <td>Laguna St at Hayes St</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
+      <td>San Francisco Public Library (Grove St at Hyde...</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
+      <td>Customer</td>
+      <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>78800.0</td>
+      <td>2017-12-31 15:56:34.842</td>
+      <td>2018-01-01 13:49:55.617</td>
+      <td>284.0</td>
+      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>96.0</td>
+      <td>Dolores St at 15th St</td>
+      <td>37.766210</td>
+      <td>-122.426614</td>
+      <td>88.0</td>
+      <td>Customer</td>
+      <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>43603.0</td>
+      <td>2017-12-31 14:23:14.001</td>
+      <td>2018-01-01 02:29:57.571</td>
+      <td>239.0</td>
+      <td>Bancroft Way at Telegraph Ave</td>
+      <td>37.868813</td>
+      <td>-122.258764</td>
+      <td>247.0</td>
+      <td>Fulton St at Bancroft Way</td>
+      <td>37.867789</td>
+      <td>-122.265896</td>
+      <td>3167.0</td>
+      <td>Subscriber</td>
+      <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4507.0</td>
+      <td>2017-12-31 23:49:28.422</td>
+      <td>2018-01-01 01:04:35.619</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>3539.0</td>
+      <td>Customer</td>
+      <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2183.0</td>
+      <td>2017-12-31 23:52:55.581</td>
+      <td>2018-01-01 00:29:18.743</td>
+      <td>67.0</td>
+      <td>San Francisco Caltrain Station 2  (Townsend St...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>2311.0</td>
+      <td>Subscriber</td>
+      <td>azureml.dataprep.native.DataPrepError("'Invali...</td>
+      <td>Male</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Jointure">Jointure<a class="anchor-link" href="#Jointure">&#182;</a></h4><p>But what were the original values? Let's use <code>join</code> to figure out what the values were that caused our assert to throw an error.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gb_errors</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">left_dataflow</span><span class="o">=</span><span class="n">gb_errors</span><span class="p">,</span>
+    <span class="n">right_dataflow</span><span class="o">=</span><span class="n">gobike</span><span class="p">,</span>
+    <span class="n">join_key_pairs</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;duration_sec&#39;</span><span class="p">,</span> <span class="s1">&#39;duration_sec&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;start_station_id&#39;</span><span class="p">,</span> <span class="s1">&#39;start_station_id&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;bike_id&#39;</span><span class="p">,</span> <span class="s1">&#39;bike_id&#39;</span><span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[15]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>l_duration_sec</th>
+      <th>l_start_time</th>
+      <th>l_end_time</th>
+      <th>l_start_station_id</th>
+      <th>l_start_station_name</th>
+      <th>l_start_station_latitude</th>
+      <th>l_start_station_longitude</th>
+      <th>l_end_station_id</th>
+      <th>l_end_station_name</th>
+      <th>l_end_station_latitude</th>
+      <th>...</th>
+      <th>r_start_station_latitude</th>
+      <th>r_start_station_longitude</th>
+      <th>r_end_station_id</th>
+      <th>r_end_station_name</th>
+      <th>r_end_station_latitude</th>
+      <th>r_end_station_longitude</th>
+      <th>r_bike_id</th>
+      <th>r_user_type</th>
+      <th>r_member_birth_year</th>
+      <th>r_member_gender</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>80110.0</td>
+      <td>2017-12-31 16:57:39.654</td>
+      <td>2018-01-01 15:12:50.245</td>
+      <td>74.0</td>
+      <td>Laguna St at Hayes St</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
+      <td>San Francisco Public Library (Grove St at Hyde...</td>
+      <td>37.778768</td>
+      <td>...</td>
+      <td>37.776435</td>
+      <td>-122.426244</td>
+      <td>43.0</td>
+      <td>San Francisco Public Library (Grove St at Hyde...</td>
+      <td>37.778768</td>
+      <td>-122.415929</td>
+      <td>96.0</td>
+      <td>Customer</td>
+      <td>1987.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>78800.0</td>
+      <td>2017-12-31 15:56:34.842</td>
+      <td>2018-01-01 13:49:55.617</td>
+      <td>284.0</td>
+      <td>Yerba Buena Center for the Arts (Howard St at ...</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>96.0</td>
+      <td>Dolores St at 15th St</td>
+      <td>37.766210</td>
+      <td>...</td>
+      <td>37.784872</td>
+      <td>-122.400876</td>
+      <td>96.0</td>
+      <td>Dolores St at 15th St</td>
+      <td>37.766210</td>
+      <td>-122.426614</td>
+      <td>88.0</td>
+      <td>Customer</td>
+      <td>1965.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>43603.0</td>
+      <td>2017-12-31 14:23:14.001</td>
+      <td>2018-01-01 02:29:57.571</td>
+      <td>239.0</td>
+      <td>Bancroft Way at Telegraph Ave</td>
+      <td>37.868813</td>
+      <td>-122.258764</td>
+      <td>247.0</td>
+      <td>Fulton St at Bancroft Way</td>
+      <td>37.867789</td>
+      <td>...</td>
+      <td>37.868813</td>
+      <td>-122.258764</td>
+      <td>247.0</td>
+      <td>Fulton St at Bancroft Way</td>
+      <td>37.867789</td>
+      <td>-122.265896</td>
+      <td>3167.0</td>
+      <td>Subscriber</td>
+      <td>1997.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4507.0</td>
+      <td>2017-12-31 23:49:28.422</td>
+      <td>2018-01-01 01:04:35.619</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>...</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>259.0</td>
+      <td>Addison St at Fourth St</td>
+      <td>37.866249</td>
+      <td>-122.299371</td>
+      <td>3539.0</td>
+      <td>Customer</td>
+      <td>1991.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2183.0</td>
+      <td>2017-12-31 23:52:55.581</td>
+      <td>2018-01-01 00:29:18.743</td>
+      <td>67.0</td>
+      <td>San Francisco Caltrain Station 2  (Townsend St...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>2311.0</td>
+      <td>Subscriber</td>
+      <td>1990.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2170.0</td>
+      <td>2017-12-31 23:52:55.937</td>
+      <td>2018-01-01 00:29:06.924</td>
+      <td>67.0</td>
+      <td>San Francisco Caltrain Station 2  (Townsend St...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>...</td>
+      <td>37.776639</td>
+      <td>-122.395526</td>
+      <td>24.0</td>
+      <td>Spear St at Folsom St</td>
+      <td>37.789677</td>
+      <td>-122.390428</td>
+      <td>3717.0</td>
+      <td>Subscriber</td>
+      <td>1990.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1544.0</td>
+      <td>2017-12-31 23:53:38.943</td>
+      <td>2018-01-01 00:19:23.047</td>
+      <td>14.0</td>
+      <td>Clay St at Battery St</td>
+      <td>37.795001</td>
+      <td>-122.399970</td>
+      <td>27.0</td>
+      <td>Beale St at Harrison St</td>
+      <td>37.788059</td>
+      <td>...</td>
+      <td>37.795001</td>
+      <td>-122.399970</td>
+      <td>27.0</td>
+      <td>Beale St at Harrison St</td>
+      <td>37.788059</td>
+      <td>-122.391865</td>
+      <td>558.0</td>
+      <td>Subscriber</td>
+      <td>1980.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>1474.0</td>
+      <td>2017-12-31 23:54:40.146</td>
+      <td>2018-01-01 00:19:14.351</td>
+      <td>14.0</td>
+      <td>Clay St at Battery St</td>
+      <td>37.795001</td>
+      <td>-122.399970</td>
+      <td>27.0</td>
+      <td>Beale St at Harrison St</td>
+      <td>37.788059</td>
+      <td>...</td>
+      <td>37.795001</td>
+      <td>-122.399970</td>
+      <td>27.0</td>
+      <td>Beale St at Harrison St</td>
+      <td>37.788059</td>
+      <td>-122.391865</td>
+      <td>3646.0</td>
+      <td>Subscriber</td>
+      <td>1979.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>1532.0</td>
+      <td>2017-12-31 23:52:49.497</td>
+      <td>2018-01-01 00:18:21.953</td>
+      <td>78.0</td>
+      <td>Folsom St at 9th St</td>
+      <td>37.773717</td>
+      <td>-122.411647</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
+      <td>...</td>
+      <td>37.773717</td>
+      <td>-122.411647</td>
+      <td>15.0</td>
+      <td>San Francisco Ferry Building (Harry Bridges Pl...</td>
+      <td>37.795392</td>
+      <td>-122.394203</td>
+      <td>3114.0</td>
+      <td>Subscriber</td>
+      <td>1988.0</td>
+      <td>Other</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>1216.0</td>
+      <td>2017-12-31 23:46:33.993</td>
+      <td>2018-01-01 00:06:50.058</td>
+      <td>4.0</td>
+      <td>Cyril Magnin St at Ellis St</td>
+      <td>37.785881</td>
+      <td>-122.408915</td>
+      <td>123.0</td>
+      <td>Folsom St at 19th St</td>
+      <td>37.760594</td>
+      <td>...</td>
+      <td>37.785881</td>
+      <td>-122.408915</td>
+      <td>123.0</td>
+      <td>Folsom St at 19th St</td>
+      <td>37.760594</td>
+      <td>-122.414817</td>
+      <td>1473.0</td>
+      <td>Subscriber</td>
+      <td>1971.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>386.0</td>
+      <td>2017-12-31 23:59:01.261</td>
+      <td>2018-01-01 00:05:27.809</td>
+      <td>317.0</td>
+      <td>San Salvador St at 9th St</td>
+      <td>37.333955</td>
+      <td>-121.877349</td>
+      <td>296.0</td>
+      <td>5th St at Virginia St</td>
+      <td>37.325998</td>
+      <td>...</td>
+      <td>37.333955</td>
+      <td>-121.877349</td>
+      <td>296.0</td>
+      <td>5th St at Virginia St</td>
+      <td>37.325998</td>
+      <td>-121.877120</td>
+      <td>1603.0</td>
+      <td>Subscriber</td>
+      <td>1992.0</td>
+      <td>Male</td>
+    </tr>
+  </tbody>
+</table>
+<p>11 rows × 30 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If we look at <code>r_member_birth_year</code>, we see that these people were listed as being born in 1886. That's impossible! Now that we've identified outliers and anomalies, we can appropriately clean our data however we like.</p>
 
 </div>
 </div>
@@ -12141,18 +14689,22 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.4-Submit-job">3.4 Submit job<a class="anchor-link" href="#3.4-Submit-job">&#182;</a></h3><p>Run your experiment by submitting your estimator object. Note that this call is asynchronous.</p>
+<h2 id="6.-Exportation-fichier-dprep">6. Exportation fichier dprep<a class="anchor-link" href="#6.-Exportation-fichier-dprep">&#182;</a></h2><p>One of the beautiful features of Azure ML Data Prep is that you only need to write your code once and choose whether to scale up or out; it takes care of figuring out how. To do so, you can export the <code>.dprep</code> file you've written tested on a smaller dataset, then run it with your larger dataset. Here, we show how you can export your new package. For a more detailed example on how to execute it on Spark, check out our <a href="https://github.com/Microsoft/PendletonDocs/blob/master/Scenarios/NYTaxiCab/01.new_york_taxi.ipynb">New York Taxicab scenario</a>.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">run</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gobike</span> <span class="o">=</span> <span class="n">gobike</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;gobike&quot;</span><span class="p">)</span>
+<span class="n">package_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mkdtemp</span><span class="p">(),</span> <span class="s2">&quot;C:\gobike.dprep&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saving package to: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package_path</span><span class="p">))</span>
+<span class="n">package</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">Package</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="n">gobike</span><span class="p">)</span>
+<span class="n">package</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">package_path</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12169,63 +14721,28 @@ Resource group: mlserviceresourcegroup
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Run(Experiment: tf-distr-ps,
-Id: tf-distr-ps_1551699379_3e846b68,
-Type: azureml.scriptrun,
-Status: Starting)
+<pre>Saving package to: C:\gobike.dprep
 </pre>
 </div>
 </div>
 
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.5-Monitor-your-run">3.5 Monitor your run<a class="anchor-link" href="#3.5-Monitor-your-run">&#182;</a></h3><p>You can monitor the progress of the run with a Jupyter widget. Like the run submission, the widget is asynchronous and provides live updates every 10-15 seconds until the job completes.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.widgets</span> <span class="k">import</span> <span class="n">RunDetails</span>
-
-<span class="n">RunDetails</span><span class="p">(</span><span class="n">run</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
 <div class="output_area">
 
-<div class="prompt"></div>
+<div class="prompt output_prompt">Out[16]:</div>
 
 
 
 
-
- 
- 
-<div id="d5862377-a157-4229-8080-b7c4ba5cd67d"></div>
-<div class="output_subarea output_widget_view ">
-<script type="text/javascript">
-var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
-</script>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "a6bd35794e3b49b68bd413be0403c049", "version_major": 2, "version_minor": 0}
-</script>
+<div class="output_text output_subarea output_execute_result">
+<pre>Package
+  name: None
+  path: C:\gobike.dprep
+  dataflows: [
+    Dataflow {
+      name: gobike
+      steps: 4
+    },
+  ]</pre>
 </div>
 
 </div>
@@ -12238,17 +14755,18 @@ var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Alternatively, you can block until the script has completed training before running more code.</p>
+<p>On charge le package</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># run.wait_for_completion(show_output=True) # this provides a verbose log</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">package</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">Package</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;C:\gobike.dprep&quot;</span><span class="p">)</span>
+<span class="n">dataflow_list</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">dataflows</span>
 </pre></div>
 
 </div>
@@ -12256,11 +14774,101 @@ var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
 </div>
 
 </div>
-    </div>
-  </div>
-</body>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p>Documentation
+<a href="https://docs.microsoft.com/fr-fr/python/api/overview/azure/dataprep/intro?view=azure-dataprep-py">https://docs.microsoft.com/fr-fr/python/api/overview/azure/dataprep/intro?view=azure-dataprep-py</a></p>
+</blockquote>
 
- 
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Want-more-information?">Want more information?<a class="anchor-link" href="#Want-more-information?">&#182;</a></h2><p>Congratulations on finishing your introduction to the Azure ML Data Prep SDK! If you'd like more detailed tutorials on how to construct machine learning datasets or dive deeper into all of its functionality, you can find more information in our detailed notebooks <a href="https://github.com/Microsoft/PendletonDocs">here</a>. There, we cover topics including how to:</p>
+<ul>
+<li>Cache your Dataflow to speed up your iterations</li>
+<li>Add your custom Python transforms</li>
+<li>Impute missing values</li>
+<li>Sample your data</li>
+<li>Reference and link between Dataflows</li>
+<li>Apply your Dataflow to a new, larger data source</li>
+</ul>
+
+</div>
+</div>
+</div></section></section>
+</div>
+</div>
+
+<script>
+
+require(
+    {
+      // it makes sense to wait a little bit when you are loading
+      // reveal from a cdn in a slow connection environment
+      waitSeconds: 15
+    },
+    [
+      "reveal.js/lib/js/head.min.js",
+      "reveal.js/js/reveal.js"
+    ],
+
+    function(head, Reveal){
+
+        // Full list of configuration options available here: https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+
+            transition: "slide",
+
+            // Optional libraries used to extend on reveal.js
+            dependencies: [
+                { src: "reveal.js/lib/js/classList.js",
+                  condition: function() { return !document.body.classList; } },
+                { src: "reveal.js/plugin/notes/notes.js",
+                  async: true,
+                  condition: function() { return !!document.body.classList; } }
+            ]
+        });
+
+        var update = function(event){
+          if(MathJax.Hub.getAllJax(Reveal.getCurrentSlide())){
+            MathJax.Hub.Rerender(Reveal.getCurrentSlide());
+          }
+        };
+
+        Reveal.addEventListener('slidechanged', update);
+
+        function setScrollingSlide() {
+            var scroll = false
+            if (scroll === true) {
+              var h = $('.reveal').height() * 0.95;
+              $('section.present').find('section')
+                .filter(function() {
+                  return $(this).height() > h;
+                })
+                .css('height', 'calc(95vh)')
+                .css('overflow-y', 'scroll')
+                .css('margin-top', '20px');
+            }
+        }
+
+        // check and set the scrolling slide every time the slide change
+        Reveal.addEventListener('slidechanged', setScrollingSlide);
+
+    }
+
+);
+</script>
+
+</body>
 
 
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>10 Distributed TensorFlow</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>12 ONNX</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11775,7 +11775,8 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="10.-Distributed-TensorFlow-with-parameter-server">10. Distributed TensorFlow with parameter server<a class="anchor-link" href="#10.-Distributed-TensorFlow-with-parameter-server">&#182;</a></h1><p>In this tutorial, you will train a TensorFlow model on the <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> dataset using native <a href="https://www.tensorflow.org/deploy/distributed">distributed TensorFlow</a>.</p>
+<p>Copyright (c) Microsoft Corporation. All rights reserved.<br>
+Licensed under the MIT License.</p>
 
 </div>
 </div>
@@ -11784,15 +11785,46 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="1.-Prerequisites">1. Prerequisites<a class="anchor-link" href="#1.-Prerequisites">&#182;</a></h2><ul>
-<li>Understand the <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture">architecture and terms</a> introduced by Azure Machine Learning (AML)</li>
-<li>Go through the <a href="https://github.com/Azure/MachineLearningNotebooks/blob/master/00.configuration.ipynb">00.configuration.ipynb</a> notebook to:<ul>
-<li>install the AML SDK</li>
-<li>create a workspace and its configuration file (<code>config.json</code>)</li>
+<h1 id="Handwritten-Digit-Classification-(MNIST)-using-ONNX-Runtime-on-Azure-ML">Handwritten Digit Classification (MNIST) using ONNX Runtime on Azure ML<a class="anchor-link" href="#Handwritten-Digit-Classification-(MNIST)-using-ONNX-Runtime-on-Azure-ML">&#182;</a></h1><p>This example shows how to deploy an image classification neural network using the Modified National Institute of Standards and Technology (<a href="http://yann.lecun.com/exdb/mnist/">MNIST</a>) dataset and Open Neural Network eXchange format (<a href="http://aka.ms/onnxdocarticle">ONNX</a>) on the Azure Machine Learning platform. MNIST is a popular dataset consisting of 70,000 grayscale images. Each image is a handwritten digit of 28x28 pixels, representing number from 0 to 9. This tutorial will show you how to deploy a MNIST model from the <a href="https://github.com/onnx/models">ONNX model zoo</a>, use it to make predictions using ONNX Runtime Inference, and deploy it as a web service in Azure.</p>
+<p>Throughout this tutorial, we will be referring to ONNX, a neural network exchange format used to represent deep learning models. With ONNX, AI developers can more easily move models between state-of-the-art tools (CNTK, PyTorch, Caffe, MXNet, TensorFlow) and choose the combination that is best for them. ONNX is developed and supported by a community of partners including Microsoft AI, Facebook, and Amazon. For more information, explore the <a href="http://onnx.ai">ONNX website</a> and <a href="https://github.com/onnx">open source files</a>.</p>
+<p><a href="https://aka.ms/onnxruntime-python">ONNX Runtime</a> is the runtime engine that enables evaluation of trained machine learning (Traditional ML and Deep Learning) models with high performance and low resource utilization.</p>
+<h4 id="Tutorial-Objectives:">Tutorial Objectives:<a class="anchor-link" href="#Tutorial-Objectives:">&#182;</a></h4><ul>
+<li>Describe the MNIST dataset and pretrained Convolutional Neural Net ONNX model, stored in the ONNX model zoo.</li>
+<li>Deploy and run the pretrained MNIST ONNX model on an Azure Machine Learning instance</li>
+<li>Predict labels for test set data points in the cloud using ONNX Runtime and Azure ML</li>
 </ul>
-</li>
-<li>Review the <a href="https://aka.ms/aml-notebook-hyperdrive">tutorial</a> on single-node TensorFlow training using the SDK</li>
-</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><a href="https://onnx.ai/">https://onnx.ai/</a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="https://docs.microsoft.com/en-us/azure/machine-learning/service/media/concept-onnx/onnx.png"></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Prerequisites">Prerequisites<a class="anchor-link" href="#Prerequisites">&#182;</a></h2><h3 id="1.-Install-Azure-ML-SDK-and-create-a-new-workspace">1. Install Azure ML SDK and create a new workspace<a class="anchor-link" href="#1.-Install-Azure-ML-SDK-and-create-a-new-workspace">&#182;</a></h3><p>Please follow <a href="../../../configuration.ipynb">Azure ML configuration notebook</a> to set up your environment.</p>
+<h3 id="2.-Install-additional-packages-needed-for-this-tutorial-notebook">2. Install additional packages needed for this tutorial notebook<a class="anchor-link" href="#2.-Install-additional-packages-needed-for-this-tutorial-notebook">&#182;</a></h3><p>You need to install the popular plotting library <code>matplotlib</code>, the image manipulation library <code>opencv</code>, and the <code>onnx</code> library in the conda environment where Azure Maching Learning SDK is installed.</p>
+<div class="highlight"><pre><span></span><span class="o">(</span>myenv<span class="o">)</span> $ pip install matplotlib onnx opencv-python
+</pre></div>
+<p><strong>Debugging tip</strong>: Make sure that you run the "jupyter notebook" command to launch this notebook after activating your virtual environment. Choose the respective Python kernel for your new virtual environment using the <code>Kernel &gt; Change Kernel</code> menu above. If you have completed the steps correctly, the upper right corner of your screen should state <code>Python [conda env:myenv]</code> instead of <code>Python [default]</code>.</p>
+<h3 id="3.-Download-sample-data-and-pre-trained-ONNX-model-from-ONNX-Model-Zoo.">3. Download sample data and pre-trained ONNX model from ONNX Model Zoo.<a class="anchor-link" href="#3.-Download-sample-data-and-pre-trained-ONNX-model-from-ONNX-Model-Zoo.">&#182;</a></h3><p>In the following lines of code, we download <a href="https://github.com/onnx/models/tree/master/mnist">the trained ONNX MNIST model and corresponding test data</a> and place them in the same folder as this tutorial notebook. For more information about the MNIST dataset, please visit <a href="http://yann.lecun.com/exdb/mnist/">Yan LeCun's website</a>.</p>
 
 </div>
 </div>
@@ -11800,6 +11832,102 @@ div#notebook {
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># urllib is a built-in Python library to download files from URLs</span>
+
+<span class="c1"># Objective: retrieve the latest version of the ONNX MNIST model files from the</span>
+<span class="c1"># ONNX Model Zoo and save it in the same folder as this tutorial</span>
+
+<span class="kn">import</span> <span class="nn">urllib.request</span>
+
+<span class="n">onnx_model_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.cntk.ai/OnnxModels/mnist/opset_7/mnist.tar.gz&quot;</span>
+<span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">onnx_model_url</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;mnist.tar.gz&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[1]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#39;mnist.tar.gz&#39;, &lt;http.client.HTTPMessage at 0x1e154396f98&gt;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># the ! magic command tells our jupyter notebook kernel to run the following line of </span>
+<span class="c1"># code from the command line instead of the notebook kernel</span>
+
+<span class="c1"># We use tar and xvcf to unzip the files we just retrieved from the ONNX model zoo</span>
+
+<span class="o">!</span>tar xvzf mnist.tar.gz
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>mnist/
+mnist/model.onnx
+mnist/test_data_set_0/
+mnist/test_data_set_0/input_0.pb
+mnist/test_data_set_0/output_0.pb
+mnist/test_data_set_1/
+mnist/test_data_set_1/input_0.pb
+mnist/test_data_set_1/output_0.pb
+mnist/test_data_set_2/
+mnist/test_data_set_2/input_0.pb
+mnist/test_data_set_2/output_0.pb
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Deploy-a-VM-with-your-ONNX-model-in-the-Cloud">Deploy a VM with your ONNX model in the Cloud<a class="anchor-link" href="#Deploy-a-VM-with-your-ONNX-model-in-the-Cloud">&#182;</a></h2><h3 id="Load-Azure-ML-workspace">Load Azure ML workspace<a class="anchor-link" href="#Load-Azure-ML-workspace">&#182;</a></h3><p>We begin by instantiating a workspace object from the existing workspace created earlier in the configuration notebook.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check core SDK version number</span>
@@ -11831,68 +11959,15 @@ div#notebook {
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Diagnostics">Diagnostics<a class="anchor-link" href="#Diagnostics">&#182;</a></h2><p>Opt-in diagnostics for better experience, quality, and security of future releases.</p>
-
-</div>
-</div>
-</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.telemetry</span> <span class="k">import</span> <span class="n">set_diagnostics_collection</span>
-
-<span class="n">set_diagnostics_collection</span><span class="p">(</span><span class="n">send_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Turning diagnostics collection on. 
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Initialize-workspace">Initialize workspace<a class="anchor-link" href="#Initialize-workspace">&#182;</a></h2><p>Initialize a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#workspace">Workspace</a> object from the existing workspace you created in the Prerequisites step. <code>Workspace.from_config()</code> creates a workspace object from the details stored in <code>config.json</code>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.workspace</span> <span class="k">import</span> <span class="n">Workspace</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core</span> <span class="k">import</span> <span class="n">Workspace</span>
 
 <span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="o">.</span><span class="n">from_config</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Workspace name: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
-      <span class="s1">&#39;Azure region: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> 
-      <span class="s1">&#39;Resource group: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ws</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span><span class="p">,</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11910,9 +11985,9 @@ div#notebook {
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Found the config file in: C:\Users\seretkow\notebooks\Labs Azure ML service\aml_config\config.json
-Workspace name: MLServiceWorkspace
-Azure region: westeurope
-Resource group: mlserviceresourcegroup
+MLServiceWorkspace
+mlserviceresourcegroup
+westeurope
 </pre>
 </div>
 </div>
@@ -11925,79 +12000,7 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="2.-Create-a-remote-compute-target">2. Create a remote compute target<a class="anchor-link" href="#2.-Create-a-remote-compute-target">&#182;</a></h2><p>You will need to create a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#compute-target">compute target</a> to execute your training script on. In this tutorial, you create an <code>AmlCompute</code> cluster as your training compute resource. This code creates a cluster for you if it does not already exist in your workspace.</p>
-<p><strong>Creation of the cluster takes approximately 5 minutes.</strong> If the cluster is already in your workspace this code will skip the cluster creation process.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.compute</span> <span class="k">import</span> <span class="n">ComputeTarget</span><span class="p">,</span> <span class="n">AmlCompute</span>
-<span class="kn">from</span> <span class="nn">azureml.core.compute_target</span> <span class="k">import</span> <span class="n">ComputeTargetException</span>
-
-<span class="c1"># choose a name for your cluster</span>
-<span class="n">cluster_name</span> <span class="o">=</span> <span class="s2">&quot;gpucluster&quot;</span>
-
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">cluster_name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found existing compute target.&#39;</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">ComputeTargetException</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating a new compute target...&#39;</span><span class="p">)</span>
-    <span class="n">compute_config</span> <span class="o">=</span> <span class="n">AmlCompute</span><span class="o">.</span><span class="n">provisioning_configuration</span><span class="p">(</span><span class="n">vm_size</span><span class="o">=</span><span class="s1">&#39;STANDARD_NC6&#39;</span><span class="p">,</span> 
-                                                           <span class="n">max_nodes</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-
-    <span class="c1"># create the cluster</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">cluster_name</span><span class="p">,</span> <span class="n">compute_config</span><span class="p">)</span>
-
-    <span class="n">compute_target</span><span class="o">.</span><span class="n">wait_for_completion</span><span class="p">(</span><span class="n">show_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Use the &#39;status&#39; property to get a detailed status for the current cluster. </span>
-<span class="nb">print</span><span class="p">(</span><span class="n">compute_target</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">serialize</span><span class="p">())</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Found existing compute target.
-{&#39;allocationState&#39;: &#39;Steady&#39;, &#39;allocationStateTransitionTime&#39;: &#39;2019-02-22T14:28:25.671000+00:00&#39;, &#39;creationTime&#39;: &#39;2018-11-23T16:53:14.040220+00:00&#39;, &#39;currentNodeCount&#39;: 0, &#39;errors&#39;: None, &#39;modifiedTime&#39;: &#39;2018-11-23T16:53:56.988534+00:00&#39;, &#39;nodeStateCounts&#39;: {&#39;idleNodeCount&#39;: 0, &#39;leavingNodeCount&#39;: 0, &#39;preemptedNodeCount&#39;: 0, &#39;preparingNodeCount&#39;: 0, &#39;runningNodeCount&#39;: 0, &#39;unusableNodeCount&#39;: 0}, &#39;provisioningState&#39;: &#39;Succeeded&#39;, &#39;provisioningStateTransitionTime&#39;: None, &#39;scaleSettings&#39;: {&#39;minNodeCount&#39;: 0, &#39;maxNodeCount&#39;: 4, &#39;nodeIdleTimeBeforeScaleDown&#39;: &#39;&#39;}, &#39;targetNodeCount&#39;: None, &#39;vmPriority&#39;: &#39;Dedicated&#39;, &#39;vmSize&#39;: &#39;STANDARD_NC6&#39;}
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="3.-Train-model-on-the-remote-compute">3. Train model on the remote compute<a class="anchor-link" href="#3.-Train-model-on-the-remote-compute">&#182;</a></h2><p>Now that we have the cluster ready to go, let's run our distributed training job.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.1-Create-a-project-directory">3.1 Create a project directory<a class="anchor-link" href="#3.1-Create-a-project-directory">&#182;</a></h3><p>Create a directory that will contain all the necessary code from your local machine that you will need access to on the remote resource. This includes the training script, and any additional files your training script depends on3.1.</p>
-
+<h3 id="Registering-your-model-with-Azure-ML">Registering your model with Azure ML<a class="anchor-link" href="#Registering-your-model-with-Azure-ML">&#182;</a></h3>
 </div>
 </div>
 </div>
@@ -12006,10 +12009,9 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;mnist&quot;</span> <span class="c1"># replace this with the location of your model files</span>
 
-<span class="n">project_folder</span> <span class="o">=</span> <span class="s1">&#39;./tf-distr-ps&#39;</span>
-<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">project_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># leave as is if it&#39;s in the same folder as this notebook</span>
 </pre></div>
 
 </div>
@@ -12022,137 +12024,13 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Copy the training script `tf_mnist_replica.py` into this project directory.</span>
-<span class="c1"># https://github.com/Azure/MachineLearningNotebooks/tree/master/how-to-use-azureml/training-with-deep-learning/distributed-tensorflow-with-parameter-server</span>
-</pre></div>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.model</span> <span class="k">import</span> <span class="n">Model</span>
 
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">shutil</span>
-
-<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span> <span class="n">project_folder</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[8]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;./tf-distr-ps\\tf_mnist_replica.py&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.2-Create-an-experiment">3.2 Create an experiment<a class="anchor-link" href="#3.2-Create-an-experiment">&#182;</a></h3><p>Create an <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#experiment">Experiment</a> to track all the runs in your workspace for this distributed TensorFlow tutorial.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core</span> <span class="k">import</span> <span class="n">Experiment</span>
-
-<span class="n">experiment_name</span> <span class="o">=</span> <span class="s1">&#39;tf-distr-ps&#39;</span>
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">experiment_name</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.3-Create-a-TensorFlow-estimator">3.3 Create a TensorFlow estimator<a class="anchor-link" href="#3.3-Create-a-TensorFlow-estimator">&#182;</a></h3><p>The AML SDK's TensorFlow estimator enables you to easily submit TensorFlow training jobs for both single-node and distributed runs. For more information on the TensorFlow estimator, refer <a href="https://docs.microsoft.com/azure/machine-learning/service/how-to-train-tensorflow">here</a>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.train.dnn</span> <span class="k">import</span> <span class="n">TensorFlow</span>
-
-<span class="n">script_params</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;--num_gpus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s1">&#39;--train_steps&#39;</span><span class="p">:</span> <span class="mi">500</span>
-<span class="p">}</span>
-
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">TensorFlow</span><span class="p">(</span><span class="n">source_directory</span><span class="o">=</span><span class="n">project_folder</span><span class="p">,</span>
-                       <span class="n">compute_target</span><span class="o">=</span><span class="n">compute_target</span><span class="p">,</span>
-                       <span class="n">script_params</span><span class="o">=</span><span class="n">script_params</span><span class="p">,</span>
-                       <span class="n">entry_script</span><span class="o">=</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span>
-                       <span class="n">node_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">worker_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">parameter_server_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>   
-                       <span class="n">distributed_backend</span><span class="o">=</span><span class="s1">&#39;ps&#39;</span><span class="p">,</span>
-                       <span class="n">use_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The above code specifies that we will run our training script on <code>2</code> nodes, with two workers and one parameter server. In order to execute a native distributed TensorFlow run, you must provide the argument <code>distributed_backend='ps'</code>. Using this estimator with these settings, TensorFlow and its dependencies will be installed for you. However, if your script also uses other packages, make sure to install them via the <code>TensorFlow</code> constructor's <code>pip_packages</code> or <code>conda_packages</code> parameters.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.4-Submit-job">3.4 Submit job<a class="anchor-link" href="#3.4-Submit-job">&#182;</a></h3><p>Run your experiment by submitting your estimator object. Note that this call is asynchronous.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">run</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">workspace</span> <span class="o">=</span> <span class="n">ws</span><span class="p">,</span>
+                       <span class="n">model_path</span> <span class="o">=</span> <span class="n">model_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;model.onnx&quot;</span><span class="p">,</span>
+                       <span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;mnist_1&quot;</span><span class="p">,</span>
+                       <span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;onnx&quot;</span><span class="p">:</span> <span class="s2">&quot;demo&quot;</span><span class="p">},</span>
+                       <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;MNIST image classification CNN from ONNX Model Zoo&quot;</span><span class="p">,)</span>
 </pre></div>
 
 </div>
@@ -12169,10 +12047,7 @@ Resource group: mlserviceresourcegroup
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Run(Experiment: tf-distr-ps,
-Id: tf-distr-ps_1551699379_3e846b68,
-Type: azureml.scriptrun,
-Status: Starting)
+<pre>Registering model mnist_1
 </pre>
 </div>
 </div>
@@ -12185,7 +12060,223 @@ Status: Starting)
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.5-Monitor-your-run">3.5 Monitor your run<a class="anchor-link" href="#3.5-Monitor-your-run">&#182;</a></h3><p>You can monitor the progress of the run with a Jupyter widget. Like the run submission, the widget is asynchronous and provides live updates every 10-15 seconds until the job completes.</p>
+<h3 id="Optional:-Displaying-your-registered-models">Optional: Displaying your registered models<a class="anchor-link" href="#Optional:-Displaying-your-registered-models">&#182;</a></h3><p>This step is not required, so feel free to skip it.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">models</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">models</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Name:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Version:&quot;</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Description:&quot;</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">tags</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Name: AutoMLed3a72d2dbest 	Version: 1 	Description: Automated Machine Learning Model {}
+Name: AutoML92e490524best 	Version: 1 	Description: Automated Machine Learning Model {}
+Name: pi_estimate 	Version: 4 	Description: None {}
+Name: best_model 	Version: 22 	Description: None {}
+Name: AutoML88db15159best 	Version: 1 	Description: Automated Machine Learning Model {}
+Name: AdultCensus.mml 	Version: 13 	Description: Modèle Azure Databricks {}
+Name: AutoMLe4d19a00cbest 	Version: 1 	Description: Automated Machine Learning Model {}
+Name: AutoMLb5c32c3cebest 	Version: 1 	Description: Automated Machine Learning Model {}
+Name: AutoML379d733f6best 	Version: 1 	Description: Automated Machine Learning Model {}
+Name: AutoML7f9413c06best 	Version: 1 	Description: Automated Machine Learning Model {}
+Name: mnist_1 	Version: 2 	Description: MNIST image classification CNN from ONNX Model Zoo {&#39;onnx&#39;: &#39;demo&#39;}
+Name: AutoML91793920dbest 	Version: 1 	Description: Automated Machine Learning Model {}
+Name: sklearn_mnist 	Version: 5 	Description: None {}
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="ONNX-MNIST-Model-Methodology">ONNX MNIST Model Methodology<a class="anchor-link" href="#ONNX-MNIST-Model-Methodology">&#182;</a></h3><p>The image classification model we are using is pre-trained using Microsoft's deep learning cognitive toolkit, <a href="https://github.com/Microsoft/CNTK">CNTK</a>, from the <a href="http://github.com/onnx/models">ONNX model zoo</a>. The model zoo has many other models that can be deployed on cloud providers like AzureML without any additional training. To ensure that our cloud deployed model works, we use testing data from the famous MNIST data set, provided as part of the <a href="https://github.com/onnx/models/tree/master/mnist">trained MNIST model</a> in the ONNX model zoo.</p>
+<p><strong><em>Input: Handwritten Images from MNIST Dataset</em></strong></p>
+<p><strong><em>Task: Classify each MNIST image into an appropriate digit</em></strong></p>
+<p><strong><em>Output: Digit prediction for input image</em></strong></p>
+<p>Run the cell below to look at some of the sample images from the MNIST dataset that we used to train this ONNX model. Remember, once the application is deployed in Azure ML, you can use your own images as input for the model to classify!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># for images and plots in this notebook</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>  
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">Image</span>
+
+<span class="c1"># display images inline</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Image</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;http://3.bp.blogspot.com/_UpN7DfJA0j4/TJtUBWPk0SI/AAAAAAAAABY/oWPMtmqJn3k/s1600/mnist_originals.png&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[10]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<img src="http://3.bp.blogspot.com/_UpN7DfJA0j4/TJtUBWPk0SI/AAAAAAAAABY/oWPMtmqJn3k/s1600/mnist_originals.png" width="200" height="200"/>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Specify-our-Score-and-Environment-Files">Specify our Score and Environment Files<a class="anchor-link" href="#Specify-our-Score-and-Environment-Files">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We are now going to deploy our ONNX Model on AML with inference in ONNX Runtime. We begin by writing a score.py file, which will help us run the model in our Azure ML virtual machine (VM), and then specify our environment by writing a yml file. You will also notice that we import the onnxruntime library to do runtime inference on our ONNX models (passing in input and evaluating out model's predicted output). More information on the API and commands can be found in the <a href="https://aka.ms/onnxruntime">ONNX Runtime documentation</a>.</p>
+<h3 id="Write-Score-File">Write Score File<a class="anchor-link" href="#Write-Score-File">&#182;</a></h3><p>A score file is what tells our Azure cloud service what to do. After initializing our model using azureml.core.model, we start an ONNX Runtime inference session to evaluate the data passed in on our function calls.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">writefile</span> score.py
+import json
+import numpy as np
+import onnxruntime
+import sys
+import os
+from azureml.core.model import Model
+import time
+
+
+def init():
+    global session, input_name, output_name
+    model = Model.get_model_path(model_name = &#39;mnist_1&#39;)
+    session = onnxruntime.InferenceSession(model, None)
+    input_name = session.get_inputs()[0].name
+    output_name = session.get_outputs()[0].name 
+    
+
+def preprocess(input_data_json):
+    # convert the JSON data into the tensor input
+    return np.array(json.loads(input_data_json)[&#39;data&#39;]).astype(&#39;float32&#39;)
+
+def postprocess(result):
+    # We use argmax to pick the highest confidence label
+    return int(np.argmax(np.array(result).squeeze(), axis=0))
+    
+def run(input_data):
+
+    try:
+        # load in our data, convert to readable format
+        data = preprocess(input_data)
+        
+        # start timer
+        start = time.time()
+        
+        r = session.run([output_name], {input_name: data})
+        
+        #end timer
+        end = time.time()
+        
+        result = postprocess(r)
+        result_dict = {&quot;result&quot;: result,
+                      &quot;time_in_sec&quot;: end - start}
+    except Exception as e:
+        result_dict = {&quot;error&quot;: str(e)}
+    
+    return result_dict
+
+def choose_class(result_prob):
+    &quot;&quot;&quot;We use argmax to determine the right label to choose from our output&quot;&quot;&quot;
+    return int(np.argmax(result_prob, axis=0))
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Overwriting score.py
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Write-Environment-File">Write Environment File<a class="anchor-link" href="#Write-Environment-File">&#182;</a></h3><p>This step creates a YAML environment file that specifies which dependencies we would like to see in our Linux Virtual Machine.</p>
 
 </div>
 </div>
@@ -12195,9 +12286,359 @@ Status: Starting)
 <div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.widgets</span> <span class="k">import</span> <span class="n">RunDetails</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.conda_dependencies</span> <span class="k">import</span> <span class="n">CondaDependencies</span> 
 
-<span class="n">RunDetails</span><span class="p">(</span><span class="n">run</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">myenv</span> <span class="o">=</span> <span class="n">CondaDependencies</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pip_packages</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="s2">&quot;onnxruntime&quot;</span><span class="p">,</span> <span class="s2">&quot;azureml-core&quot;</span><span class="p">])</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;myenv.yml&quot;</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">myenv</span><span class="o">.</span><span class="n">serialize_to_string</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Create-the-Container-Image">Create the Container Image<a class="anchor-link" href="#Create-the-Container-Image">&#182;</a></h3><p>This step will likely take a few minutes.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">time</span>
+from azureml.core.image import ContainerImage
+
+image_config = ContainerImage.image_configuration(execution_script = &quot;score.py&quot;,
+                                                  runtime = &quot;python&quot;,
+                                                  conda_file = &quot;myenv.yml&quot;,
+                                                  description = &quot;MNIST ONNX Runtime container&quot;,
+                                                  tags = {&quot;demo&quot;: &quot;onnx&quot;}) 
+
+
+image = ContainerImage.create(name = &quot;onnximage&quot;,
+                              # this is the model object
+                              models = [model],
+                              image_config = image_config,
+                              workspace = ws)
+
+image.wait_for_creation(show_output = True)
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Creating image
+Running........................
+SucceededImage creation operation finished for image onnximage:2, operation &#34;Succeeded&#34;
+Wall time: 2min 12s
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In case you need to debug your code, the next line of code accesses the log file.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">image_build_log_uri</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>https://mlserviceworks0764555666.blob.core.windows.net/azureml/ImageLogs/a9dc2480-a167-44f4-b88f-12144364af6e/build.log?sv=2017-04-17&amp;sr=b&amp;sig=IbIL5ynoq5bnme8wfyWzUL%2FL6afF8JaiJu1sXZI0jRg%3D&amp;st=2019-03-04T15%3A04%3A09Z&amp;se=2019-04-03T15%3A09%3A09Z&amp;sp=rl
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We're all done specifying what we want our virtual machine to do. Let's configure and deploy our container image.</p>
+<h3 id="Deploy-the-container-image">Deploy the container image<a class="anchor-link" href="#Deploy-the-container-image">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.webservice</span> <span class="k">import</span> <span class="n">AciWebservice</span>
+
+<span class="n">aciconfig</span> <span class="o">=</span> <span class="n">AciWebservice</span><span class="o">.</span><span class="n">deploy_configuration</span><span class="p">(</span><span class="n">cpu_cores</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> 
+                                               <span class="n">memory_gb</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> 
+                                               <span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;demo&#39;</span><span class="p">:</span> <span class="s1">&#39;onnx&#39;</span><span class="p">},</span> 
+                                               <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;ONNX for mnist model&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The following cell will likely take a few minutes to run as well.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">time</span>
+from azureml.core.webservice import Webservice
+
+aci_service_name = &#39;onnx-demo-mnist-v2&#39;
+print(&quot;Service&quot;, aci_service_name)
+
+aci_service = Webservice.deploy_from_image(deployment_config = aciconfig,
+                                           image = image,
+                                           name = aci_service_name,
+                                           workspace = ws)
+
+aci_service.wait_for_deployment(True)
+print(aci_service.state)
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Service onnx-demo-mnist-v2
+Creating service
+Running...............
+SucceededACI service creation operation finished, operation &#34;Succeeded&#34;
+Healthy
+Wall time: 1min 30s
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="n">aci_service</span><span class="o">.</span><span class="n">state</span> <span class="o">!=</span> <span class="s1">&#39;Healthy&#39;</span><span class="p">:</span>
+    <span class="c1"># run this command for debugging.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">aci_service</span><span class="o">.</span><span class="n">get_logs</span><span class="p">())</span>
+
+    <span class="c1"># If your deployment fails, make sure to delete your aci_service or rename your service before trying again!</span>
+    <span class="c1"># aci_service.delete()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Success!">Success!<a class="anchor-link" href="#Success!">&#182;</a></h3><p>If you've made it this far, you've deployed a working VM with a handwritten digit classifier running in the cloud using Azure ML. Congratulations!</p>
+<p>You can get the URL for the webservice with the code below. Let's now see how well our model deals with our test images.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">aci_service</span><span class="o">.</span><span class="n">scoring_uri</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>http://40.67.221.164:80/score
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Testing-and-Evaluation">Testing and Evaluation<a class="anchor-link" href="#Testing-and-Evaluation">&#182;</a></h2><h3 id="Load-Test-Data">Load Test Data<a class="anchor-link" href="#Load-Test-Data">&#182;</a></h3><p>These are already in your directory from your ONNX model download (from the model zoo).</p>
+<p>Notice that our Model Zoo files have a .pb extension. This is because they are <a href="https://developers.google.com/protocol-buffers/docs/pythontutorial">protobuf files (Protocol Buffers)</a>, so we need to read in our data through our ONNX TensorProto reader into a format we can work with, like numerical arrays.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># to manipulate our arrays</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+
+<span class="c1"># read in test data protobuf files included with the model</span>
+<span class="kn">import</span> <span class="nn">onnx</span>
+<span class="kn">from</span> <span class="nn">onnx</span> <span class="k">import</span> <span class="n">numpy_helper</span>
+
+<span class="c1"># to use parsers to read in our model/data</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">test_inputs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">test_outputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># read in 3 testing images from .pb files</span>
+<span class="n">test_data_size</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">test_data_size</span><span class="p">):</span>
+    <span class="n">input_test_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="s1">&#39;test_data_set_</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="s1">&#39;input_0.pb&#39;</span><span class="p">)</span>
+    <span class="n">output_test_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="s1">&#39;test_data_set_</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="s1">&#39;output_0.pb&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># convert protobuf tensors to np arrays using the TensorProto reader from ONNX</span>
+    <span class="n">tensor</span> <span class="o">=</span> <span class="n">onnx</span><span class="o">.</span><span class="n">TensorProto</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_test_data</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">tensor</span><span class="o">.</span><span class="n">ParseFromString</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">numpy_helper</span><span class="o">.</span><span class="n">to_array</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+    <span class="n">test_inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_test_data</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">tensor</span><span class="o">.</span><span class="n">ParseFromString</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    
+    <span class="n">output_data</span> <span class="o">=</span> <span class="n">numpy_helper</span><span class="o">.</span><span class="n">to_array</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+    <span class="n">test_outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output_data</span><span class="p">)</span>
+    
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_inputs</span><span class="p">)</span> <span class="o">==</span> <span class="n">test_data_size</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Test data loaded successfully.&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Test data loaded successfully.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Show-some-sample-images">Show some sample images<a class="anchor-link" href="#Show-some-sample-images">&#182;</a></h3><p>We use <code>matplotlib</code> to plot 3 test images from the dataset.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">test_image</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">test_image</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">test_inputs</span><span class="p">[</span><span class="n">test_image</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">),</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12215,17 +12656,10 @@ Status: Starting)
 
 
 
-
- 
- 
-<div id="d5862377-a157-4229-8080-b7c4ba5cd67d"></div>
-<div class="output_subarea output_widget_view ">
-<script type="text/javascript">
-var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
-</script>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "a6bd35794e3b49b68bd413be0403c049", "version_major": 2, "version_minor": 0}
-</script>
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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Q7L8cSuuKv3vXqPkLW4Cx/9flt5vM3HiRKCUApTn8Etoq6f+iiuPZD0TiUTZRM5XX30FwEUXXVTy2dls1lh8eSkl7e40faWENO64coWDDjoIgOeeew6AF154AYA999wTKMpdb9oziiLTjwceeACAL7/8ErCUtluy4Jcpf/311wCcddZZQDFnOv7440s+o3bPtYhg+QOaFluM6vQtdqFQKIvF5QlcqlPQMd+av/vuu2VtdF2tp7/j4K+eUqnBhg0bABtjjx492ngnPxbfHGsh1scfv5aWFkMPXnzxxQC89957AFx22WUAnH/++UDRs9a72C2fz/Pjjz8CsM8++wCw8847AxhGa9SoUcZjihkS83feeecBcOSRRwJwwgknlEUKmuhUWUe1CJY/oGlRFc/voj8LEzcP4DIZ+q2/Zc39MuVFixYBxcxfLIBfSltrtseVzS+fljXSZ27atAmAuXPnGlZGlsq/1j3mzwVUKgsG2HfffQGYPXs2YGPs3377DSguDax3sVtra6ux1N9//33JOc13dHV1mVKUpUuXAna8tt12WwDuuOMOc530Q96wVhbf9Lmaizc3seWvUIJSShOswvz0009AMXlUiCBaUJC7fPLJJ8s+W25Wg1W7ev5iwru5NahHH300AL///jtQrEaEohv3F3DrPiWf8JccGhu3nh3sBJsri8If1TKpNkoU47PPPht73ZaGXnaFOQp7lPCuWrXKjJcqcg8++GAAXn31VaB03Yd0x0+S42bKh4IQ9gQ0LWo2yeVTV3o7dXzJkiXGIqumW25SrnDdunXGEs6cOROwlvH9998HbMjQ09NjLI0qPWtlEXy4VtnfUkQVm3vssQdgJ6va29uNS5e79unLbDZb1lfd11/3C3YslSz61J/qitrb2819al0SUAlRFDF16lTAPs/PPvsMsOHYrFmzzDhdcsklgKWu99prL6B0Ui6ONIFAdQYEVI2aFbYpznvllVcAePTRRwEbo/f29ppYVW2VCLkTVmrz1FNPAdYCqlRAK73AJkv33XcfAGecccZQxOkXcZtD+Qmlqk1VjVooFMoSNL8qMZVKVSyXkHVz8w2N7ZtvvgnYmnh5VLewT7lTI3Z22G+//QCYNm1aWR800XfDDTcAmCrPuJ0e/NxNYx7KGwICqsSQLH8cjfbggw8CcO655wKw4447ArYoCSzLM2HCBAB22GEHwE6DuyW+giyY2BR9dmtrq1kRphU/H3zwAQC33norUAvKMwKikpjfpyvlkUTBnnnmmUZGn92JK1nQmPjMkKylShhWr17N3LlzAWvxVNgmD3rBBRcApZNq2Wy2LnF/IpEwtK9P10rG7u5uTj/9dMA+s7333rvkPq539FmeEPMHBNQIQ7L8Lk+v+EtT68Kvv/4K2On/KVOmmH16VJillVya2l6+fLnhrLUqSTH+lVdeCdjircWLF5t8QjH0woULAZsL3HvvvUMRz0ECdzvwZDJZ5vXkkWSFTzvtNNO/7bffHqi8m8SGDRt4+umnAcuQyFrqvpoD6erqMnIJyinEnGgXC7BMWltbW13i/nw+H1tSDfb5zJgxwyzWufrqq2PbxpW3C/7Cl2rlCpY/oGkxSMtfjIHdqXwtYJB183cd0BK7jo4Os9uArtGUtpYzKmYEWyimwicxCMKxxx5rli8+9thjJfd74oknBidWRRTLG+LYBXkksVPi3pctWwbA9OnTzbJCjY08nWL0jo4Ow3ZoaaLyAlnIH374ASjmBDqn2FeMiVguf3YY6sf2uB7R3WkZbCnDhx9+aBbk+N7QL8SLi+srFU0OFYNU/tIwYMSIEabTSvRUmyHXJNe8cuVKoyhr1qwB7IOVcrkKrZIFrfZS4izX2t7ebihOKZVCJdXWV49EWQ2//tYKLCXrCu+keGvXrjU16oK/Nbs7kaWHrbFQuKPxHT9+vCn5kNz+ff2woN6Q7HpGMnzTp08HYP78+WYS0Kd9feVPp9Nl2xUKIewJCKgSQ0p4FdKMHDnSvKnaSnzevHlAcQ0m2PWr2223nUnCtCLp0ksvBSwtGvftLYLcpEs1ygJoityvsKwexd0a4som/EpDJbpy60pgwRZ2KTRyv1RD4ZO//lWUr+S+/vrr+93yXGjUluXqn8bmpJNOAmzx2pw5cyp+MYm7RQsUvYe8gbyhrq3V8w2WP6BpMeiEN4oik7C5Xzghi6xJH000udtL+6uz/PLguCSnUmzY0tJS8jdsmZLmZDJZMtnil9lKJu26oDj/nXfeMV5MSbB2MZBMJ598Mvvvvz9gvZ/2LfJ3b3DzjUrfZukWhdW7nt8t/b7qqqsAePvttwHrxbQhMZSvY/DXPMybN48XX3wRsDt2+GXu1SJY/oCmxaDZHn8Xhkp75YidcXctq2SRXXbCX+jiZ/quFfbP1b6kuXzfnkqUnI5romnChAnGUqs8W9sp6trJkyeXUcS+xXc/z7f4vleMK5+IW0CzJZBOpw09ra+O0lb0rsWvtOWgm0dCMWdU+YsK+F577TXA5orVxv7B8gc0LYbE9rhFWJViS73BLipZZPd4pSltH3HHa7WBqfMpsbsoxMEfB7cv4r0V328OlRa3xGEg8tZro9r29nYziXn55ZcDcMghh5S0KRQKFfvs60sqlTIlM37pTK0QLH9A06JuX04R8O/Gxo0bTZmKyrArbVgAlO3J0wgE5Q+oCVKplClbcb9XGazSZ7NZE/Y0UumFEPYENC2C5Q+oCTZHWtR6BVatECx/QNMiMZjy10QisQbYBHRvsR7VBxOjKNq+v0ZB3n8sBibvYGu/E4nEiiiKpg25W/8wBHn/vQhhT0DTIih/QNNiKMp/V8178fdGkPdfikHH/AEB/xaEsCegaRGUP6BpEZQ/oGkRlD+gaRGUP6Bp8X+V3sgC9wEq3gAAAABJRU5ErkJggg==
+"
+>
 </div>
 
 </div>
@@ -12238,7 +12672,96 @@ var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Alternatively, you can block until the script has completed training before running more code.</p>
+<h3 id="Run-evaluation-/-prediction">Run evaluation / prediction<a class="anchor-link" href="#Run-evaluation-/-prediction">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;True Label: &quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">13</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Result: &quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">13</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Inference Time: &quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">13</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Model Input&quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">18</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;(28 x 28)&quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">28</span><span class="p">,</span><span class="mi">28</span><span class="p">)),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys</span><span class="p">)</span>    
+
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">test_data_size</span><span class="p">):</span>
+    
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">test_inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()})</span>
+    
+    <span class="c1"># predict using the deployed model</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">aci_service</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="s2">&quot;error&quot;</span> <span class="ow">in</span> <span class="n">r</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">])</span>
+        <span class="k">break</span>
+        
+    <span class="n">result</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span>
+    <span class="n">time_ms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;time_in_sec&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    
+    <span class="n">ground_truth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">test_outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+    
+    <span class="c1"># compare actual value vs. the predicted values:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># use different color for misclassified sample</span>
+    <span class="n">font_color</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span> <span class="k">if</span> <span class="n">ground_truth</span> <span class="o">!=</span> <span class="n">result</span> <span class="k">else</span> <span class="s1">&#39;black&#39;</span>
+    <span class="n">clr_map</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span> <span class="k">if</span> <span class="n">ground_truth</span> <span class="o">!=</span> <span class="n">result</span> <span class="k">else</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys</span>
+
+    <span class="c1"># ground truth labels are in blue</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">18</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># predictions are in black if correct, red if incorrect</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">result</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">18</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">font_color</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_ms</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; ms&#39;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">font_color</span><span class="p">)</span>
+
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">test_inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">),</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">clr_map</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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UIR56r+PioqKJLxw4cJUPD/vwge1++3c+YbI1GUmn3A2sVzXV9h26z855pxzzkmte+2115Lw+eefn4QHDx6ciuf3G8j39JmGKvyMfP7550l4++23T8Ibb7xxKp4/k5d/nsObFH+mKX/mN4BBgwYl4b333jsJH3HEEal4ufpxACxZsiQJt2jRgmJpEDl//PHHM2HChOT1HXfcQb9+/VJxvv32W/r168f6669Pp06dGDVqVHKhL1u2jLPPPpv27dvTpUsX/vnPf1bbduDAgVRUVNChQwcuuOCCahdUIQYMGMCgQYM48MADadWqFTvvvDNjA6h2AAAVg0lEQVT//e9/k/VmxrXXXkuXLl1o374955xzTpLGkSNH8tvf/jaJ698tDx8+nOeff57BgwfTsmXLah9uEREpXw2ioN1ll11YuHAhU6dOZdmyZdx3332pQgng9NNP59tvv+WTTz5h0qRJTJgwIRm4fvPNN/PYY4/xxhtvMHnyZB544IHUtv3792eNNdbg448/5o033uCJJ56oczXtPffcw4gRI/jmm2/YYostGD58eGr9Qw89xOTJk3n99dd5+OGHue2221a6z8suu4zdd9+dv/zlLyxatKjaM1VFRKR8NYiqY1hxV7vnnnuy1VZbpWaJqSp833jjDVq1akWrVq0YNmwYd955JwMHDuT+++9n6NChyewx5513Hs8++ywAc+fO5fHHH2fBggWss846tGjRgjPPPJObbrqJU089tdbpPPzww5PZbY477jjOOuus1Po//OEPtGvXjnbt2jF06FDuueeeVFf1hqY2VXt1qTor9EEEYRVRrmE1YU2FX9UbViX6Q1L8icvDWY78ZoxwyEChVdilkXtmKF94zvzz5FfFhfv4/vvvk/D//u//ptb5My/5VXj5jpUvTfkeTJDrGgqHHPl+/vOfp14fffTRSdgfxvLll+mRjf6MVY2hqjgUDvXyq2lnzZqVczv/IRIffPBBEq76Hq7y4osvJmH/+gFo165dEr7hhhtyHsv/LgibEYpZXexrUAXtHnvswfTp06tVG8+fP5/KysrUWMdOnTol7QezZ89OTdHmx5s5cyZLly5NtTUtX748Fb82/Kd5NG/evNqYyzAds2fPrtNxRESkYWgwP7k6derEZpttxsSJE6sNSG7fvj3NmjVj5syZybJZs2Yld70VFRWpAfL+L69NN92UtdZai/nz57NgwQIWLFjAwoULee+99zJ5H2E6qjoNtGjRItURIHxMV10eMSciIqXXYO5oAW699Va++eYbWrRokeqt1rRpU44++miGDx/OhAkT+Prrrxk9enQyU83RRx/Ntddey0EHHUSLFi248soVw34rKirYd999GTZsGJdeeiktW7Zk+vTpfPbZZ+y55571/h7+/Oc/s/POO7No0SLGjh2bVC1369aNP/7xj8yaNYt1112XK664IrXdhhtumJoZpRwsX7682g+AuvwgCKuf81VHF/qwAL+mwJ+9KOzhGk5i7/OvsYcfXjEnS7736Pe8hHQ1VjEnMS/Mipmh8lXZhtW3/nnZb7/9kvA333yTinf11VcnYb/HKFSv6q9SaCfEMA/86yLs7evv06/6zJcHfs9YgE022SQJf/XVV0nYn0gfSHW0DKtZyyPP65ffBOD3LA57Hfu9zqdOnZqE/esH4Prrr0/Cu+22W2rdv//97ySc6/qB9PdHvpmn/Ou4XB8qUBKbb745O+64Y43rrrvuOlq0aEGXLl3o2bMnffv25cQTTwSiD8N+++3Hz3/+c375y19WuyOeMGEClZWVbLPNNrRt25Yjjzwy9XDn+tSnTx+6d+9Ot27dOPDAAxk4cCAA++yzD//zP//DDjvsQPfu3as9oHzIkCE88MADtG3bljPOOCOTtImISP0r+zvaXBNSrLHGGqlfJ23btuVvf/tbzrjXXHNNak5M/xf2uuuuyw033FBjA/uAAQMYMGBAjfvt3LlzKg3jx49Pre/VqxefffZZatkBBxyQs6C8/vrrU7/o/F/Lu+66Kx9++GGN24mISPlqUHe0IiIiDU3Z39FK45HryRzh7DB+vPBpLn4757333puEw5mh/GEDX3+9YobQsG2vT58+OddNmTIlCfvtlH6nNUi3Uz311FOpdcVsB1oV4VAUv50zXOe/fuutt5LwlltumYrn97AP29T8oRv+kIt8T9optI07TG+hU6T6112Yx7me+vLyyy+n4vnvM0xHXWa5Kjfhe+jevXsS9j9zYWdSfxjUYYcdloTDa+bcc89Nwv7oEICf/exnSThsh/cVOtNcMT+PKmiLqDF80EREpHYaVdXxeeedx5gxY0qdjFVy1llnceONN5Y6GSIiUk8azR3tvHnzmDBhQjKU4+WXX+bCCy9kypQpNG3alF69enHttdcmE1P8+OOPDBkyhIceeoilS5ey2267ceONN6ZmnKqLL7/8kiFDhjBp0iS+//57tttuO0aPHp2qXrzuuusYPXo0X331FV27dmXMmDHJo/jOOeccevTowYknnliGMwmlNWnSJO8Dw0N+9/+nn346CYdTYvpDacKHR/jDLvz9+TPPQO6Hs4fDNh555JEkHFYxtm3bNgl/9913Ne4P0tWgYYe8XB3pyk2+BweEcq3r27dv6vUhhxyShMPrJNcMPWEe5BqOE6Y333Xnb+dXAYfV1P41+fzzz6fWjRs3Lgn7Vdjh8B5/yFk4lKyxj4X/5S9/mYTD0SG53nvYNPTHP/4xCb/zzjupdfmGnPnyNTH4124xh9s1mjva8ePHc8ABByTT433zzTeccsopzJgxg5kzZ9KqVStOOOGEJP7YsWN56aWXePvtt5k9ezZt2rRJng60KhYtWsROO+3ElClT+Prrr+nfvz8HHnhg8sX/yiuvcO655/LAAw8kDzM47LDDki+AiooKttpqq1QBICIiDVejKWgff/zx1AQT+++/P0cddRStW7emefPmDB48mBdeeCFZP336dPbbbz823HBD1l57bY455pics0G9+OKLtG/fPpnV6a233qJNmzapOTurdOnShbPOOouKigqaNm3KKaecQmVlJdOmTQOi4Urbbrst3bt3x8zo168f8+fPT3UW6NWrV7UnDImISMPUaArad955J9UrLfTcc8+x7bbbJq8HDhzICy+8wOzZs/nhhx+466672H///Wvc9le/+hWnnnoq/fv3Z/HixRx//PGMGjWKrbbaaqXpevPNN6msrGSLLbYAoh8Ay5Yt45VXXmHZsmXcdtttdOvWLTVH8tZbb53qzSkiIg1Xo2mjXbBgQerJGb63336bSy65JNX217VrVzp27EiHDh1o2rQp22+/fd7Hz40cOZJddtmFHj160KFDh2pTytVk4cKFHH/88YwYMSJpG2zVqhVHHHEEPXv2xDlHmzZtePzxx1NtGK1atWLBggWFvvWScc7V6gkl99xzTxL+/e9/n4Q33HDDVLywXdbnt4F17NgxCW+wwQapeB999FES9odq+O26obBNzZ9S0H+f4dR67777bhIeNmxYat3rr7+ehMeOHZuEy6P93QGOZcuWVWvz8ttU803P6Ldj+084ApKZ2SCdVzXts6Z95xM+lSXflHz+Z2vixIlJ2J93HNJPGArb7PzPo98f4Mwzz0zFy/cQ+3xPC2oowrZW/+lN/jkL4/n5NX/+/CTcv3//VDz/87PddtvlTIfflp9vqsuwLb9Uw3sazR1t27Zta+yw8vHHH7P//vszduxYdt9992T57373O5YsWcJXX33F999/z+GHH57zjhaiTBkwYADvvvsuw4YNW2nHhsWLF3PwwQezyy67cN555yXLb7nlFm677Tbee+89Kisr+dvf/sZBBx2Umpv3u+++S80NKiIiDVejKWh32GGHalMUzpw5k7333psLL7yQ448/PrXurbfeYsCAAbRr14611lqL008/nVdffTX1a8v3+eefc/HFF3PCCScwbNiwahMk+H788UcOPfRQOnTokOqtWHXcgw8+mK5du9KkSRN69+5NRUVF6jmMU6dOrfY8TBERaZgaTdXxAQccwKRJkzjuuOOAqGD89a9/zaBBgzjttNOqxd9pp52YMGECvXr1onnz5vz1r39l4403pn379tXiOucYMGAAAwcO5Morr6R3795ceOGF/OlPf6oWd+nSpRx55JGss846TJgwoVrV6k477cRll13G6aefzmabbcZTTz3Fhx9+mKommTRpUoN4GLyZVavC86tEw6qywYMH17ifuXPnpl77zwbeeuutU+tGjRqVhHfdddck7D8iEdJzWfuz9/hPXoFovuoqYY3IRRddlIS7du2ahO+8885UPL9JIqzG8sdE+8OAJkyYQOkZYDVW1/rXbb7mAb96PWzu8H/chuds/fXXT8JVIwVWZuHChUn40UcfTa3zZyUKa5v8NPo1R2FnxvBB4z5/OJI/e1GXLl1ybhP+GC+P5oJVE1b556sq9/mfC3/YVzic8tJLLy1of7me4gX5z7N/bfjVylkPvWo0d7T9+vVj4sSJSfveLbfcwieffMLFF19My5Ytk78qV111FWuvvTZbbrkl66+/PhMnTuShhx6qcd/XXnstc+fO5dJLL8XMuP3227n99turjbWDqIfyY489xhNPPEGbNm2S41bF7devH8cccwy9evWidevWnHHGGYwbNy7pWDVnzhzef/99Dj300Po+RSIiUgKN5o62ffv29OvXj3HjxjF06FBGjBjBiBEjcsZfb731uOuuuwra95AhQxgyZEjyeuONN2bevHk1xt1zzz3zTrVoZlxyySVccsklNa6/6qqr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
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Try-classifying-your-own-images!">Try classifying your own images!<a class="anchor-link" href="#Try-classifying-your-own-images!">&#182;</a></h3><p>Create your own handwritten image and pass it into the model.</p>
 
 </div>
 </div>
@@ -12248,13 +12771,190 @@ var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># run.wait_for_completion(show_output=True) # this provides a verbose log</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Preprocessing functions take your image and format it so it can be passed</span>
+<span class="c1"># as input into our ONNX model</span>
+
+<span class="kn">import</span> <span class="nn">cv2</span>
+
+<span class="k">def</span> <span class="nf">rgb2gray</span><span class="p">(</span><span class="n">rgb</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert the input image into grayscale&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rgb</span><span class="p">[</span><span class="o">...</span><span class="p">,:</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.299</span><span class="p">,</span> <span class="mf">0.587</span><span class="p">,</span> <span class="mf">0.114</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">resize_img</span><span class="p">(</span><span class="n">img_to_resize</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Resize image to MNIST model input dimensions&quot;&quot;&quot;</span>
+    <span class="n">r_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">img_to_resize</span><span class="p">,</span> <span class="n">dsize</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">),</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">INTER_AREA</span><span class="p">)</span>
+    <span class="n">r_img</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">r_img</span>
+
+<span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="n">img_to_preprocess</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Resize input images and convert them to grayscale.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">img_to_preprocess</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">):</span>
+        <span class="n">img_to_preprocess</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">img_to_preprocess</span>
+    
+    <span class="n">grayscale</span> <span class="o">=</span> <span class="n">rgb2gray</span><span class="p">(</span><span class="n">img_to_preprocess</span><span class="p">)</span>
+    <span class="n">processed_img</span> <span class="o">=</span> <span class="n">resize_img</span><span class="p">(</span><span class="n">grayscale</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">processed_img</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Replace this string with your own path/test image</span>
+<span class="c1"># Make sure your image is square and the dimensions are equal (i.e. 100 * 100 pixels or 28 * 28 pixels)</span>
+
+<span class="c1"># Any PNG or JPG image file should work</span>
+
+<span class="n">your_test_image</span> <span class="o">=</span> <span class="s2">&quot;&lt;path to file&gt;&quot;</span>
+
+<span class="c1"># e.g. your_test_image = &quot;C:/Users/vinitra.swamy/Pictures/handwritten_digit.png&quot;</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mpimg</span>
+
+<span class="k">if</span> <span class="n">your_test_image</span> <span class="o">!=</span> <span class="s2">&quot;&lt;path to file&gt;&quot;</span><span class="p">:</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">mpimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">your_test_image</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Old Dimensions: &quot;</span><span class="p">,</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">preprocess</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New Dimensions: &quot;</span><span class="p">,</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="n">img</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Add the path for your image data.&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">img</span><span class="o">.</span><span class="n">tolist</span><span class="p">()})</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">aci_service</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span>
+        <span class="n">time_ms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;time_in_sec&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Model prediction: &quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">14</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Inference time: &quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">14</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">14</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_ms</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; ms&quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">14</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Input image: &quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">14</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">),</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span><span class="p">)</span>    
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Optional:-How-does-our--ONNX-MNIST-model-work?">Optional: How does our  ONNX MNIST model work?<a class="anchor-link" href="#Optional:-How-does-our--ONNX-MNIST-model-work?">&#182;</a></h2><h4 id="A-brief-explanation-of-Convolutional-Neural-Networks">A brief explanation of Convolutional Neural Networks<a class="anchor-link" href="#A-brief-explanation-of-Convolutional-Neural-Networks">&#182;</a></h4><p>A <a href="https://en.wikipedia.org/wiki/Convolutional_neural_network">convolutional neural network</a> (CNN, or ConvNet) is a type of <a href="https://en.wikipedia.org/wiki/Feedforward_neural_network">feed-forward</a> artificial neural network made up of neurons that have learnable weights and biases. The CNNs take advantage of the spatial nature of the data. In nature, we perceive different objects by their shapes, size and colors. For example, objects in a natural scene are typically edges, corners/vertices (defined by two of more edges), color patches etc. These primitives are often identified using different detectors (e.g., edge detection, color detector) or combination of detectors interacting to facilitate image interpretation (object classification, region of interest detection, scene description etc.) in real world vision related tasks. These detectors are also known as filters. Convolution is a mathematical operator that takes an image and a filter as input and produces a filtered output (representing say edges, corners, or colors in the input image).</p>
+<p>Historically, these filters are a set of weights that were often hand crafted or modeled with mathematical functions (e.g., <a href="https://en.wikipedia.org/wiki/Gaussian_filter">Gaussian</a> / <a href="http://homepages.inf.ed.ac.uk/rbf/HIPR2/log.htm">Laplacian</a> / <a href="https://en.wikipedia.org/wiki/Canny_edge_detector">Canny</a> filter).  The filter outputs are mapped through non-linear activation functions mimicking human brain cells called <a href="https://en.wikipedia.org/wiki/Neuron">neurons</a>. Popular deep CNNs or ConvNets (such as <a href="https://en.wikipedia.org/wiki/AlexNet">AlexNet</a>, <a href="https://arxiv.org/abs/1409.1556">VGG</a>, <a href="http://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Szegedy_Going_Deeper_With_2015_CVPR_paper.pdf">Inception</a>, <a href="https://arxiv.org/pdf/1512.03385v1.pdf">ResNet</a>) that are used for various <a href="https://en.wikipedia.org/wiki/Computer_vision">computer vision</a> tasks have many of these architectural primitives (inspired from biology).</p>
+<h3 id="Convolution-Layer">Convolution Layer<a class="anchor-link" href="#Convolution-Layer">&#182;</a></h3><p>A convolution layer is a set of filters. Each filter is defined by a weight (<strong>W</strong>) matrix, and  bias ($b$).</p>
+<p><img src="https://www.cntk.ai/jup/cntk103d_filterset_v2.png" alt=""></p>
+<p>These filters are scanned across the image performing the dot product between the weights and corresponding input value ($x$). The bias value is added to the output of the dot product and the resulting sum is optionally mapped through an activation function. This process is illustrated in the following animation.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Image</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://www.cntk.ai/jup/cntk103d_conv2d_final.gif&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span> <span class="mi">200</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Model-Description">Model Description<a class="anchor-link" href="#Model-Description">&#182;</a></h3><p>The MNIST model from the ONNX Model Zoo uses maxpooling to update the weights in its convolutions, summarized by the graphic below. You can see the entire workflow of our pre-trained model in the following image, with our input images and our output probabilities of each of our 10 labels. If you're interested in exploring the logic behind creating a Deep Learning model further, please look at the <a href="https://github.com/Microsoft/CNTK/blob/master/Tutorials/CNTK_103D_MNIST_ConvolutionalNeuralNetwork.ipynb">training tutorial for our ONNX MNIST Convolutional Neural Network</a>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Max-Pooling-for-Convolutional-Neural-Nets">Max-Pooling for Convolutional Neural Nets<a class="anchor-link" href="#Max-Pooling-for-Convolutional-Neural-Nets">&#182;</a></h4><p><img src="http://www.cntk.ai/jup/c103d_max_pooling.gif" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Pre-Trained-Model-Architecture">Pre-Trained Model Architecture<a class="anchor-link" href="#Pre-Trained-Model-Architecture">&#182;</a></h4><p><img src="http://www.cntk.ai/jup/conv103d_mnist-conv-mp.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># remember to delete your service after you are done using it!</span>
+
+<span class="c1"># aci_service.delete()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Conclusion">Conclusion<a class="anchor-link" href="#Conclusion">&#182;</a></h2><p>Congratulations!</p>
+<p>In this tutorial, you have:</p>
+<ul>
+<li>familiarized yourself with ONNX Runtime inference and the pretrained models in the ONNX model zoo</li>
+<li>understood a state-of-the-art convolutional neural net image classification model (MNIST in ONNX) and deployed it in Azure ML cloud</li>
+<li>ensured that your deep learning model is working perfectly (in the cloud) on test data, and checked it against some of your own!</li>
+</ul>
+<p>Next steps:</p>
+<ul>
+<li>Check out another interesting application based on a Microsoft Research computer vision paper that lets you set up a <a href="https://github.com/Azure/MachineLearningNotebooks/tree/master/onnx/onnx-inference-emotion-recognition.ipynb">facial emotion recognition model</a> in the cloud! This tutorial deploys a pre-trained ONNX Computer Vision model in an Azure ML virtual machine.</li>
+<li>Contribute to our <a href="http://github.com/onnx/onnx">open source ONNX repository on github</a> and/or add to our <a href="http://github.com/onnx/models">ONNX model zoo</a></li>
+</ul>
+
+</div>
+</div>
 </div>
     </div>
   </div>

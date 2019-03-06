@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>10 Distributed TensorFlow</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>6 regression-part1-data-prep</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11775,7 +11775,25 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="10.-Distributed-TensorFlow-with-parameter-server">10. Distributed TensorFlow with parameter server<a class="anchor-link" href="#10.-Distributed-TensorFlow-with-parameter-server">&#182;</a></h1><p>In this tutorial, you will train a TensorFlow model on the <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> dataset using native <a href="https://www.tensorflow.org/deploy/distributed">distributed TensorFlow</a>.</p>
+<h1 id="Tutorial-#1:-Prepare-data-for-regression-modeling">Tutorial #1: Prepare data for regression modeling<a class="anchor-link" href="#Tutorial-#1:-Prepare-data-for-regression-modeling">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In this tutorial, you learn how to prep data for regression modeling using the Azure Machine Learning Data Prep SDK. Perform various transformations to filter and combine two different NYC Taxi data sets. The end goal of this tutorial set is to predict the cost of a taxi trip by training a model on data features including pickup hour, day of week, number of passengers, and coordinates. This tutorial is part one of a two-part tutorial series.</p>
+<p>In this tutorial, you:</p>
+<blockquote><ul>
+<li>Setup a Python environment and import packages</li>
+<li>Load two datasets with different field names</li>
+<li>Cleanse data to remove anomalies</li>
+<li>Transform data using intelligent transforms to create new features</li>
+<li>Save your dataflow object to use in a regression model</li>
+</ul>
+</blockquote>
+<p>You can prepare your data in Python using the <a href="https://aka.ms/data-prep-sdk">Azure Machine Learning Data Prep SDK</a>.</p>
 
 </div>
 </div>
@@ -11784,15 +11802,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="1.-Prerequisites">1. Prerequisites<a class="anchor-link" href="#1.-Prerequisites">&#182;</a></h2><ul>
-<li>Understand the <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture">architecture and terms</a> introduced by Azure Machine Learning (AML)</li>
-<li>Go through the <a href="https://github.com/Azure/MachineLearningNotebooks/blob/master/00.configuration.ipynb">00.configuration.ipynb</a> notebook to:<ul>
-<li>install the AML SDK</li>
-<li>create a workspace and its configuration file (<code>config.json</code>)</li>
-</ul>
-</li>
-<li>Review the <a href="https://aka.ms/aml-notebook-hyperdrive">tutorial</a> on single-node TensorFlow training using the SDK</li>
-</ul>
+<h2 id="Import-packages">Import packages<a class="anchor-link" href="#Import-packages">&#182;</a></h2><p>Begin by importing the SDK.</p>
 
 </div>
 </div>
@@ -11802,31 +11812,10 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check core SDK version number</span>
-<span class="kn">import</span> <span class="nn">azureml.core</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SDK version:&quot;</span><span class="p">,</span> <span class="n">azureml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">VERSION</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">azureml.dataprep</span> <span class="k">as</span> <span class="nn">dprep</span>
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>SDK version: 1.0.17
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -11835,7 +11824,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Diagnostics">Diagnostics<a class="anchor-link" href="#Diagnostics">&#182;</a></h2><p>Opt-in diagnostics for better experience, quality, and security of future releases.</p>
+<h2 id="Load-data">Load data<a class="anchor-link" href="#Load-data">&#182;</a></h2><p>Download two different NYC Taxi data sets into dataflow objects. These datasets contain slightly different fields. The method <code>auto_read_file()</code> automatically recognizes the input file type.</p>
 
 </div>
 </div>
@@ -11845,9 +11834,17 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.telemetry</span> <span class="k">import</span> <span class="n">set_diagnostics_collection</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dataset_root</span> <span class="o">=</span> <span class="s2">&quot;https://dprepdata.blob.core.windows.net/demo&quot;</span>
 
-<span class="n">set_diagnostics_collection</span><span class="p">(</span><span class="n">send_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">green_path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">dataset_root</span><span class="p">,</span> <span class="s2">&quot;green-small/*&quot;</span><span class="p">])</span>
+<span class="n">yellow_path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">dataset_root</span><span class="p">,</span> <span class="s2">&quot;yellow-small/*&quot;</span><span class="p">])</span>
+
+<span class="n">green_df</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">green_path</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">dprep</span><span class="o">.</span><span class="n">PromoteHeadersMode</span><span class="o">.</span><span class="n">GROUPED</span><span class="p">)</span>
+<span class="c1"># auto_read_file will automatically identify and parse the file type, and is useful if you don&#39;t know the file type</span>
+<span class="n">yellow_df</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">auto_read_file</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">yellow_path</span><span class="p">)</span>
+
+<span class="n">green_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">yellow_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11860,13 +11857,160 @@ div#notebook {
 
 <div class="output_area">
 
-<div class="prompt"></div>
+<div class="prompt output_prompt">Out[2]:</div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Turning diagnostics collection on. 
-</pre>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>vendor_name</th>
+      <th>Trip_Pickup_DateTime</th>
+      <th>Trip_Dropoff_DateTime</th>
+      <th>Passenger_Count</th>
+      <th>Trip_Distance</th>
+      <th>Start_Lon</th>
+      <th>Start_Lat</th>
+      <th>Rate_Code</th>
+      <th>store_and_forward</th>
+      <th>End_Lon</th>
+      <th>End_Lat</th>
+      <th>Payment_Type</th>
+      <th>Fare_Amt</th>
+      <th>surcharge</th>
+      <th>mta_tax</th>
+      <th>Tip_Amt</th>
+      <th>Tolls_Amt</th>
+      <th>Total_Amt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td></td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+      <td>NA</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>VTS</td>
+      <td>2009-01-04 02:52:00</td>
+      <td>2009-01-04 03:02:00</td>
+      <td>1</td>
+      <td>2.6299999999999999</td>
+      <td>-73.991956999999999</td>
+      <td>40.721567</td>
+      <td></td>
+      <td></td>
+      <td>-73.993803</td>
+      <td>40.695922000000003</td>
+      <td>CASH</td>
+      <td>8.9000000000000004</td>
+      <td>0.5</td>
+      <td></td>
+      <td>0</td>
+      <td>0</td>
+      <td>9.4000000000000004</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>VTS</td>
+      <td>2009-01-04 03:31:00</td>
+      <td>2009-01-04 03:38:00</td>
+      <td>3</td>
+      <td>4.5499999999999998</td>
+      <td>-73.982101999999998</td>
+      <td>40.736289999999997</td>
+      <td></td>
+      <td></td>
+      <td>-73.955849999999998</td>
+      <td>40.768030000000003</td>
+      <td>Credit</td>
+      <td>12.1</td>
+      <td>0.5</td>
+      <td></td>
+      <td>2</td>
+      <td>0</td>
+      <td>14.6</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>VTS</td>
+      <td>2009-01-03 15:43:00</td>
+      <td>2009-01-03 15:57:00</td>
+      <td>5</td>
+      <td>10.35</td>
+      <td>-74.002587000000005</td>
+      <td>40.739747999999999</td>
+      <td></td>
+      <td></td>
+      <td>-73.869983000000005</td>
+      <td>40.770225000000003</td>
+      <td>Credit</td>
+      <td>23.699999999999999</td>
+      <td>0</td>
+      <td></td>
+      <td>4.7400000000000002</td>
+      <td>0</td>
+      <td>28.440000000000001</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>DDS</td>
+      <td>2009-01-01 20:52:58</td>
+      <td>2009-01-01 21:14:00</td>
+      <td>1</td>
+      <td>5</td>
+      <td>-73.974266999999998</td>
+      <td>40.790954999999997</td>
+      <td></td>
+      <td></td>
+      <td>-73.996557999999993</td>
+      <td>40.731848999999997</td>
+      <td>CREDIT</td>
+      <td>14.9</td>
+      <td>0.5</td>
+      <td></td>
+      <td>3.0499999999999998</td>
+      <td>0</td>
+      <td>18.449999999999999</td>
+    </tr>
+  </tbody>
+</table>
 </div>
+</div>
+
 </div>
 
 </div>
@@ -11877,7 +12021,42 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Initialize-workspace">Initialize workspace<a class="anchor-link" href="#Initialize-workspace">&#182;</a></h2><p>Initialize a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#workspace">Workspace</a> object from the existing workspace you created in the Prerequisites step. <code>Workspace.from_config()</code> creates a workspace object from the details stored in <code>config.json</code>.</p>
+<h2 id="Cleanse-data">Cleanse data<a class="anchor-link" href="#Cleanse-data">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now you populate some variables with shortcut transforms that will apply to all dataflows. The variable <code>drop_if_all_null</code> will be used to delete records where all fields are null. The variable <code>useful_columns</code> holds an array of column descriptions that are retained in each dataflow.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_columns</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">ColumnSelector</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="s2">&quot;.*&quot;</span><span class="p">,</span> <span class="n">use_regex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">drop_if_all_null</span> <span class="o">=</span> <span class="p">[</span><span class="n">all_columns</span><span class="p">,</span> <span class="n">dprep</span><span class="o">.</span><span class="n">ColumnRelationship</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">ColumnRelationship</span><span class="o">.</span><span class="n">ALL</span><span class="p">)]</span>
+<span class="n">useful_columns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="s2">&quot;distance&quot;&quot;distance&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_datetime&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_longitude&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;passengers&quot;</span><span class="p">,</span> <span class="s2">&quot;pickup_datetime&quot;</span><span class="p">,</span> <span class="s2">&quot;pickup_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;pickup_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;store_forward&quot;</span><span class="p">,</span> <span class="s2">&quot;vendor&quot;</span>
+<span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You first work with the green taxi data and get it into a valid shape that can be combined with the yellow taxi data. Create a temporary dataflow <code>tmp_df</code>, and call the <code>replace_na()</code>, <code>drop_nulls()</code>, and <code>keep_columns()</code> functions using the shortcut transform variables you created. Additionally, rename all the columns in the dataframe to match the names in <code>useful_columns</code>.</p>
 
 </div>
 </div>
@@ -11887,12 +12066,26 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.workspace</span> <span class="k">import</span> <span class="n">Workspace</span>
-
-<span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="o">.</span><span class="n">from_config</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Workspace name: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
-      <span class="s1">&#39;Azure region: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> 
-      <span class="s1">&#39;Resource group: &#39;</span> <span class="o">+</span> <span class="n">ws</span><span class="o">.</span><span class="n">resource_group</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tmp_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">green_df</span>
+    <span class="o">.</span><span class="n">replace_na</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">all_columns</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">drop_nulls</span><span class="p">(</span><span class="o">*</span><span class="n">drop_if_all_null</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">rename_columns</span><span class="p">(</span><span class="n">column_pairs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;VendorID&quot;</span><span class="p">:</span> <span class="s2">&quot;vendor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;lpep_pickup_datetime&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_datetime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Lpep_dropoff_datetime&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_datetime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;lpep_dropoff_datetime&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_datetime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Store_and_fwd_flag&quot;</span><span class="p">:</span> <span class="s2">&quot;store_forward&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;store_and_fwd_flag&quot;</span><span class="p">:</span> <span class="s2">&quot;store_forward&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pickup_longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pickup_latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Dropoff_longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Dropoff_latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Passenger_count&quot;</span><span class="p">:</span> <span class="s2">&quot;passengers&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Fare_amount&quot;</span><span class="p">:</span> <span class="s2">&quot;cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Trip_distance&quot;</span><span class="p">:</span> <span class="s2">&quot;distance&quot;</span>
+     <span class="p">})</span>
+    <span class="o">.</span><span class="n">keep_columns</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">useful_columns</span><span class="p">))</span>
+<span class="n">tmp_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11905,16 +12098,112 @@ div#notebook {
 
 <div class="output_area">
 
-<div class="prompt"></div>
+<div class="prompt output_prompt">Out[4]:</div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Found the config file in: C:\Users\seretkow\notebooks\Labs Azure ML service\aml_config\config.json
-Workspace name: MLServiceWorkspace
-Azure region: westeurope
-Resource group: mlserviceresourcegroup
-</pre>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>vendor</th>
+      <th>pickup_datetime</th>
+      <th>dropoff_datetime</th>
+      <th>store_forward</th>
+      <th>pickup_longitude</th>
+      <th>pickup_latitude</th>
+      <th>dropoff_longitude</th>
+      <th>dropoff_latitude</th>
+      <th>passengers</th>
+      <th>cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2</td>
+      <td>2013-08-01 08:14:37</td>
+      <td>2013-08-01 09:09:06</td>
+      <td>N</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>21.25</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>2013-08-01 09:13:00</td>
+      <td>2013-08-01 11:38:00</td>
+      <td>N</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>74.5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>2013-08-01 09:48:00</td>
+      <td>2013-08-01 09:49:00</td>
+      <td>N</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2</td>
+      <td>2013-08-01 10:38:35</td>
+      <td>2013-08-01 10:38:51</td>
+      <td>N</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>3.25</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2</td>
+      <td>2013-08-01 11:51:45</td>
+      <td>2013-08-01 12:03:52</td>
+      <td>N</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>8.5</td>
+    </tr>
+  </tbody>
+</table>
 </div>
+</div>
+
 </div>
 
 </div>
@@ -11925,8 +12214,7 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="2.-Create-a-remote-compute-target">2. Create a remote compute target<a class="anchor-link" href="#2.-Create-a-remote-compute-target">&#182;</a></h2><p>You will need to create a <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#compute-target">compute target</a> to execute your training script on. In this tutorial, you create an <code>AmlCompute</code> cluster as your training compute resource. This code creates a cluster for you if it does not already exist in your workspace.</p>
-<p><strong>Creation of the cluster takes approximately 5 minutes.</strong> If the cluster is already in your workspace this code will skip the cluster creation process.</p>
+<p>Overwrite the <code>green_df</code> variable with the transforms performed on <code>tmp_df</code> in the previous step.</p>
 
 </div>
 </div>
@@ -11936,27 +12224,54 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core.compute</span> <span class="k">import</span> <span class="n">ComputeTarget</span><span class="p">,</span> <span class="n">AmlCompute</span>
-<span class="kn">from</span> <span class="nn">azureml.core.compute_target</span> <span class="k">import</span> <span class="n">ComputeTargetException</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">green_df</span> <span class="o">=</span> <span class="n">tmp_df</span>
+</pre></div>
 
-<span class="c1"># choose a name for your cluster</span>
-<span class="n">cluster_name</span> <span class="o">=</span> <span class="s2">&quot;gpucluster&quot;</span>
+</div>
+</div>
+</div>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">cluster_name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found existing compute target.&#39;</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">ComputeTargetException</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating a new compute target...&#39;</span><span class="p">)</span>
-    <span class="n">compute_config</span> <span class="o">=</span> <span class="n">AmlCompute</span><span class="o">.</span><span class="n">provisioning_configuration</span><span class="p">(</span><span class="n">vm_size</span><span class="o">=</span><span class="s1">&#39;STANDARD_NC6&#39;</span><span class="p">,</span> 
-                                                           <span class="n">max_nodes</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Perform the same transformation steps to the yellow taxi data.</p>
 
-    <span class="c1"># create the cluster</span>
-    <span class="n">compute_target</span> <span class="o">=</span> <span class="n">ComputeTarget</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">cluster_name</span><span class="p">,</span> <span class="n">compute_config</span><span class="p">)</span>
-
-    <span class="n">compute_target</span><span class="o">.</span><span class="n">wait_for_completion</span><span class="p">(</span><span class="n">show_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Use the &#39;status&#39; property to get a detailed status for the current cluster. </span>
-<span class="nb">print</span><span class="p">(</span><span class="n">compute_target</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">serialize</span><span class="p">())</span>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tmp_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">yellow_df</span>
+    <span class="o">.</span><span class="n">replace_na</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">all_columns</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">drop_nulls</span><span class="p">(</span><span class="o">*</span><span class="n">drop_if_all_null</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">rename_columns</span><span class="p">(</span><span class="n">column_pairs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;vendor_name&quot;</span><span class="p">:</span> <span class="s2">&quot;vendor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;VendorID&quot;</span><span class="p">:</span> <span class="s2">&quot;vendor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vendor_id&quot;</span><span class="p">:</span> <span class="s2">&quot;vendor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Trip_Pickup_DateTime&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_datetime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tpep_pickup_datetime&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_datetime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Trip_Dropoff_DateTime&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_datetime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tpep_dropoff_datetime&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_datetime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;store_and_forward&quot;</span><span class="p">:</span> <span class="s2">&quot;store_forward&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;store_and_fwd_flag&quot;</span><span class="p">:</span> <span class="s2">&quot;store_forward&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Start_Lon&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Start_Lat&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;End_Lon&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;End_Lat&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Passenger_Count&quot;</span><span class="p">:</span> <span class="s2">&quot;passengers&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;passenger_count&quot;</span><span class="p">:</span> <span class="s2">&quot;passengers&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Fare_Amt&quot;</span><span class="p">:</span> <span class="s2">&quot;cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fare_amount&quot;</span><span class="p">:</span> <span class="s2">&quot;cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Trip_Distance&quot;</span><span class="p">:</span> <span class="s2">&quot;distance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;trip_distance&quot;</span><span class="p">:</span> <span class="s2">&quot;distance&quot;</span>
+    <span class="p">})</span>
+    <span class="o">.</span><span class="n">keep_columns</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">useful_columns</span><span class="p">))</span>
+<span class="n">tmp_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11969,14 +12284,112 @@ Resource group: mlserviceresourcegroup
 
 <div class="output_area">
 
-<div class="prompt"></div>
+<div class="prompt output_prompt">Out[6]:</div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Found existing compute target.
-{&#39;allocationState&#39;: &#39;Steady&#39;, &#39;allocationStateTransitionTime&#39;: &#39;2019-02-22T14:28:25.671000+00:00&#39;, &#39;creationTime&#39;: &#39;2018-11-23T16:53:14.040220+00:00&#39;, &#39;currentNodeCount&#39;: 0, &#39;errors&#39;: None, &#39;modifiedTime&#39;: &#39;2018-11-23T16:53:56.988534+00:00&#39;, &#39;nodeStateCounts&#39;: {&#39;idleNodeCount&#39;: 0, &#39;leavingNodeCount&#39;: 0, &#39;preemptedNodeCount&#39;: 0, &#39;preparingNodeCount&#39;: 0, &#39;runningNodeCount&#39;: 0, &#39;unusableNodeCount&#39;: 0}, &#39;provisioningState&#39;: &#39;Succeeded&#39;, &#39;provisioningStateTransitionTime&#39;: None, &#39;scaleSettings&#39;: {&#39;minNodeCount&#39;: 0, &#39;maxNodeCount&#39;: 4, &#39;nodeIdleTimeBeforeScaleDown&#39;: &#39;&#39;}, &#39;targetNodeCount&#39;: None, &#39;vmPriority&#39;: &#39;Dedicated&#39;, &#39;vmSize&#39;: &#39;STANDARD_NC6&#39;}
-</pre>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>vendor</th>
+      <th>pickup_datetime</th>
+      <th>dropoff_datetime</th>
+      <th>passengers</th>
+      <th>pickup_longitude</th>
+      <th>pickup_latitude</th>
+      <th>store_forward</th>
+      <th>dropoff_longitude</th>
+      <th>dropoff_latitude</th>
+      <th>cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>VTS</td>
+      <td>2009-01-04 02:52:00</td>
+      <td>2009-01-04 03:02:00</td>
+      <td>1</td>
+      <td>-73.991956999999999</td>
+      <td>40.721567</td>
+      <td>None</td>
+      <td>-73.993803</td>
+      <td>40.695922000000003</td>
+      <td>8.9000000000000004</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>VTS</td>
+      <td>2009-01-04 03:31:00</td>
+      <td>2009-01-04 03:38:00</td>
+      <td>3</td>
+      <td>-73.982101999999998</td>
+      <td>40.736289999999997</td>
+      <td>None</td>
+      <td>-73.955849999999998</td>
+      <td>40.768030000000003</td>
+      <td>12.1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>VTS</td>
+      <td>2009-01-03 15:43:00</td>
+      <td>2009-01-03 15:57:00</td>
+      <td>5</td>
+      <td>-74.002587000000005</td>
+      <td>40.739747999999999</td>
+      <td>None</td>
+      <td>-73.869983000000005</td>
+      <td>40.770225000000003</td>
+      <td>23.699999999999999</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>DDS</td>
+      <td>2009-01-01 20:52:58</td>
+      <td>2009-01-01 21:14:00</td>
+      <td>1</td>
+      <td>-73.974266999999998</td>
+      <td>40.790954999999997</td>
+      <td>None</td>
+      <td>-73.996557999999993</td>
+      <td>40.731848999999997</td>
+      <td>14.9</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>DDS</td>
+      <td>2009-01-24 16:18:23</td>
+      <td>2009-01-24 16:24:56</td>
+      <td>1</td>
+      <td>-74.001580000000004</td>
+      <td>40.719382000000003</td>
+      <td>None</td>
+      <td>-74.008377999999993</td>
+      <td>40.720350000000003</td>
+      <td>3.7000000000000002</td>
+    </tr>
+  </tbody>
+</table>
 </div>
+</div>
+
 </div>
 
 </div>
@@ -11987,43 +12400,18 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="3.-Train-model-on-the-remote-compute">3. Train model on the remote compute<a class="anchor-link" href="#3.-Train-model-on-the-remote-compute">&#182;</a></h2><p>Now that we have the cluster ready to go, let's run our distributed training job.</p>
+<p>Again, overwrite <code>yellow_df</code> with <code>tmp_df</code>, and then call the <code>append_rows()</code> function on the green taxi data to append the yellow taxi data, creating a new combined dataframe.</p>
 
 </div>
 </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.1-Create-a-project-directory">3.1 Create a project directory<a class="anchor-link" href="#3.1-Create-a-project-directory">&#182;</a></h3><p>Create a directory that will contain all the necessary code from your local machine that you will need access to on the remote resource. This includes the training script, and any additional files your training script depends on3.1.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-
-<span class="n">project_folder</span> <span class="o">=</span> <span class="s1">&#39;./tf-distr-ps&#39;</span>
-<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">project_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Copy the training script `tf_mnist_replica.py` into this project directory.</span>
-<span class="c1"># https://github.com/Azure/MachineLearningNotebooks/tree/master/how-to-use-azureml/training-with-deep-learning/distributed-tensorflow-with-parameter-server</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">yellow_df</span> <span class="o">=</span> <span class="n">tmp_df</span>
+<span class="n">combined_df</span> <span class="o">=</span> <span class="n">green_df</span><span class="o">.</span><span class="n">append_rows</span><span class="p">([</span><span class="n">yellow_df</span><span class="p">])</span>
 </pre></div>
 
 </div>
@@ -12031,14 +12419,39 @@ Resource group: mlserviceresourcegroup
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Convert-types-and-filter">Convert types and filter<a class="anchor-link" href="#Convert-types-and-filter">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Examine the pickup and drop-off coordinates summary statistics to see how the data is distributed. First define a <code>TypeConverter</code> object to change the lat/long fields to decimal type. Next, call the <code>keep_columns()</code> function to restrict output to only the lat/long fields, and then call <code>get_profile()</code>.</p>
+
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">shutil</span>
-
-<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span> <span class="n">project_folder</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">decimal_type</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">TypeConverter</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="n">dprep</span><span class="o">.</span><span class="n">FieldType</span><span class="o">.</span><span class="n">DECIMAL</span><span class="p">)</span>
+<span class="n">combined_df</span> <span class="o">=</span> <span class="n">combined_df</span><span class="o">.</span><span class="n">set_column_types</span><span class="p">(</span><span class="n">type_conversions</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;pickup_longitude&quot;</span><span class="p">:</span> <span class="n">decimal_type</span><span class="p">,</span>
+    <span class="s2">&quot;pickup_latitude&quot;</span><span class="p">:</span> <span class="n">decimal_type</span><span class="p">,</span>
+    <span class="s2">&quot;dropoff_longitude&quot;</span><span class="p">:</span> <span class="n">decimal_type</span><span class="p">,</span>
+    <span class="s2">&quot;dropoff_latitude&quot;</span><span class="p">:</span> <span class="n">decimal_type</span>
+<span class="p">})</span>
+<span class="n">combined_df</span><span class="o">.</span><span class="n">keep_columns</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+    <span class="s2">&quot;pickup_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;pickup_latitude&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;dropoff_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_latitude&quot;</span>
+<span class="p">])</span><span class="o">.</span><span class="n">get_profile</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12055,9 +12468,143 @@ Resource group: mlserviceresourcegroup
 
 
 
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;./tf-distr-ps\\tf_mnist_replica.py&#39;</pre>
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Type</th>
+      <th>Min</th>
+      <th>Max</th>
+      <th>Count</th>
+      <th>Missing Count</th>
+      <th>Not Missing Count</th>
+      <th>Percent missing</th>
+      <th>Error Count</th>
+      <th>Empty count</th>
+      <th>0.1% Quantile</th>
+      <th>1% Quantile</th>
+      <th>5% Quantile</th>
+      <th>25% Quantile</th>
+      <th>50% Quantile</th>
+      <th>75% Quantile</th>
+      <th>95% Quantile</th>
+      <th>99% Quantile</th>
+      <th>99.9% Quantile</th>
+      <th>Mean</th>
+      <th>Standard Deviation</th>
+      <th>Variance</th>
+      <th>Skewness</th>
+      <th>Kurtosis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>pickup_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-115.179337</td>
+      <td>0.000000</td>
+      <td>7722.0</td>
+      <td>0.0</td>
+      <td>7722.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-88.114046</td>
+      <td>-73.961840</td>
+      <td>-73.961964</td>
+      <td>-73.947693</td>
+      <td>-73.922097</td>
+      <td>-73.846670</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>-68.833579</td>
+      <td>18.792672</td>
+      <td>353.164515</td>
+      <td>3.369970</td>
+      <td>9.475822</td>
+    </tr>
+    <tr>
+      <th>pickup_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0.000000</td>
+      <td>40.919121</td>
+      <td>7722.0</td>
+      <td>0.0</td>
+      <td>7722.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>40.682889</td>
+      <td>40.675541</td>
+      <td>40.721075</td>
+      <td>40.756159</td>
+      <td>40.803909</td>
+      <td>40.849406</td>
+      <td>40.870681</td>
+      <td>40.891244</td>
+      <td>37.936742</td>
+      <td>10.345967</td>
+      <td>107.039038</td>
+      <td>-3.391034</td>
+      <td>9.507615</td>
+    </tr>
+    <tr>
+      <th>dropoff_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-115.179337</td>
+      <td>0.000000</td>
+      <td>7722.0</td>
+      <td>0.0</td>
+      <td>7722.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-87.699611</td>
+      <td>-73.984734</td>
+      <td>-73.985777</td>
+      <td>-73.956250</td>
+      <td>-73.928948</td>
+      <td>-73.866208</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>-68.896978</td>
+      <td>18.696526</td>
+      <td>349.560067</td>
+      <td>3.393537</td>
+      <td>9.637675</td>
+    </tr>
+    <tr>
+      <th>dropoff_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0.000000</td>
+      <td>41.008934</td>
+      <td>7722.0</td>
+      <td>0.0</td>
+      <td>7722.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>40.662763</td>
+      <td>40.654851</td>
+      <td>40.717821</td>
+      <td>40.756534</td>
+      <td>40.784688</td>
+      <td>40.852437</td>
+      <td>40.879289</td>
+      <td>40.937291</td>
+      <td>37.963774</td>
+      <td>10.290780</td>
+      <td>105.900157</td>
+      <td>-3.414918</td>
+      <td>9.670386</td>
+    </tr>
+  </tbody>
+</table>
 </div>
 
 </div>
@@ -12070,7 +12617,7 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.2-Create-an-experiment">3.2 Create an experiment<a class="anchor-link" href="#3.2-Create-an-experiment">&#182;</a></h3><p>Create an <a href="https://docs.microsoft.com/azure/machine-learning/service/concept-azure-machine-learning-architecture#experiment">Experiment</a> to track all the runs in your workspace for this distributed TensorFlow tutorial.</p>
+<p>From the summary statistics output, you see that there are coordinates that are missing, and coordinates that are not in New York City. Filter out coordinates not in the city border by chaining column filter commands within the <code>filter()</code> function, and defining minimum and maximum bounds for each field. Then call <code>get_profile()</code> again to verify the transformation.</p>
 
 </div>
 </div>
@@ -12080,13 +12627,182 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.core</span> <span class="k">import</span> <span class="n">Experiment</span>
-
-<span class="n">experiment_name</span> <span class="o">=</span> <span class="s1">&#39;tf-distr-ps&#39;</span>
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">experiment_name</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tmp_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">combined_df</span>
+    <span class="o">.</span><span class="n">drop_nulls</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;pickup_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;pickup_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_latitude&quot;</span><span class="p">],</span>
+        <span class="n">column_relationship</span><span class="o">=</span><span class="n">dprep</span><span class="o">.</span><span class="n">ColumnRelationship</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">ColumnRelationship</span><span class="o">.</span><span class="n">ANY</span><span class="p">)</span>
+    <span class="p">)</span> 
+    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dprep</span><span class="o">.</span><span class="n">f_and</span><span class="p">(</span>
+        <span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;pickup_longitude&quot;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">73.72</span><span class="p">,</span>
+        <span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;pickup_longitude&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">74.09</span><span class="p">,</span>
+        <span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;pickup_latitude&quot;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">40.88</span><span class="p">,</span>
+        <span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;pickup_latitude&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">40.53</span><span class="p">,</span>
+        <span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;dropoff_longitude&quot;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">73.72</span><span class="p">,</span>
+        <span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;dropoff_longitude&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">74.09</span><span class="p">,</span>
+        <span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;dropoff_latitude&quot;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">40.88</span><span class="p">,</span>
+        <span class="n">dprep</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;dropoff_latitude&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">40.53</span>
+    <span class="p">)))</span>
+<span class="n">tmp_df</span><span class="o">.</span><span class="n">keep_columns</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+    <span class="s2">&quot;pickup_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;pickup_latitude&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;dropoff_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_latitude&quot;</span>
+<span class="p">])</span><span class="o">.</span><span class="n">get_profile</span><span class="p">()</span>
 </pre></div>
 
 </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[9]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Type</th>
+      <th>Min</th>
+      <th>Max</th>
+      <th>Count</th>
+      <th>Missing Count</th>
+      <th>Not Missing Count</th>
+      <th>Percent missing</th>
+      <th>Error Count</th>
+      <th>Empty count</th>
+      <th>0.1% Quantile</th>
+      <th>1% Quantile</th>
+      <th>5% Quantile</th>
+      <th>25% Quantile</th>
+      <th>50% Quantile</th>
+      <th>75% Quantile</th>
+      <th>95% Quantile</th>
+      <th>99% Quantile</th>
+      <th>99.9% Quantile</th>
+      <th>Mean</th>
+      <th>Standard Deviation</th>
+      <th>Variance</th>
+      <th>Skewness</th>
+      <th>Kurtosis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>pickup_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-74.078156</td>
+      <td>-73.736481</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-74.076314</td>
+      <td>-73.962542</td>
+      <td>-73.962893</td>
+      <td>-73.948975</td>
+      <td>-73.927856</td>
+      <td>-73.866662</td>
+      <td>-73.830438</td>
+      <td>-73.823160</td>
+      <td>-73.769750</td>
+      <td>-73.913865</td>
+      <td>0.048711</td>
+      <td>0.002373</td>
+      <td>0.402697</td>
+      <td>-0.613516</td>
+    </tr>
+    <tr>
+      <th>pickup_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>40.575485</td>
+      <td>40.879852</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>40.632884</td>
+      <td>40.713105</td>
+      <td>40.711600</td>
+      <td>40.721403</td>
+      <td>40.758142</td>
+      <td>40.805145</td>
+      <td>40.848855</td>
+      <td>40.867567</td>
+      <td>40.877690</td>
+      <td>40.765226</td>
+      <td>0.048348</td>
+      <td>0.002338</td>
+      <td>0.228088</td>
+      <td>-0.598862</td>
+    </tr>
+    <tr>
+      <th>dropoff_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-74.085747</td>
+      <td>-73.720871</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-74.078828</td>
+      <td>-73.985650</td>
+      <td>-73.985813</td>
+      <td>-73.959041</td>
+      <td>-73.936681</td>
+      <td>-73.884846</td>
+      <td>-73.815507</td>
+      <td>-73.776697</td>
+      <td>-73.733471</td>
+      <td>-73.920718</td>
+      <td>0.055961</td>
+      <td>0.003132</td>
+      <td>0.648649</td>
+      <td>0.022914</td>
+    </tr>
+    <tr>
+      <th>dropoff_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>40.583530</td>
+      <td>40.879734</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>40.597741</td>
+      <td>40.695376</td>
+      <td>40.695115</td>
+      <td>40.727549</td>
+      <td>40.758160</td>
+      <td>40.788378</td>
+      <td>40.850372</td>
+      <td>40.867968</td>
+      <td>40.878586</td>
+      <td>40.759487</td>
+      <td>0.050462</td>
+      <td>0.002546</td>
+      <td>0.048418</td>
+      <td>-0.036880</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
 </div>
 </div>
 
@@ -12095,7 +12811,7 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.3-Create-a-TensorFlow-estimator">3.3 Create a TensorFlow estimator<a class="anchor-link" href="#3.3-Create-a-TensorFlow-estimator">&#182;</a></h3><p>The AML SDK's TensorFlow estimator enables you to easily submit TensorFlow training jobs for both single-node and distributed runs. For more information on the TensorFlow estimator, refer <a href="https://docs.microsoft.com/azure/machine-learning/service/how-to-train-tensorflow">here</a>.</p>
+<p>Overwrite <code>combined_df</code> with the transformations you made to <code>tmp_df</code>.</p>
 
 </div>
 </div>
@@ -12105,22 +12821,7 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.train.dnn</span> <span class="k">import</span> <span class="n">TensorFlow</span>
-
-<span class="n">script_params</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;--num_gpus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s1">&#39;--train_steps&#39;</span><span class="p">:</span> <span class="mi">500</span>
-<span class="p">}</span>
-
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">TensorFlow</span><span class="p">(</span><span class="n">source_directory</span><span class="o">=</span><span class="n">project_folder</span><span class="p">,</span>
-                       <span class="n">compute_target</span><span class="o">=</span><span class="n">compute_target</span><span class="p">,</span>
-                       <span class="n">script_params</span><span class="o">=</span><span class="n">script_params</span><span class="p">,</span>
-                       <span class="n">entry_script</span><span class="o">=</span><span class="s1">&#39;tf_mnist_replica.py&#39;</span><span class="p">,</span>
-                       <span class="n">node_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">worker_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">parameter_server_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>   
-                       <span class="n">distributed_backend</span><span class="o">=</span><span class="s1">&#39;ps&#39;</span><span class="p">,</span>
-                       <span class="n">use_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">combined_df</span> <span class="o">=</span> <span class="n">tmp_df</span>
 </pre></div>
 
 </div>
@@ -12132,8 +12833,7 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The above code specifies that we will run our training script on <code>2</code> nodes, with two workers and one parameter server. In order to execute a native distributed TensorFlow run, you must provide the argument <code>distributed_backend='ps'</code>. Using this estimator with these settings, TensorFlow and its dependencies will be installed for you. However, if your script also uses other packages, make sure to install them via the <code>TensorFlow</code> constructor's <code>pip_packages</code> or <code>conda_packages</code> parameters.</p>
-
+<h3 id="Split-and-rename-columns">Split and rename columns<a class="anchor-link" href="#Split-and-rename-columns">&#182;</a></h3>
 </div>
 </div>
 </div>
@@ -12141,7 +12841,7 @@ Resource group: mlserviceresourcegroup
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.4-Submit-job">3.4 Submit job<a class="anchor-link" href="#3.4-Submit-job">&#182;</a></h3><p>Run your experiment by submitting your estimator object. Note that this call is asynchronous.</p>
+<p>Look at the data profile for the <code>store_forward</code> column.</p>
 
 </div>
 </div>
@@ -12151,8 +12851,7 @@ Resource group: mlserviceresourcegroup
 <div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">run</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">combined_df</span><span class="o">.</span><span class="n">keep_columns</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;store_forward&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_profile</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12165,16 +12864,71 @@ Resource group: mlserviceresourcegroup
 
 <div class="output_area">
 
-<div class="prompt"></div>
+<div class="prompt output_prompt">Out[11]:</div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Run(Experiment: tf-distr-ps,
-Id: tf-distr-ps_1551699379_3e846b68,
-Type: azureml.scriptrun,
-Status: Starting)
-</pre>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Type</th>
+      <th>Min</th>
+      <th>Max</th>
+      <th>Count</th>
+      <th>Missing Count</th>
+      <th>Not Missing Count</th>
+      <th>Percent missing</th>
+      <th>Error Count</th>
+      <th>Empty count</th>
+      <th>0.1% Quantile</th>
+      <th>1% Quantile</th>
+      <th>5% Quantile</th>
+      <th>25% Quantile</th>
+      <th>50% Quantile</th>
+      <th>75% Quantile</th>
+      <th>95% Quantile</th>
+      <th>99% Quantile</th>
+      <th>99.9% Quantile</th>
+      <th>Mean</th>
+      <th>Standard Deviation</th>
+      <th>Variance</th>
+      <th>Skewness</th>
+      <th>Kurtosis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>store_forward</th>
+      <td>FieldType.STRING</td>
+      <td>N</td>
+      <td>Y</td>
+      <td>7059.0</td>
+      <td>99.0</td>
+      <td>6960.0</td>
+      <td>0.014025</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
 </div>
+
 </div>
 
 </div>
@@ -12185,7 +12939,7 @@ Status: Starting)
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="3.5-Monitor-your-run">3.5 Monitor your run<a class="anchor-link" href="#3.5-Monitor-your-run">&#182;</a></h3><p>You can monitor the progress of the run with a Jupyter widget. Like the run submission, the widget is asynchronous and provides live updates every 10-15 seconds until the job completes.</p>
+<p>From the data profile output of <code>store_forward</code>, you see that the data is inconsistent and there are missing/null values. Replace these values using the <code>replace()</code> and <code>fill_nulls()</code> functions, and in both cases change to the string "N".</p>
 
 </div>
 </div>
@@ -12195,9 +12949,32 @@ Status: Starting)
 <div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">azureml.widgets</span> <span class="k">import</span> <span class="n">RunDetails</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">combined_df</span> <span class="o">=</span> <span class="n">combined_df</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">&quot;store_forward&quot;</span><span class="p">,</span> <span class="n">find</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fill_nulls</span><span class="p">(</span><span class="s2">&quot;store_forward&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">)</span>
+</pre></div>
 
-<span class="n">RunDetails</span><span class="p">(</span><span class="n">run</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Split the pick up and drop off datetimes into respective date and time columns. Use <code>split_column_by_example()</code> to perform the split. In this case, the optional <code>example</code> parameter of <code>split_column_by_example()</code> is omitted. Therefore the function will automatically determine where to split based on the data.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tmp_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">combined_df</span>
+    <span class="o">.</span><span class="n">split_column_by_example</span><span class="p">(</span><span class="n">source_column</span><span class="o">=</span><span class="s2">&quot;pickup_datetime&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">split_column_by_example</span><span class="p">(</span><span class="n">source_column</span><span class="o">=</span><span class="s2">&quot;dropoff_datetime&quot;</span><span class="p">))</span>
+<span class="n">tmp_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12210,22 +12987,134 @@ Status: Starting)
 
 <div class="output_area">
 
-<div class="prompt"></div>
+<div class="prompt output_prompt">Out[13]:</div>
 
 
 
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
 
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
 
- 
- 
-<div id="d5862377-a157-4229-8080-b7c4ba5cd67d"></div>
-<div class="output_subarea output_widget_view ">
-<script type="text/javascript">
-var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
-</script>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "a6bd35794e3b49b68bd413be0403c049", "version_major": 2, "version_minor": 0}
-</script>
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>vendor</th>
+      <th>pickup_datetime</th>
+      <th>pickup_datetime_1</th>
+      <th>pickup_datetime_2</th>
+      <th>dropoff_datetime</th>
+      <th>dropoff_datetime_1</th>
+      <th>dropoff_datetime_2</th>
+      <th>store_forward</th>
+      <th>pickup_longitude</th>
+      <th>pickup_latitude</th>
+      <th>dropoff_longitude</th>
+      <th>dropoff_latitude</th>
+      <th>passengers</th>
+      <th>cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2</td>
+      <td>2013-08-01 17:22:00</td>
+      <td>2013-08-01</td>
+      <td>17:22:00</td>
+      <td>2013-08-01 17:22:00</td>
+      <td>2013-08-01</td>
+      <td>17:22:00</td>
+      <td>N</td>
+      <td>-73.937767</td>
+      <td>40.758480</td>
+      <td>-73.937767</td>
+      <td>40.758480</td>
+      <td>1</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>2013-08-01 17:24:00</td>
+      <td>2013-08-01</td>
+      <td>17:24:00</td>
+      <td>2013-08-01 17:25:00</td>
+      <td>2013-08-01</td>
+      <td>17:25:00</td>
+      <td>N</td>
+      <td>-73.937927</td>
+      <td>40.757843</td>
+      <td>-73.937927</td>
+      <td>40.757843</td>
+      <td>1</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>2013-08-06 06:51:19</td>
+      <td>2013-08-06</td>
+      <td>06:51:19</td>
+      <td>2013-08-06 06:51:36</td>
+      <td>2013-08-06</td>
+      <td>06:51:36</td>
+      <td>N</td>
+      <td>-73.937721</td>
+      <td>40.758404</td>
+      <td>-73.937721</td>
+      <td>40.758369</td>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2</td>
+      <td>2013-08-06 13:26:34</td>
+      <td>2013-08-06</td>
+      <td>13:26:34</td>
+      <td>2013-08-06 13:26:57</td>
+      <td>2013-08-06</td>
+      <td>13:26:57</td>
+      <td>N</td>
+      <td>-73.937691</td>
+      <td>40.758419</td>
+      <td>-73.937790</td>
+      <td>40.758358</td>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2</td>
+      <td>2013-08-06 13:27:53</td>
+      <td>2013-08-06</td>
+      <td>13:27:53</td>
+      <td>2013-08-06 13:28:08</td>
+      <td>2013-08-06</td>
+      <td>13:28:08</td>
+      <td>N</td>
+      <td>-73.937805</td>
+      <td>40.758396</td>
+      <td>-73.937775</td>
+      <td>40.758450</td>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 </div>
 
 </div>
@@ -12238,23 +13127,1506 @@ var element = $('#d5862377-a157-4229-8080-b7c4ba5cd67d');
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Alternatively, you can block until the script has completed training before running more code.</p>
+<p>Rename the columns generated by <code>split_column_by_example()</code> into meaningful names.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># run.wait_for_completion(show_output=True) # this provides a verbose log</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tmp_df_renamed</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_df</span>
+    <span class="o">.</span><span class="n">rename_columns</span><span class="p">(</span><span class="n">column_pairs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;pickup_datetime_1&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pickup_datetime_2&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_time&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dropoff_datetime_1&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dropoff_datetime_2&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_time&quot;</span>
+    <span class="p">}))</span>
+<span class="n">tmp_df_renamed</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[14]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>vendor</th>
+      <th>pickup_datetime</th>
+      <th>pickup_date</th>
+      <th>pickup_time</th>
+      <th>dropoff_datetime</th>
+      <th>dropoff_date</th>
+      <th>dropoff_time</th>
+      <th>store_forward</th>
+      <th>pickup_longitude</th>
+      <th>pickup_latitude</th>
+      <th>dropoff_longitude</th>
+      <th>dropoff_latitude</th>
+      <th>passengers</th>
+      <th>cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2</td>
+      <td>2013-08-01 17:22:00</td>
+      <td>2013-08-01</td>
+      <td>17:22:00</td>
+      <td>2013-08-01 17:22:00</td>
+      <td>2013-08-01</td>
+      <td>17:22:00</td>
+      <td>N</td>
+      <td>-73.937767</td>
+      <td>40.758480</td>
+      <td>-73.937767</td>
+      <td>40.758480</td>
+      <td>1</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>2013-08-01 17:24:00</td>
+      <td>2013-08-01</td>
+      <td>17:24:00</td>
+      <td>2013-08-01 17:25:00</td>
+      <td>2013-08-01</td>
+      <td>17:25:00</td>
+      <td>N</td>
+      <td>-73.937927</td>
+      <td>40.757843</td>
+      <td>-73.937927</td>
+      <td>40.757843</td>
+      <td>1</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>2013-08-06 06:51:19</td>
+      <td>2013-08-06</td>
+      <td>06:51:19</td>
+      <td>2013-08-06 06:51:36</td>
+      <td>2013-08-06</td>
+      <td>06:51:36</td>
+      <td>N</td>
+      <td>-73.937721</td>
+      <td>40.758404</td>
+      <td>-73.937721</td>
+      <td>40.758369</td>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2</td>
+      <td>2013-08-06 13:26:34</td>
+      <td>2013-08-06</td>
+      <td>13:26:34</td>
+      <td>2013-08-06 13:26:57</td>
+      <td>2013-08-06</td>
+      <td>13:26:57</td>
+      <td>N</td>
+      <td>-73.937691</td>
+      <td>40.758419</td>
+      <td>-73.937790</td>
+      <td>40.758358</td>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2</td>
+      <td>2013-08-06 13:27:53</td>
+      <td>2013-08-06</td>
+      <td>13:27:53</td>
+      <td>2013-08-06 13:28:08</td>
+      <td>2013-08-06</td>
+      <td>13:28:08</td>
+      <td>N</td>
+      <td>-73.937805</td>
+      <td>40.758396</td>
+      <td>-73.937775</td>
+      <td>40.758450</td>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Overwrite <code>combined_df</code> with the executed transformations, and then call <code>get_profile()</code> to see full summary statistics after all transformations.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">combined_df</span> <span class="o">=</span> <span class="n">tmp_df_renamed</span>
+<span class="n">combined_df</span><span class="o">.</span><span class="n">get_profile</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[15]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Type</th>
+      <th>Min</th>
+      <th>Max</th>
+      <th>Count</th>
+      <th>Missing Count</th>
+      <th>Not Missing Count</th>
+      <th>Percent missing</th>
+      <th>Error Count</th>
+      <th>Empty count</th>
+      <th>0.1% Quantile</th>
+      <th>1% Quantile</th>
+      <th>5% Quantile</th>
+      <th>25% Quantile</th>
+      <th>50% Quantile</th>
+      <th>75% Quantile</th>
+      <th>95% Quantile</th>
+      <th>99% Quantile</th>
+      <th>99.9% Quantile</th>
+      <th>Mean</th>
+      <th>Standard Deviation</th>
+      <th>Variance</th>
+      <th>Skewness</th>
+      <th>Kurtosis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>vendor</th>
+      <td>FieldType.STRING</td>
+      <td>1</td>
+      <td>VTS</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_datetime</th>
+      <td>FieldType.STRING</td>
+      <td>2009-01-01 20:52:58</td>
+      <td>2013-08-31 23:59:14</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_date</th>
+      <td>FieldType.STRING</td>
+      <td>2009-01-01</td>
+      <td>2013-08-31</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_time</th>
+      <td>FieldType.STRING</td>
+      <td>00:00:48</td>
+      <td>23:59:48</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>dropoff_datetime</th>
+      <td>FieldType.STRING</td>
+      <td>2009-01-01 21:14:00</td>
+      <td>2013-09-01 00:25:07</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>dropoff_date</th>
+      <td>FieldType.STRING</td>
+      <td>2009-01-01</td>
+      <td>2013-09-01</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>dropoff_time</th>
+      <td>FieldType.STRING</td>
+      <td>00:00:00</td>
+      <td>23:59:45</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>store_forward</th>
+      <td>FieldType.STRING</td>
+      <td>N</td>
+      <td>Y</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-74.0782</td>
+      <td>-73.7365</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-74.0763</td>
+      <td>-73.9625</td>
+      <td>-73.9629</td>
+      <td>-73.949</td>
+      <td>-73.9279</td>
+      <td>-73.8667</td>
+      <td>-73.8304</td>
+      <td>-73.8232</td>
+      <td>-73.7698</td>
+      <td>-73.9139</td>
+      <td>0.0487111</td>
+      <td>0.00237277</td>
+      <td>0.402697</td>
+      <td>-0.613516</td>
+    </tr>
+    <tr>
+      <th>pickup_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>40.5755</td>
+      <td>40.8799</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>40.6329</td>
+      <td>40.7131</td>
+      <td>40.7116</td>
+      <td>40.7214</td>
+      <td>40.7581</td>
+      <td>40.8051</td>
+      <td>40.8489</td>
+      <td>40.8676</td>
+      <td>40.8777</td>
+      <td>40.7652</td>
+      <td>0.0483485</td>
+      <td>0.00233758</td>
+      <td>0.228088</td>
+      <td>-0.598862</td>
+    </tr>
+    <tr>
+      <th>dropoff_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-74.0857</td>
+      <td>-73.7209</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-74.0788</td>
+      <td>-73.9856</td>
+      <td>-73.9858</td>
+      <td>-73.959</td>
+      <td>-73.9367</td>
+      <td>-73.8848</td>
+      <td>-73.8155</td>
+      <td>-73.7767</td>
+      <td>-73.7335</td>
+      <td>-73.9207</td>
+      <td>0.055961</td>
+      <td>0.00313163</td>
+      <td>0.648649</td>
+      <td>0.0229141</td>
+    </tr>
+    <tr>
+      <th>dropoff_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>40.5835</td>
+      <td>40.8797</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>40.5977</td>
+      <td>40.6954</td>
+      <td>40.6951</td>
+      <td>40.7275</td>
+      <td>40.7582</td>
+      <td>40.7884</td>
+      <td>40.8504</td>
+      <td>40.868</td>
+      <td>40.8786</td>
+      <td>40.7595</td>
+      <td>0.0504621</td>
+      <td>0.00254642</td>
+      <td>0.0484179</td>
+      <td>-0.0368799</td>
+    </tr>
+    <tr>
+      <th>passengers</th>
+      <td>FieldType.STRING</td>
+      <td>1</td>
+      <td>6</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>cost</th>
+      <td>FieldType.STRING</td>
+      <td>0</td>
+      <td>90</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Transform-data">Transform data<a class="anchor-link" href="#Transform-data">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Split the pickup and drop-off date further into day of week, day of month, and month. To get day of week, use the <code>derive_column_by_example()</code> function. This function takes as a parameter an array of example objects that define the input data, and the desired output. The function then automatically determines your desired transformation. For pickup and drop-off time columns, split into hour, minute, and second using the <code>split_column_by_example()</code> function with no example parameter.</p>
+<p>Once you have generated these new features, delete the original fields in favor of the newly generated features using <code>drop_columns()</code>. Rename all remaining fields to accurate descriptions.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tmp_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">combined_df</span>
+    <span class="o">.</span><span class="n">derive_column_by_example</span><span class="p">(</span>
+        <span class="n">source_columns</span><span class="o">=</span><span class="s2">&quot;pickup_date&quot;</span><span class="p">,</span> 
+        <span class="n">new_column_name</span><span class="o">=</span><span class="s2">&quot;pickup_weekday&quot;</span><span class="p">,</span> 
+        <span class="n">example_data</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;2009-01-04&quot;</span><span class="p">,</span> <span class="s2">&quot;Sunday&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;2013-08-22&quot;</span><span class="p">,</span> <span class="s2">&quot;Thursday&quot;</span><span class="p">)]</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">derive_column_by_example</span><span class="p">(</span>
+        <span class="n">source_columns</span><span class="o">=</span><span class="s2">&quot;dropoff_date&quot;</span><span class="p">,</span>
+        <span class="n">new_column_name</span><span class="o">=</span><span class="s2">&quot;dropoff_weekday&quot;</span><span class="p">,</span>
+        <span class="n">example_data</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;2013-08-22&quot;</span><span class="p">,</span> <span class="s2">&quot;Thursday&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;2013-11-03&quot;</span><span class="p">,</span> <span class="s2">&quot;Sunday&quot;</span><span class="p">)]</span>
+    <span class="p">)</span>
+          
+    <span class="o">.</span><span class="n">split_column_by_example</span><span class="p">(</span><span class="n">source_column</span><span class="o">=</span><span class="s2">&quot;pickup_time&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">split_column_by_example</span><span class="p">(</span><span class="n">source_column</span><span class="o">=</span><span class="s2">&quot;dropoff_time&quot;</span><span class="p">)</span>
+    <span class="c1"># the following two split_column_by_example calls reference the generated column names from the above two calls</span>
+    <span class="o">.</span><span class="n">split_column_by_example</span><span class="p">(</span><span class="n">source_column</span><span class="o">=</span><span class="s2">&quot;pickup_time_1&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">split_column_by_example</span><span class="p">(</span><span class="n">source_column</span><span class="o">=</span><span class="s2">&quot;dropoff_time_1&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">drop_columns</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;pickup_date&quot;</span><span class="p">,</span> <span class="s2">&quot;pickup_time&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_date&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_time&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;pickup_date_1&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_date_1&quot;</span><span class="p">,</span> <span class="s2">&quot;pickup_time_1&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_time_1&quot;</span>
+    <span class="p">])</span>
+          
+    <span class="o">.</span><span class="n">rename_columns</span><span class="p">(</span><span class="n">column_pairs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;pickup_date_2&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_month&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pickup_date_3&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_monthday&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pickup_time_1_1&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_hour&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pickup_time_1_2&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_minute&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pickup_time_2&quot;</span><span class="p">:</span> <span class="s2">&quot;pickup_second&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dropoff_date_2&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_month&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dropoff_date_3&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_monthday&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dropoff_time_1_1&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_hour&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dropoff_time_1_2&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_minute&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dropoff_time_2&quot;</span><span class="p">:</span> <span class="s2">&quot;dropoff_second&quot;</span>
+    <span class="p">}))</span>
+
+<span class="n">tmp_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[16]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>vendor</th>
+      <th>pickup_datetime</th>
+      <th>pickup_weekday</th>
+      <th>pickup_hour</th>
+      <th>pickup_minute</th>
+      <th>pickup_second</th>
+      <th>dropoff_datetime</th>
+      <th>dropoff_weekday</th>
+      <th>dropoff_hour</th>
+      <th>dropoff_minute</th>
+      <th>dropoff_second</th>
+      <th>store_forward</th>
+      <th>pickup_longitude</th>
+      <th>pickup_latitude</th>
+      <th>dropoff_longitude</th>
+      <th>dropoff_latitude</th>
+      <th>passengers</th>
+      <th>cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2</td>
+      <td>2013-08-01 17:22:00</td>
+      <td>Thursday</td>
+      <td>17</td>
+      <td>22</td>
+      <td>00</td>
+      <td>2013-08-01 17:22:00</td>
+      <td>Thursday</td>
+      <td>17</td>
+      <td>22</td>
+      <td>00</td>
+      <td>N</td>
+      <td>-73.937767</td>
+      <td>40.758480</td>
+      <td>-73.937767</td>
+      <td>40.758480</td>
+      <td>1</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>2013-08-01 17:24:00</td>
+      <td>Thursday</td>
+      <td>17</td>
+      <td>24</td>
+      <td>00</td>
+      <td>2013-08-01 17:25:00</td>
+      <td>Thursday</td>
+      <td>17</td>
+      <td>25</td>
+      <td>00</td>
+      <td>N</td>
+      <td>-73.937927</td>
+      <td>40.757843</td>
+      <td>-73.937927</td>
+      <td>40.757843</td>
+      <td>1</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>2013-08-06 06:51:19</td>
+      <td>Tuesday</td>
+      <td>06</td>
+      <td>51</td>
+      <td>19</td>
+      <td>2013-08-06 06:51:36</td>
+      <td>Tuesday</td>
+      <td>06</td>
+      <td>51</td>
+      <td>36</td>
+      <td>N</td>
+      <td>-73.937721</td>
+      <td>40.758404</td>
+      <td>-73.937721</td>
+      <td>40.758369</td>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2</td>
+      <td>2013-08-06 13:26:34</td>
+      <td>Tuesday</td>
+      <td>13</td>
+      <td>26</td>
+      <td>34</td>
+      <td>2013-08-06 13:26:57</td>
+      <td>Tuesday</td>
+      <td>13</td>
+      <td>26</td>
+      <td>57</td>
+      <td>N</td>
+      <td>-73.937691</td>
+      <td>40.758419</td>
+      <td>-73.937790</td>
+      <td>40.758358</td>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2</td>
+      <td>2013-08-06 13:27:53</td>
+      <td>Tuesday</td>
+      <td>13</td>
+      <td>27</td>
+      <td>53</td>
+      <td>2013-08-06 13:28:08</td>
+      <td>Tuesday</td>
+      <td>13</td>
+      <td>28</td>
+      <td>08</td>
+      <td>N</td>
+      <td>-73.937805</td>
+      <td>40.758396</td>
+      <td>-73.937775</td>
+      <td>40.758450</td>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>From the data above, you see that the pickup and drop-off date and time components produced from the derived transformations are correct. Drop the <code>pickup_datetime</code> and <code>dropoff_datetime</code> columns as they are no longer needed.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tmp_df</span> <span class="o">=</span> <span class="n">tmp_df</span><span class="o">.</span><span class="n">drop_columns</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;pickup_datetime&quot;</span><span class="p">,</span> <span class="s2">&quot;dropoff_datetime&quot;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Use the type inference functionality to automatically check the data type of each field, and display the inference results.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">type_infer</span> <span class="o">=</span> <span class="n">tmp_df</span><span class="o">.</span><span class="n">builders</span><span class="o">.</span><span class="n">set_column_types</span><span class="p">()</span>
+<span class="n">type_infer</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+<span class="n">type_infer</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[18]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Column types conversion candidates:
+&#39;pickup_hour&#39;: [FieldType.DECIMAL],
+&#39;pickup_minute&#39;: [FieldType.DECIMAL],
+&#39;pickup_second&#39;: [FieldType.DECIMAL],
+&#39;dropoff_weekday&#39;: [FieldType.STRING],
+&#39;pickup_longitude&#39;: [FieldType.DECIMAL],
+&#39;pickup_latitude&#39;: [FieldType.DECIMAL],
+&#39;dropoff_longitude&#39;: [FieldType.DECIMAL],
+&#39;dropoff_latitude&#39;: [FieldType.DECIMAL],
+&#39;passengers&#39;: [FieldType.DECIMAL],
+&#39;cost&#39;: [FieldType.DECIMAL],
+&#39;vendor&#39;: [FieldType.STRING],
+&#39;pickup_weekday&#39;: [FieldType.STRING],
+&#39;dropoff_hour&#39;: [FieldType.DECIMAL],
+&#39;dropoff_minute&#39;: [FieldType.DECIMAL],
+&#39;dropoff_second&#39;: [FieldType.DECIMAL],
+&#39;store_forward&#39;: [FieldType.BOOLEAN]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The inference results look correct based on the data, now apply the type conversions to the dataflow.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tmp_df</span> <span class="o">=</span> <span class="n">type_infer</span><span class="o">.</span><span class="n">to_dataflow</span><span class="p">()</span>
+<span class="n">tmp_df</span><span class="o">.</span><span class="n">get_profile</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[19]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Type</th>
+      <th>Min</th>
+      <th>Max</th>
+      <th>Count</th>
+      <th>Missing Count</th>
+      <th>Not Missing Count</th>
+      <th>Percent missing</th>
+      <th>Error Count</th>
+      <th>Empty count</th>
+      <th>0.1% Quantile</th>
+      <th>1% Quantile</th>
+      <th>5% Quantile</th>
+      <th>25% Quantile</th>
+      <th>50% Quantile</th>
+      <th>75% Quantile</th>
+      <th>95% Quantile</th>
+      <th>99% Quantile</th>
+      <th>99.9% Quantile</th>
+      <th>Mean</th>
+      <th>Standard Deviation</th>
+      <th>Variance</th>
+      <th>Skewness</th>
+      <th>Kurtosis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>vendor</th>
+      <td>FieldType.STRING</td>
+      <td>1</td>
+      <td>VTS</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_weekday</th>
+      <td>FieldType.STRING</td>
+      <td>Friday</td>
+      <td>Wednesday</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_hour</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0</td>
+      <td>23</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>3.57523</td>
+      <td>3</td>
+      <td>9.91106</td>
+      <td>15.9327</td>
+      <td>19</td>
+      <td>22.0225</td>
+      <td>23</td>
+      <td>23</td>
+      <td>14.2326</td>
+      <td>6.34926</td>
+      <td>40.3131</td>
+      <td>-0.693335</td>
+      <td>-0.459336</td>
+    </tr>
+    <tr>
+      <th>pickup_minute</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0</td>
+      <td>59</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>5.32313</td>
+      <td>4.92308</td>
+      <td>14.2214</td>
+      <td>29.5244</td>
+      <td>44.6436</td>
+      <td>56.3767</td>
+      <td>58.9798</td>
+      <td>59</td>
+      <td>29.4635</td>
+      <td>17.4396</td>
+      <td>304.14</td>
+      <td>0.00440324</td>
+      <td>-1.20458</td>
+    </tr>
+    <tr>
+      <th>pickup_second</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0</td>
+      <td>59</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>4.99286</td>
+      <td>4.91954</td>
+      <td>14.6121</td>
+      <td>29.9239</td>
+      <td>44.5221</td>
+      <td>56.6792</td>
+      <td>59</td>
+      <td>59</td>
+      <td>29.6225</td>
+      <td>17.3868</td>
+      <td>302.302</td>
+      <td>-0.0227466</td>
+      <td>-1.19409</td>
+    </tr>
+    <tr>
+      <th>dropoff_weekday</th>
+      <td>FieldType.STRING</td>
+      <td>Friday</td>
+      <td>Wednesday</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>dropoff_hour</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0</td>
+      <td>23</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>3.23217</td>
+      <td>2.93333</td>
+      <td>9.92334</td>
+      <td>15.9135</td>
+      <td>19</td>
+      <td>22.2739</td>
+      <td>23</td>
+      <td>23</td>
+      <td>14.1815</td>
+      <td>6.45578</td>
+      <td>41.677</td>
+      <td>-0.691001</td>
+      <td>-0.500215</td>
+    </tr>
+    <tr>
+      <th>dropoff_minute</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0</td>
+      <td>59</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>5.1064</td>
+      <td>5</td>
+      <td>14.2051</td>
+      <td>29.079</td>
+      <td>44.2937</td>
+      <td>56.6338</td>
+      <td>58.9984</td>
+      <td>59</td>
+      <td>29.353</td>
+      <td>17.4241</td>
+      <td>303.598</td>
+      <td>0.0142562</td>
+      <td>-1.21531</td>
+    </tr>
+    <tr>
+      <th>dropoff_second</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0</td>
+      <td>59</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>5.03373</td>
+      <td>5</td>
+      <td>14.7471</td>
+      <td>29.598</td>
+      <td>45.3216</td>
+      <td>56.1044</td>
+      <td>58.9728</td>
+      <td>59</td>
+      <td>29.7923</td>
+      <td>17.481</td>
+      <td>305.585</td>
+      <td>-0.0281313</td>
+      <td>-1.21965</td>
+    </tr>
+    <tr>
+      <th>store_forward</th>
+      <td>FieldType.BOOLEAN</td>
+      <td>False</td>
+      <td>True</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>pickup_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-74.0782</td>
+      <td>-73.7365</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-74.0763</td>
+      <td>-73.9625</td>
+      <td>-73.9629</td>
+      <td>-73.949</td>
+      <td>-73.9279</td>
+      <td>-73.8667</td>
+      <td>-73.8304</td>
+      <td>-73.8232</td>
+      <td>-73.7698</td>
+      <td>-73.9139</td>
+      <td>0.0487111</td>
+      <td>0.00237277</td>
+      <td>0.402697</td>
+      <td>-0.613516</td>
+    </tr>
+    <tr>
+      <th>pickup_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>40.5755</td>
+      <td>40.8799</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>40.6329</td>
+      <td>40.7131</td>
+      <td>40.7116</td>
+      <td>40.7214</td>
+      <td>40.7581</td>
+      <td>40.8051</td>
+      <td>40.8489</td>
+      <td>40.8676</td>
+      <td>40.8777</td>
+      <td>40.7652</td>
+      <td>0.0483485</td>
+      <td>0.00233758</td>
+      <td>0.228088</td>
+      <td>-0.598862</td>
+    </tr>
+    <tr>
+      <th>dropoff_longitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>-74.0857</td>
+      <td>-73.7209</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>-74.0788</td>
+      <td>-73.9856</td>
+      <td>-73.9858</td>
+      <td>-73.959</td>
+      <td>-73.9367</td>
+      <td>-73.8848</td>
+      <td>-73.8155</td>
+      <td>-73.7767</td>
+      <td>-73.7335</td>
+      <td>-73.9207</td>
+      <td>0.055961</td>
+      <td>0.00313163</td>
+      <td>0.648649</td>
+      <td>0.0229141</td>
+    </tr>
+    <tr>
+      <th>dropoff_latitude</th>
+      <td>FieldType.DECIMAL</td>
+      <td>40.5835</td>
+      <td>40.8797</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>40.5977</td>
+      <td>40.6954</td>
+      <td>40.6951</td>
+      <td>40.7275</td>
+      <td>40.7582</td>
+      <td>40.7884</td>
+      <td>40.8504</td>
+      <td>40.868</td>
+      <td>40.8786</td>
+      <td>40.7595</td>
+      <td>0.0504621</td>
+      <td>0.00254642</td>
+      <td>0.0484179</td>
+      <td>-0.0368799</td>
+    </tr>
+    <tr>
+      <th>passengers</th>
+      <td>FieldType.DECIMAL</td>
+      <td>1</td>
+      <td>6</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>5</td>
+      <td>5</td>
+      <td>6</td>
+      <td>6</td>
+      <td>2.32979</td>
+      <td>1.79978</td>
+      <td>3.2392</td>
+      <td>0.834099</td>
+      <td>-1.11111</td>
+    </tr>
+    <tr>
+      <th>cost</th>
+      <td>FieldType.DECIMAL</td>
+      <td>0</td>
+      <td>444</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>7059.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>3.01808</td>
+      <td>3.0125</td>
+      <td>5.91545</td>
+      <td>9.49055</td>
+      <td>16.5816</td>
+      <td>33.5638</td>
+      <td>51.9924</td>
+      <td>81.1368</td>
+      <td>12.9112</td>
+      <td>11.6447</td>
+      <td>135.599</td>
+      <td>8.6842</td>
+      <td>269.818</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>At this point, you have a fully transformed and prepared dataflow object to use in a machine learning model. The DataPrep SDK includes object serialization functionality, which is used as follows.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dflow_prepared</span> <span class="o">=</span> <span class="n">tmp_df</span>
+<span class="n">package</span> <span class="o">=</span> <span class="n">dprep</span><span class="o">.</span><span class="n">Package</span><span class="p">([</span><span class="n">dflow_prepared</span><span class="p">])</span>
+<span class="n">package</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;.\dflows&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[20]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Package
+  name: None
+  path: C:\Users\seretkow\notebooks\Labs Azure ML service\dflows
+  dataflows: [
+    Dataflow {
+      name: dataflow
+      steps: 26
+    },
+  ]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Clean-up-resources">Clean up resources<a class="anchor-link" href="#Clean-up-resources">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Delete the file <code>dflows</code> (whether you are running locally or in Azure Notebooks) in your current directory if you do not wish to continue with part two of the tutorial. If you continue on to part two, you will need the <code>dflows</code> file in the current directory.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Next-steps">Next steps<a class="anchor-link" href="#Next-steps">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In this Azure Machine Learning Data Prep SDK tutorial, you:</p>
+<blockquote><ul>
+<li>Set up your development environment</li>
+<li>Loaded and cleansed data sets</li>
+<li>Used smart transforms to predict your logic based on an example</li>
+<li>Merged and packaged datasets for machine learning training</li>
+</ul>
+</blockquote>
+<p>You are ready to use this training data in the next part of the tutorial series:</p>
+<blockquote><p><a href="regression-part2-automated-ml.ipynb">Tutorial #2: Train regression model</a></p>
+</blockquote>
+
+</div>
+</div>
 </div>
     </div>
   </div>
